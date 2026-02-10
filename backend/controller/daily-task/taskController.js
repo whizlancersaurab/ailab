@@ -84,7 +84,7 @@ exports.getAllDailyTasks = async (req, res) => {
             FROM daily_tasks dt
             LEFT JOIN classes c ON c.id = dt.class_id
             LEFT JOIN curriculum_months cm ON cm.id = dt.month_id
-            WHERE school_id=?
+            WHERE dt.school_id=?
             ORDER BY dt.id DESC
         `;
 

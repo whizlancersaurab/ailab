@@ -12,8 +12,7 @@ import type { OptionType, syllabusData } from "../../../../core/data/interface";
 import Select from "react-select";
 import dayjs from 'dayjs'
 import { Spinner } from "../../../../spinner";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../../../core/data/redux/store";
+
 
 
 interface Month {
@@ -64,7 +63,7 @@ const AddSyllabus = () => {
 
     const [editId, setEditId] = useState<number | null>(null)
     const [sortType, setSortType] = useState<"asc" | "desc">("asc");
-    const { role } = useSelector((state: RootState) => state.authSlice)
+ 
 
 
     const fetchAllClassSyllabus = async () => {
@@ -460,7 +459,7 @@ const AddSyllabus = () => {
                             <ul className="dropdown-menu dropdown-menu-right p-3">
 
                                 {
-                                    role === 'SUPER_ADMIN' &&
+                                 
                                     <li>
                                         <button
                                             className="dropdown-item rounded-1"
@@ -487,7 +486,7 @@ const AddSyllabus = () => {
                                     </button>
                                 </li>
                                 {
-                                    role === 'SUPER_ADMIN' && <li>
+                                <li>
                                         <button
                                             className="dropdown-item rounded-1"
                                             onClick={() => setDeleteId(record.id)}
@@ -583,8 +582,7 @@ const AddSyllabus = () => {
                         </div>
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
                             <TooltipOption />
-                            {
-                                role === 'SUPER_ADMIN' ? (
+                           
                                     <div className="mb-2">
                                         <Link
                                             to="#"
@@ -596,8 +594,7 @@ const AddSyllabus = () => {
                                             Add Class Syllabus
                                         </Link>
                                     </div>
-                                ) : (<></>)
-                            }
+                              
                         </div>
                     </div>
                     {/* /Page Header */}

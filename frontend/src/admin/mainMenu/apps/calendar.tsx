@@ -60,11 +60,11 @@ const Calendar = () => {
   });
 
   const colorOptions = [
-    { value: "bg-success", label: "Success" },
-    { value: "bg-danger", label: "Danger" },
-    { value: "bg-primary", label: "Primary" },
-    { value: "bg-warning", label: "Warning" },
-    { value: "bg-info", label: "Info" },
+    { value: "bg-success", label: "Green" },
+    { value: "bg-danger", label: "Red" },
+    { value: "bg-primary", label: "Violet" },
+    { value: "bg-warning", label: "Yellow" },
+    { value: "bg-info", label: "Blue" },
   ];
 
 

@@ -3,7 +3,7 @@ import Table from "../../../../core/common/dataTable/index";
 import { Link } from "react-router-dom";
 import TooltipOption from "../../../../core/common/tooltipOption";
 import { all_routes } from "../../../../router/all_routes";
-import { addClass, allClasses, deleteClass, editClass, speClass } from "../../../../service/api.ts";
+import { addClass, allClasses, deleteClass, editClass} from "../../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
 import { handleModalPopUp } from "../../../../handlePopUpmodal";
@@ -63,21 +63,21 @@ const Classes = () => {
         }));
     };
 
-    const fetchSpecificClass = async (id: number) => {
+    // const fetchSpecificClass = async (id: number) => {
 
-        try {
-            const { data } = await speClass(id)
-            setFormData({
-                className: data.data.className,
+    //     try {
+    //         const { data } = await speClass(id)
+    //         setFormData({
+    //             className: data.data.className,
 
-            }
-            )
-            setEditId(id)
-        } catch (error) {
-            console.log(error)
-        }
+    //         }
+    //         )
+    //         setEditId(id)
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
 
-    }
+    // }
 
     const cancelEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
@@ -172,53 +172,53 @@ const Classes = () => {
                 <span>{`Class-${text}`}</span>
             ),
             sorter: (a: any, b: any) => a.className.length - b.className.length,
-        },
+        }
 
 
-        {
-            title: "Action",
-            dataIndex: "action",
-            render: (_: any, record: any) => (
-                <>
-                    <div className="d-flex align-items-center">
-                        <div className="dropdown">
-                            <Link
-                                to="#"
-                                className="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                            >
-                                <i className="ti ti-dots-vertical fs-14" />
-                            </Link>
-                            <ul className="dropdown-menu dropdown-menu-right p-3">
-                                <li>
-                                    <button
-                                        className="dropdown-item rounded-1"
-                                        onClick={() => fetchSpecificClass(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#edit_class"
-                                    >
-                                        <i className="ti ti-edit-circle me-2" />
-                                        Edit
-                                    </button>
-                                </li>
-                                <li>
-                                    <button
-                                        className="dropdown-item rounded-1"
-                                        onClick={() => setDeleteId(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#delete-modal"
-                                    >
-                                        <i className="ti ti-trash-x me-2" />
-                                        Delete
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </>
-            ),
-        },
+        // {
+        //     title: "Action",
+        //     dataIndex: "action",
+        //     render: (_: any, record: any) => (
+        //         <>
+        //             <div className="d-flex align-items-center">
+        //                 <div className="dropdown">
+        //                     <Link
+        //                         to="#"
+        //                         className="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0"
+        //                         data-bs-toggle="dropdown"
+        //                         aria-expanded="false"
+        //                     >
+        //                         <i className="ti ti-dots-vertical fs-14" />
+        //                     </Link>
+        //                     <ul className="dropdown-menu dropdown-menu-right p-3">
+        //                         <li>
+        //                             <button
+        //                                 className="dropdown-item rounded-1"
+        //                                 onClick={() => fetchSpecificClass(record.id)}
+        //                                 data-bs-toggle="modal"
+        //                                 data-bs-target="#edit_class"
+        //                             >
+        //                                 <i className="ti ti-edit-circle me-2" />
+        //                                 Edit
+        //                             </button>
+        //                         </li>
+        //                         <li>
+        //                             <button
+        //                                 className="dropdown-item rounded-1"
+        //                                 onClick={() => setDeleteId(record.id)}
+        //                                 data-bs-toggle="modal"
+        //                                 data-bs-target="#delete-modal"
+        //                             >
+        //                                 <i className="ti ti-trash-x me-2" />
+        //                                 Delete
+        //                             </button>
+        //                         </li>
+        //                     </ul>
+        //                 </div>
+        //             </div>
+        //         </>
+        //     ),
+        // },
     ];
 
 
@@ -248,7 +248,7 @@ const Classes = () => {
                         </div>
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
                             <TooltipOption />
-                            <div className="mb-2">
+                            {/* <div className="mb-2">
                                 <Link
                                     to="#"
                                     className="btn btn-primary"
@@ -258,7 +258,7 @@ const Classes = () => {
                                     <i className="ti ti-square-rounded-plus-filled me-2" />
                                     Add Class
                                 </Link>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     {/* /Page Header */}
@@ -268,7 +268,7 @@ const Classes = () => {
                             <h4 className="mb-3">Classes List</h4>
                             <div className="d-flex align-items-center flex-wrap">
                                 <div className="dropdown mb-3 me-2">
-                                    <Link
+                                    {/* <Link
                                         to="#"
                                         className="btn btn-outline-light bg-white dropdown-toggle"
                                         data-bs-toggle="dropdown"
@@ -276,10 +276,10 @@ const Classes = () => {
                                     >
                                         <i className="ti ti-filter me-2" />
                                         Filter
-                                    </Link>
+                                    </Link> */}
 
                                 </div>
-                                <div className="dropdown mb-3">
+                                {/* <div className="dropdown mb-3">
                                     <Link
                                         to="#"
                                         className="btn btn-outline-light bg-white dropdown-toggle"
@@ -301,7 +301,7 @@ const Classes = () => {
                                         </li>
 
                                     </ul>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                         <div className="card-body p-0 py-3">

@@ -162,15 +162,15 @@ export const superAdminSidebar = [
         showSubRoute: false,
 
       },
-      {
-        label: "Class Syllabus",
-        link: routes.syllabus,
-        icon: "ti ti-layout-dashboard",
-        submenu: false,
-        showSubRoute: false,
+      // {
+      //   label: "Class Syllabus",
+      //   link: routes.syllabus,
+      //   icon: "ti ti-layout-dashboard",
+      //   submenu: false,
+      //   showSubRoute: false,
 
 
-      },
+      // },
 
     ],
   },

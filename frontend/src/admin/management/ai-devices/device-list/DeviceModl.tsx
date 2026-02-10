@@ -364,7 +364,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, addQuantityId,
                                         Cancel
                                     </button>
                                     <button type="submit" className="btn btn-primary px-4">
-                                        Mannage Quantity
+                                        Manage Quantity
                                     </button>
                                 </div>
                             </div>
