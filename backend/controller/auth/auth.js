@@ -445,22 +445,20 @@ exports.profile = async (req, res) => {
 exports.logout = async (req, res) => {
   try {
     const id = req.user.id;
+
     await db.query(
       "DELETE FROM refresh_token WHERE user_id = ?",
       [id]
     );
 
-    res.clearCookie("access_token", {
+    const cookieOptions = {
       httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production"
-    });
+      secure: true,    
+      sameSite: "None"
+    };
 
-    res.clearCookie("refresh_token", {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production"
-    });
+    res.clearCookie("access_token", cookieOptions);
+    res.clearCookie("refresh_token", cookieOptions);
 
     return res.status(200).json({
       message: "Logged out successfully",
@@ -475,6 +473,7 @@ exports.logout = async (req, res) => {
     });
   }
 };
+
 
 exports.refreshToken = async (req, res) => {
   try {
@@ -523,7 +522,7 @@ exports.refreshToken = async (req, res) => {
 
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: true,          
+      secure: true,
       sameSite: "None",
       maxAge: 15 * 60 * 1000
     });
