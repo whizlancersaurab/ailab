@@ -6,8 +6,8 @@ const jwt = require('jsonwebtoken')
 
 exports.register = async (req, res) => {
   const { firstName, lastName, email, password, schoolName } = req.body;
-   const profileImage = req.files.profileImage[0].path;
-    const schoolLogo = req.files.schoolLogo[0].path;
+  const profileImage = req.files.profileImage[0].path;
+  const schoolLogo = req.files.schoolLogo[0].path;
   const conn = await db.getConnection();
   await conn.beginTransaction();
 
@@ -47,7 +47,7 @@ exports.register = async (req, res) => {
     const [schoolResult] = await conn.query(
       `INSERT INTO schools (name, status,profileImage,schoolLogo, created_at)
        VALUES (?, 'ACTIVE', ?, ?, NOW())`,
-      [schoolName.trim() , profileImage , schoolLogo]
+      [schoolName.trim(), profileImage, schoolLogo]
     );
 
     const schoolId = schoolResult.insertId;
@@ -161,7 +161,7 @@ exports.login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    
+
     await db.query(
       `
       INSERT INTO refresh_token (user_id, token, expires_at)
@@ -173,20 +173,21 @@ exports.login = async (req, res) => {
       [user.id, refreshToken]
     );
 
-    
+
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge:15* 60 * 1000
+      secure: true,          // 🔴 FORCE TRUE
+      sameSite: "None",
+      maxAge: 15 * 60 * 1000
     });
 
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true,          // 🔴 FORCE TRUE
+      sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
+
 
     return res.status(200).json({
       message: "Login successful",
@@ -204,9 +205,9 @@ exports.login = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  const userId =  req.user.id;
- const {schoolId }= req.user; 
-  const { firstName, lastName, email,schoolName } = req.body;
+  const userId = req.user.id;
+  const { schoolId } = req.user;
+  const { firstName, lastName, email, schoolName } = req.body;
 
   if (!userId || !schoolId) {
     return res.status(400).json({
@@ -279,7 +280,7 @@ exports.update = async (req, res) => {
       ]
     );
 
-   
+
 
     // Update user
     await conn.query(
@@ -417,7 +418,7 @@ exports.profile = async (req, res) => {
       sql,
       [id]
     );
-    
+
 
     if (rows.length === 0) {
       return res.status(404).json({
@@ -480,7 +481,7 @@ exports.refreshToken = async (req, res) => {
     const { id } = req.user;
     const refreshToken = req.refreshToken;
 
-    
+
 
     const [rows] = await db.query(
       `SELECT rt.expires_at, u.id, u.email, u.role, u.school_id
@@ -491,7 +492,7 @@ exports.refreshToken = async (req, res) => {
       [id, refreshToken]
     );
 
-   
+
 
     if (rows.length === 0) {
       return res.status(401).json({
@@ -520,14 +521,14 @@ exports.refreshToken = async (req, res) => {
       { expiresIn: "15m" }
     );
 
-
-
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 15* 60 * 1000
+      secure: true,          
+      sameSite: "None",
+      maxAge: 15 * 60 * 1000
     });
+
+
 
     return res.status(200).json({
       message: "Access token refreshed successfully",
