@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Table from "../../../../core/common/dataTable/index";
 import { Link } from "react-router-dom";
-import TooltipOption from "../../../../core/common/tooltipOption";
+// import TooltipOption from "../../../../core/common/tooltipOption";
 import { all_routes } from "../../../../router/all_routes";
 
 // allClasses
@@ -73,7 +73,7 @@ const AddSyllabus = () => {
 
             const { data } = await allClassSyllabus()
             if (data.success) {
-               
+
                 setAllSyllabusData(data.data)
                 setOriginalAllSyllabusData(data.data)
             }
@@ -486,19 +486,19 @@ const AddSyllabus = () => {
                                         View
                                     </button>
                                 </li>
-                                
-                                    <li>
-                                        <button
-                                            className="dropdown-item rounded-1"
-                                            onClick={() => setDeleteId(record.id)}
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#delete-modal"
-                                        >
-                                            <i className="ti ti-trash-x me-2" />
-                                            Delete
-                                        </button>
-                                    </li>
-                                
+
+                                <li>
+                                    <button
+                                        className="dropdown-item rounded-1"
+                                        onClick={() => setDeleteId(record.id)}
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#delete-modal"
+                                    >
+                                        <i className="ti ti-trash-x me-2" />
+                                        Delete
+                                    </button>
+                                </li>
+
                             </ul>
                         </div>
                     </div>
@@ -545,7 +545,7 @@ const AddSyllabus = () => {
         });
 
         setAllSyllabusData([...filtered]);
-         setFilterData({ className: null });
+        setFilterData({ className: null });
         if (dropdownMenuRef.current) {
             dropdownMenuRef.current.classList.remove("show");
         }
@@ -586,9 +586,24 @@ const AddSyllabus = () => {
                             </nav>
                         </div>
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-                            <TooltipOption />
+                            {/* <TooltipOption />
+                             */}
+                            <button
+                                className="btn btn-success me-2"
+                                onClick={() => {
+                                    const link = document.createElement("a");
+                                    link.href = "/assets/botixbo.pdf"; // your PDF path
+                                    link.target = "_blank"; // open in new tab
+                                    link.click();
+                                }}
+                            >
+                                Download Syllabus
+                            </button>
 
-                            <div className="mb-2">
+
+
+
+                            <div className="mb-">
                                 <Link
                                     to="#"
                                     className="btn btn-primary"
@@ -702,7 +717,7 @@ const AddSyllabus = () => {
                                         <span className="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
-                            ) : (<Table   key={sortType + allSyllabusData.length + Math.floor(Math.random() * 100000)}columns={columns} dataSource={sortedDevices} Selection={false} />)
+                            ) : (<Table key={sortType + allSyllabusData.length + Math.floor(Math.random() * 100000)} columns={columns} dataSource={sortedDevices} Selection={false} />)
                             }
                             {/* /Guardians List */}
                         </div>

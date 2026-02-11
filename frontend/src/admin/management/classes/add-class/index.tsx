@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Table from "../../../../core/common/dataTable/index";
 import { Link } from "react-router-dom";
-import TooltipOption from "../../../../core/common/tooltipOption";
+// import TooltipOption from "../../../../core/common/tooltipOption";
 import { all_routes } from "../../../../router/all_routes";
 import { addClass, allClasses, deleteClass, editClass} from "../../../../service/api.ts";
 // allClasses
@@ -247,7 +247,7 @@ const Classes = () => {
                             </nav>
                         </div>
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-                            <TooltipOption />
+                            {/* <TooltipOption /> */}
                             {/* <div className="mb-2">
                                 <Link
                                     to="#"

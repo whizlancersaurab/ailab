@@ -259,7 +259,7 @@ const Category = () => {
 
                                 </div>
 
-                                <div className="dropdown mb-3">
+                                {/* <div className="dropdown mb-3">
                                     <Link
                                         to="#"
                                         className="btn btn-outline-light bg-white dropdown-toggle"
@@ -281,7 +281,7 @@ const Category = () => {
                                         </li>
 
                                     </ul>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                         <div className="card-body p-0 py-3">

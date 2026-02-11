@@ -132,7 +132,7 @@ const OutOfStockDevice = () => {
             <div className="d-flex align-items-center flex-wrap">
               {/* FILTER (future) */}
               <div className="dropdown mb-3 me-2">
-                <Link
+                {/* <Link
                   to="#"
                   className="btn btn-outline-light bg-white dropdown-toggle"
                   data-bs-toggle="dropdown"
@@ -140,7 +140,7 @@ const OutOfStockDevice = () => {
                 >
                   <i className="ti ti-filter me-2" />
                   Filter
-                </Link>
+                </Link> */}
               </div>
 
               {/* 🔥 SORT DROPDOWN (WORKING) */}

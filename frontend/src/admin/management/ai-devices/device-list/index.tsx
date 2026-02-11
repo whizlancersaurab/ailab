@@ -3,7 +3,7 @@ import Table from "../../../../core/common/dataTable/index";
 import { Link } from "react-router-dom";
 import TooltipOption from "../../../../core/common/tooltipOption";
 import { all_routes } from "../../../../router/all_routes";
-import { allAiDevices, deleteAiDevice } from "../../../../service/api.ts";
+import { allAiDevices, deleteAiDevice, speAiDevice } from "../../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
 import { handleModalPopUp } from "../../../../handlePopUpmodal";
@@ -28,6 +28,7 @@ const Device = () => {
   const [sortType, setSortType] = useState<"asc" | "desc">("asc");
   const [editId, setEditId] = useState<number | null>(null)
   const [addQuantityId, setAddQuantityId] = useState<number | null>(null)
+  const [actualQuantity, setActualQuantity] = useState<number>(0);
   const fetchdevices = async () => {
     setLoading(true)
     await new Promise((res) => setTimeout(res, 500))
@@ -88,6 +89,23 @@ const Device = () => {
     return copy;
   }, [devices, sortType]);
 
+
+  // quantity
+    const fetchSpeDevice = async (id: number) => {
+          try {
+              const { data } = await speAiDevice(id)
+              if (data.success) {
+                  
+                  setActualQuantity(data.data.quantity)
+                  setAddQuantityId(id)
+                  
+  
+              }
+          } catch (error: any) {
+              console.log(error)
+              toast.error(error?.response?.data?.message)
+          }
+      }
   
 
   const columns = [
@@ -192,7 +210,7 @@ const Device = () => {
                 <li>
                   <button
                     className="dropdown-item rounded-1"
-                    onClick={() => setAddQuantityId(record.id)}
+                    onClick={() => fetchSpeDevice(record.id)}
                     data-bs-toggle="modal"
                     data-bs-target="#add-quantity"
                   >
@@ -352,7 +370,7 @@ const Device = () => {
 
 
         {/* /Delete Modal */}
-        <DeviceModal onAdd={fetchdevices} editId={editId} setEditId={setEditId} addQuantityId={addQuantityId} setAddQuantityId={setAddQuantityId} />
+        <DeviceModal onAdd={fetchdevices} editId={editId} setEditId={setEditId} addQuantityId={addQuantityId} setAddQuantityId={setAddQuantityId} actualQuantity={actualQuantity} />
       </>
     </div>
   );

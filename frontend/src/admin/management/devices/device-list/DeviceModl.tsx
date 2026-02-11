@@ -19,15 +19,18 @@ type props = {
     onAdd?: () => void
     setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
     setAddQuantityId?: React.Dispatch<React.SetStateAction<number | null>>;
+    actualQuantity?:number
 }
 
-const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, addQuantityId, setAddQuantityId }) => {
+const DeviceModal: React.FC<props> = ({ onAdd, editId,actualQuantity ,setEditId, addQuantityId, setAddQuantityId }) => {
     // FORM STATE
     const [deviceName, setDeviceName] = useState("");
     const [deviceCode, setDeviceCode] = useState("");
     const [category, setCategory] = useState<number | null>(null);
     const [subcategory, setSubcategory] = useState<number | null>(null);
     const [quantity, setQuantity] = useState<number>(0)
+  
+
     const [errors, setErrors] = useState<FormErrors>({});
     const [categoryOptions, setCategoryOptions] = useState<OptionType[]>([]);
     const [subCategoryOptions, setSubCategoryOptions] = useState<OptionType[]>([]);
@@ -53,7 +56,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, addQuantityId,
         if (!subcategory) {
             newErrors.subcategory = "Sub category is required";
         }
-         if (quantity <0) {
+        if (quantity < 0) {
             newErrors.quantity = "Quantity should Not be less than 0 !";
         }
 
@@ -145,6 +148,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, addQuantityId,
                 handleSubCategory(data.data.category_id)
                 setSubcategory(data.data.sub_category_id)
                 setQuantity(data.data.quantity)
+             
 
             }
         } catch (error: any) {
@@ -180,14 +184,20 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, addQuantityId,
     const handleAddQuantity = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!addQuantityId) return;
-       
+       if (actualQuantity === null || actualQuantity === undefined) return;
 
+
+        if (quantity < 0 && Math.abs(quantity) > actualQuantity) {
+            toast.error(`Cannot remove more than ${actualQuantity} devices!`);
+            return;
+        }
         try {
 
             const { data } = await addQuantity({ quantity: quantity }, addQuantityId)
             if (data.success) {
                 toast.success(data.message)
                 setQuantity(0)
+           
                 if (setAddQuantityId) setAddQuantityId(null)
                 if (onAdd) onAdd()
                 handleModalPopUp('add-quantity')
@@ -202,7 +212,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, addQuantityId,
         e.preventDefault()
         setQuantity(0)
         if (setAddQuantityId) setAddQuantityId(null)
-       
+
     }
 
 
@@ -341,6 +351,8 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, addQuantityId,
                                 ></button>
                             </div>
                             <div className="modal-body text-center pt-0">
+                                <div className="my-3 fw-bold">Available devices: {actualQuantity}</div>
+
                                 <p className="text-muted mb-3">
                                     Enter the quantity for this device
                                 </p>
