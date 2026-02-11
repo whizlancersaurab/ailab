@@ -15,13 +15,16 @@ import { all_routes } from "../../../router/all_routes";
 import Select from 'react-select'
 
 export const handleModalPopUp = (id: string) => {
- 
   const modalEl = document.getElementById(id);
   if (!modalEl) return;
+
+  // Make sure bootstrap is loaded
   const bootstrap = (window as any).bootstrap;
   if (!bootstrap) return;
+
+  // Always get or create instance
   const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-  modal.show(); 
+  modal.toggle();
 };
 
 
