@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Table from "../../../core/common/dataTable/index";
 import { Link } from "react-router-dom";
 import TooltipOption from "../../../core/common/tooltipOption";
@@ -21,6 +21,7 @@ const statusOptions = [
 const DailyTask = () => {
     const route = all_routes
     const [tasksList, setTasksList] = useState<TasksData[]>([])
+    const [originalTaskList, setOriginalTaskList] = useState<TasksData[]>([])
     const [loading, setLoading] = useState<boolean>(false)
     const [classOptions, setClassOptions] = useState<OptionType[]>([])
     const [monthsOptions, setMonthsOptions] = useState<OptionType[]>([])
@@ -31,6 +32,7 @@ const DailyTask = () => {
     const [taskTitle, setTaskTitle] = useState<string>("")
     const [status, setStatus] = useState<'IN_PROGRESS' | 'COMPLETED'>("IN_PROGRESS")
     const [editId, setEditId] = useState<number | null>(null)
+    const [sortType, setSortType] = useState<"asc" | "desc">("asc");
 
 
     const fetchTasks = async () => {
@@ -40,6 +42,7 @@ const DailyTask = () => {
             const { data } = await allTasks()
             if (data.success) {
                 setTasksList(data.data)
+                setOriginalTaskList(data.data)
             }
 
         } catch (error) {
@@ -215,6 +218,19 @@ const DailyTask = () => {
         setDeleteId(null)
     }
 
+    const sortedDevices = useMemo(() => {
+        const copy = [...tasksList];
+
+        copy.sort((a, b) => {
+            return sortType === "asc"
+                ? a.id - b.id
+                : b.id - a.id;
+        });
+
+        return copy;
+    }, [tasksList, sortType]);
+
+
 
     const columns = [
         {
@@ -322,6 +338,47 @@ const DailyTask = () => {
         },
     ];
 
+    // filter data
+
+    interface FilterData {
+        className: number | null;
+    }
+
+    const [filterData, setFilterData] = useState<FilterData>({ className: null });
+
+    const handleFilterSelectChange = (name: keyof FilterData, value: null | number) => {
+        setFilterData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
+
+    const handleApplyClick = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const filtered = originalTaskList.filter((row: any) => {
+            if (filterData.className !== null) {
+                return Number(row.className) === Number(filterData.className);
+            }
+            return true;
+        });
+
+        setTasksList([...filtered]);
+        setFilterData({ className: null });
+        if (dropdownMenuRef.current) {
+            dropdownMenuRef.current.classList.remove("show");
+        }
+    };
+
+
+    const handleResetFilter = (e?: React.MouseEvent<HTMLButtonElement>) => {
+        e?.preventDefault();
+        setFilterData({ className: null });
+        setTasksList(originalTaskList);
+        if (dropdownMenuRef.current) {
+            dropdownMenuRef.current.classList.remove("show");
+        }
+    };
+
 
 
     return (
@@ -369,8 +426,55 @@ const DailyTask = () => {
                             <h4 className="mb-3">Tasks List</h4>
                             <div className="d-flex align-items-center flex-wrap">
                                 <div className="dropdown mb-3 me-2">
-                                   
+                                    <Link
+                                        to="#"
+                                        className="btn btn-outline-light bg-white dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        data-bs-auto-close="outside"
+                                    >
+                                        <i className="ti ti-filter me-2" />
+                                        Filter
+                                    </Link>
+                                    <div className="dropdown-menu drop-width" ref={dropdownMenuRef}>
 
+
+                                        <form >
+                                            <div className="d-flex align-items-center border-bottom p-3">
+                                                <h4>Filter</h4>
+                                            </div>
+                                            <div className="p-3 border-bottom pb-0">
+                                                <div className="row">
+                                                    <div className="col-md-12">
+                                                        <div className="mb-3">
+                                                            <label className="form-label">ClassName</label>
+                                                            <Select
+                                                                className="select"
+                                                                options={classOptions} // [{ value: 1, label: "Class 1" }, ...]
+                                                                placeholder="Select class"
+                                                                value={classOptions.find(option => Number(option.value) === filterData.className) || null} // <-- make it controlled
+                                                                onChange={(option: any) =>
+                                                                    handleFilterSelectChange("className", option ? option.value : null)
+                                                                }
+                                                            />
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="p-3 d-flex align-items-center justify-content-end">
+                                                <button type="button" onClick={(e) => handleResetFilter(e)} className="btn btn-light me-3">
+                                                    Reset
+                                                </button>
+                                                <button
+                                                    // to="#"
+                                                    className="btn btn-primary"
+                                                    onClick={handleApplyClick}
+                                                >
+                                                    Apply
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                                 <div className="dropdown mb-3">
                                     <Link
@@ -383,15 +487,24 @@ const DailyTask = () => {
                                     </Link>
                                     <ul className="dropdown-menu p-3">
                                         <li>
-                                            <Link to="#" className="dropdown-item rounded-1 active">
+                                            <button
+                                                className={`dropdown-item rounded-1 ${sortType === "asc" ? "active" : ""
+                                                    }`}
+                                                onClick={() => setSortType("asc")}
+                                            >
                                                 Ascending
-                                            </Link>
+                                            </button>
                                         </li>
                                         <li>
-                                            <Link to="#" className="dropdown-item rounded-1">
+                                            <button
+                                                className={`dropdown-item rounded-1 ${sortType === "desc" ? "active" : ""
+                                                    }`}
+                                                onClick={() => setSortType("desc")}
+                                            >
                                                 Descending
-                                            </Link>
+                                            </button>
                                         </li>
+
 
                                     </ul>
                                 </div>
@@ -401,7 +514,7 @@ const DailyTask = () => {
                             {/* Guardians List */}
                             {loading ? (
                                 <Spinner />
-                            ) : (<Table columns={columns} dataSource={tasksList} Selection={false} />)
+                            ) : (<Table key={sortType+Math.floor(Math.random() * 100000)} columns={columns} dataSource={sortedDevices} Selection={false} />)
                             }
                             {/* /Guardians List */}
                         </div>

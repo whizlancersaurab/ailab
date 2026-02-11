@@ -103,7 +103,7 @@ const Header = () => {
           onMouseLeave={onMouseLeave}
         >
           <Link to={routes.adminDashboard} className="logo logo-normal">
-            <img style={{ width: '190px' }} src="assets/img/logo2.png" alt="" />
+            <img style={{ width: '170px' }} src="assets/img/logo2.png" alt="" />
           </Link>
 
           <Link id="toggle_btn" to="#" onClick={handleToggleMiniSidebar}>
@@ -127,8 +127,8 @@ const Header = () => {
           <div className="nav user-menu">
             {/* Search */}
             <div className="mx-auto d-flex align-items-center justify-content-center">
-              <div><img width={50} src="assets/img/logo.jpg" alt="" /></div>
-              <div style={{color:'black'}} className="fw-bold fs-3">ROBOTICS & AI LAB MANAGEMENT SYSTEM</div>
+              <div><img width={45} src="assets/img/logo.jpg" alt="" /></div>
+              <div style={{color:'#0061FC'}} className="fw-bold fs-3">ROBOTICS & AI LAB MANAGEMENT</div>
             </div>
             {/* /Search */}
             <div className="d-flex align-items-center  justify-content-end">

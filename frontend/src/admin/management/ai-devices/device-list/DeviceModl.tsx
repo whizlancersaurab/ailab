@@ -186,7 +186,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
       if (actualQuantity === null || actualQuantity === undefined) return;
 
         if (quantity < 0 && Math.abs(quantity) > actualQuantity) {
-            toast.error(`Cannot remove more than ${actualQuantity} devices!`);
+            toast.error(`You are trying to manage more than your actual data !`);
             return;
         }
 
@@ -361,7 +361,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
                                     className="form-control form-control-lg text-center mb-4"
                                     value={quantity}
                                     onChange={(e) => setQuantity(Number(e.target.value))}
-                                    placeholder="0"
+                                   placeholder="Use negative value to reduce quantity"
                                     required
                                 />
 

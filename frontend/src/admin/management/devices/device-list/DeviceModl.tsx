@@ -19,17 +19,17 @@ type props = {
     onAdd?: () => void
     setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
     setAddQuantityId?: React.Dispatch<React.SetStateAction<number | null>>;
-    actualQuantity?:number
+    actualQuantity?: number
 }
 
-const DeviceModal: React.FC<props> = ({ onAdd, editId,actualQuantity ,setEditId, addQuantityId, setAddQuantityId }) => {
+const DeviceModal: React.FC<props> = ({ onAdd, editId, actualQuantity, setEditId, addQuantityId, setAddQuantityId }) => {
     // FORM STATE
     const [deviceName, setDeviceName] = useState("");
     const [deviceCode, setDeviceCode] = useState("");
     const [category, setCategory] = useState<number | null>(null);
     const [subcategory, setSubcategory] = useState<number | null>(null);
     const [quantity, setQuantity] = useState<number>(0)
-  
+
 
     const [errors, setErrors] = useState<FormErrors>({});
     const [categoryOptions, setCategoryOptions] = useState<OptionType[]>([]);
@@ -148,7 +148,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId,actualQuantity ,setEditId,
                 handleSubCategory(data.data.category_id)
                 setSubcategory(data.data.sub_category_id)
                 setQuantity(data.data.quantity)
-             
+
 
             }
         } catch (error: any) {
@@ -184,11 +184,11 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId,actualQuantity ,setEditId,
     const handleAddQuantity = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!addQuantityId) return;
-       if (actualQuantity === null || actualQuantity === undefined) return;
+        if (actualQuantity === null || actualQuantity === undefined) return;
 
 
         if (quantity < 0 && Math.abs(quantity) > actualQuantity) {
-            toast.error(`Cannot remove more than ${actualQuantity} devices!`);
+            toast.error(`You are trying to manage more than your actual data !`);
             return;
         }
         try {
@@ -197,7 +197,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId,actualQuantity ,setEditId,
             if (data.success) {
                 toast.success(data.message)
                 setQuantity(0)
-           
+
                 if (setAddQuantityId) setAddQuantityId(null)
                 if (onAdd) onAdd()
                 handleModalPopUp('add-quantity')
