@@ -3,7 +3,7 @@ import Table from "../../../core/common/dataTable/index";
 import { Link } from "react-router-dom";
 import TooltipOption from "../../../core/common/tooltipOption";
 import { all_routes } from "../../../router/all_routes";
-import { addSubCategory, allSubCategories, categoryForOption,  deleteSubCategory, getSpeSubCategory, updateSubCategory } from "../../../service/api";
+import { addSubCategory, allSubCategories, categoryForOption, deleteSubCategory, getSpeSubCategory, updateSubCategory } from "../../../service/api";
 import { toast } from "react-toastify";
 import { handleModalPopUp } from "../../../handlePopUpmodal";
 import { Spinner } from "../../../spinner";
@@ -110,9 +110,11 @@ const SubCategory = () => {
 
             if (data.success) {
                 toast.success(data.message);
-                handleModalPopUp("add-sub-cat"); // close modal
+
                 setSelectedCategory(null);
                 setSubCategories([]);
+                fetchSubCategories()
+                handleModalPopUp("add-sub-cat"); // close modal
             } else {
                 // Server returned success: false
                 toast.error(data.message || "Failed to add sub-categories");

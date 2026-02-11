@@ -1,15 +1,8 @@
 export const handleModalPopUp = (elemId: string) => {
-  const modalElement = document.getElementById(elemId);
+  const modalElement = document.getElementById(elemId) as HTMLElement;
   if (modalElement) {
-    // Try to get instance
-    let modalInstance = window.bootstrap.Modal.getInstance(modalElement);
-
-    // If instance does not exist, create one
-    if (!modalInstance) {
-      modalInstance = new window.bootstrap.Modal(modalElement);
-    }
-
-    // Hide the modal
+    // Use getOrCreateInstance instead of manually checking
+    const modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalElement);
     modalInstance.hide();
   }
 };

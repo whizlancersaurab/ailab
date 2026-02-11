@@ -63,7 +63,7 @@ const AddSyllabus = () => {
 
     const [editId, setEditId] = useState<number | null>(null)
     const [sortType, setSortType] = useState<"asc" | "desc">("asc");
- 
+
 
 
     const fetchAllClassSyllabus = async () => {
@@ -73,6 +73,7 @@ const AddSyllabus = () => {
 
             const { data } = await allClassSyllabus()
             if (data.success) {
+               
                 setAllSyllabusData(data.data)
                 setOriginalAllSyllabusData(data.data)
             }
@@ -459,7 +460,7 @@ const AddSyllabus = () => {
                             <ul className="dropdown-menu dropdown-menu-right p-3">
 
                                 {
-                                 
+
                                     <li>
                                         <button
                                             className="dropdown-item rounded-1"
@@ -485,8 +486,8 @@ const AddSyllabus = () => {
                                         View
                                     </button>
                                 </li>
-                                {
-                                <li>
+                                
+                                    <li>
                                         <button
                                             className="dropdown-item rounded-1"
                                             onClick={() => setDeleteId(record.id)}
@@ -497,7 +498,7 @@ const AddSyllabus = () => {
                                             Delete
                                         </button>
                                     </li>
-                                }
+                                
                             </ul>
                         </div>
                     </div>
@@ -537,15 +538,19 @@ const AddSyllabus = () => {
         e.preventDefault();
 
         const filtered = originalAllSyllabusData.filter((row: any) => {
-            const matchClass = filterData.className ? Number(row.className) === Number(filterData.className) : true;
-            return matchClass;
+            if (filterData.className !== null) {
+                return Number(row.className) === Number(filterData.className);
+            }
+            return true;
         });
 
-        setAllSyllabusData(filtered);
+        setAllSyllabusData([...filtered]);
+         setFilterData({ className: null });
         if (dropdownMenuRef.current) {
             dropdownMenuRef.current.classList.remove("show");
         }
     };
+
 
     const handleResetFilter = (e?: React.MouseEvent<HTMLButtonElement>) => {
         e?.preventDefault();
@@ -582,19 +587,19 @@ const AddSyllabus = () => {
                         </div>
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
                             <TooltipOption />
-                           
-                                    <div className="mb-2">
-                                        <Link
-                                            to="#"
-                                            className="btn btn-primary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#add_syllabus"
-                                        >
-                                            <i className="ti ti-square-rounded-plus-filled me-2" />
-                                            Add Class Syllabus
-                                        </Link>
-                                    </div>
-                              
+
+                            <div className="mb-2">
+                                <Link
+                                    to="#"
+                                    className="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#add_syllabus"
+                                >
+                                    <i className="ti ti-square-rounded-plus-filled me-2" />
+                                    Add Class Syllabus
+                                </Link>
+                            </div>
+
                         </div>
                     </div>
                     {/* /Page Header */}
@@ -697,7 +702,7 @@ const AddSyllabus = () => {
                                         <span className="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
-                            ) : (<Table key={sortType} columns={columns} dataSource={sortedDevices} Selection={false} />)
+                            ) : (<Table   key={sortType + allSyllabusData.length + Math.floor(Math.random() * 100000)}columns={columns} dataSource={sortedDevices} Selection={false} />)
                             }
                             {/* /Guardians List */}
                         </div>
