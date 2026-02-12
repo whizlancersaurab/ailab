@@ -14,9 +14,6 @@ import "../src/style/icon/fontawesome/css/all.min.css";
 import "../src/style/icon/ionic/ionicons.css";
 import "../src/style/icon/tabler-icons/webfont/tabler-icons.css";
 import ALLRoutes from "./router/router";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
 import "../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
 // import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { BrowserRouter } from 'react-router';

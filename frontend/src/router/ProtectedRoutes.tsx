@@ -16,7 +16,7 @@ const ProtectedRoutes: React.FC = () => {
         }
     }, [dispatch, isAuth])
 
-    if (loading || isAuth === null) return <Spinner />
+    if (loading || isAuth === null) return <div style={{color:'black' , fontSize:'150px'}}><Spinner  /></div>
     if (!isAuth) return <Navigate to={'/'} replace />
 
     return <Outlet />

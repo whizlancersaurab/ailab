@@ -79,7 +79,7 @@ const Header = () => {
  
   const navigate = useNavigate()
   const dispatch = useDispatch<AppDispatch>()
-   const {user ,role ,profileImage} = useSelector((state: RootState) => state.authSlice)
+   const {user ,role,profileImage } = useSelector((state: RootState) => state.authSlice)
  
 
   const handleLogout = async () => {
@@ -87,9 +87,11 @@ const Header = () => {
     if (data.success) {
       toast.success(data.message)
       dispatch(reset())
+      localStorage.clear()
       navigate(`${routes.login}`)
     }
   }
+
 
  
   return (
@@ -126,8 +128,8 @@ const Header = () => {
         <div className="header-user">
           <div className="nav user-menu">
             {/* Search */}
-            <div className="mx-auto d-flex align-items-center justify-content-center">
-              <div><img width={45} src="assets/img/logo.jpg" alt="" /></div>
+            <div className="mx-auto d-flex g-2 align-items-center justify-content-center">
+              <div className="mx-2"><img  width={45} src="assets/img/logo.jpg" alt="" /></div>
               <div style={{color:'#0061FC'}} className="fw-bold fs-3">ROBOTICS & AI LAB MANAGEMENT</div>
             </div>
             {/* /Search */}

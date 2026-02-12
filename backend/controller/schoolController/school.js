@@ -3,88 +3,96 @@ const db = require('../../config/db')
 
 exports.allSchools = async (req, res) => {
 
-    try {
+  try {
 
-        const sql = `
-     SELECT 
-     s.id,
-     u.firstname,
-     u.lastname,
-     u.email,
-     s.name,
-     s.status,
-     s.profileImage,
-     s.schoolLogo,
-     s.created_at
-     FROM users u
-     LEFT JOIN schools s ON s.id=u.school_id
-     WHERE u.role !='SUPER_ADMIN'
+
+
+    const sql = `
+    SELECT
+    s.id,
+    u.firstname,
+    u.lastname,
+    u.email,
+    u.id AS userId,
+    s.name,
+    s.status,
+    s.profileImage,
+    s.schoolLogo,
+    s.created_at
+FROM users u
+LEFT JOIN user_schools us ON us.user_id = u.id
+LEFT JOIN schools s ON s.id = us.school_id
+WHERE u.role != 'SUPER_ADMIN'
+
         `
 
-        const [rows] = await db.query(sql)
-        return res.status(200).json({ message: "All school data fetched successfully !", data: rows, success: true })
+    const [rows] = await db.query(sql)
+    return res.status(200).json({ message: "All school data fetched successfully !", data: rows, success: true })
 
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ message: error.message, success: false })
-    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: error.message, success: false })
+  }
 }
 exports.allActiveSchools = async (req, res) => {
 
-    try {
+  try {
 
-        const sql = `
-     SELECT 
-     s.id,
-     u.firstname,
-     u.lastname,
-     u.email,
-     s.name,
-       s.profileImage,
-     s.schoolLogo,
-     s.status,
-     s.created_at
-     FROM users u
-     LEFT JOIN schools s ON s.id=u.school_id
+
+
+    const sql = `
+     SELECT
+    s.id,
+    u.firstname,
+    u.lastname,
+    u.email,
+    s.name,
+    s.status,
+    s.profileImage,
+    s.schoolLogo,
+    s.created_at
+FROM users u
+LEFT JOIN user_schools us ON us.user_id = u.id
+LEFT JOIN schools s ON s.id = us.school_id
      WHERE u.role !='SUPER_ADMIN' AND s.status="ACTIVE"
         `
 
-        const [rows] = await db.query(sql)
-        return res.status(200).json({ message: "All active school data fetched successfully !", data: rows, success: true })
+    const [rows] = await db.query(sql)
+    return res.status(200).json({ message: "All active school data fetched successfully !", data: rows, success: true })
 
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ message: error.message, success: false })
-    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: error.message, success: false })
+  }
 }
 exports.allSuspendedSchools = async (req, res) => {
 
-    try {
+  try {
 
-        const sql = `
-     SELECT 
-     s.id,
-     u.firstname,
-     u.lastname,
-     u.email,
-     s.name,
-     s.status,
-       s.profileImage,
-     s.schoolLogo,
-     s.created_at,
-     s.updated_at
-     FROM users u
-     LEFT JOIN schools s ON s.id=u.school_id
+    const sql = `
+     SELECT
+    s.id,
+    u.firstname,
+    u.lastname,
+    u.email,
+    s.name,
+    s.status,
+    s.profileImage,
+    s.schoolLogo,
+    s.created_at
+FROM users u
+LEFT JOIN user_schools us ON us.user_id = u.id
+LEFT JOIN schools s ON s.id = us.school_id
      WHERE u.role !='SUPER_ADMIN' AND s.status="SUSPENDED"
         `
 
-        const [rows] = await db.query(sql)
-        return res.status(200).json({ message: "All suspended school data fetched successfully !", data: rows, success: true })
+    const [rows] = await db.query(sql)
+    return res.status(200).json({ message: "All suspended school data fetched successfully !", data: rows, success: true })
 
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ message: error.message, success: false })
-    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: error.message, success: false })
+  }
 }
 
 exports.speSchool = async (req, res) => {
@@ -101,11 +109,8 @@ exports.speSchool = async (req, res) => {
     const sql = `
       SELECT 
         s.name,
-        s.status,
-        u.firstname,
-        u.lastname
+        s.status
       FROM schools s
-      LEFT JOIN users u ON u.school_id=s.id
       WHERE s.id = ?
     `;
 
@@ -169,64 +174,6 @@ exports.changeStatus = async (req, res) => {
   }
 };
 
-exports.updateSchool = async (req, res) => {
-  const { id } = req.params;
-  const { status, firstname, lastname } = req.body;
-
-  if (!id || !status || !firstname || !lastname) {
-    return res.status(400).json({
-      success: false,
-      message: "School ID, status, firstname, and lastname are required",
-    });
-  }
-
-  const connection = await db.getConnection(); // assuming pool
-  try {
-    await connection.beginTransaction();
-
-    const [result] = await connection.query(
-      `UPDATE schools SET status = ?, updated_at = NOW() WHERE id = ?`,
-      [status, id]
-    );
-
-    if (result.affectedRows === 0) {
-      await connection.rollback();
-      return res.status(404).json({
-        success: false,
-        message: "School not found",
-      });
-    }
-
-    const [result2] = await connection.query(
-      `UPDATE users SET firstname = ?, lastname = ?, updated_at = NOW() WHERE school_id = ?`,
-      [firstname, lastname, id]
-    );
-
-    if (result2.affectedRows === 0) {
-      await connection.rollback();
-      return res.status(404).json({
-        success: false,
-        message: "User for the school not found",
-      });
-    }
-
-    await connection.commit();
-    return res.status(200).json({
-      success: true,
-      message: "School status and user updated successfully",
-    });
-
-  } catch (error) {
-    await connection.rollback();
-    console.error("changeStatus error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  } finally {
-    connection.release();
-  }
-};
 
 exports.deleteSchool = async (req, res) => {
   const { id } = req.params;
@@ -293,3 +240,7 @@ exports.schoolStats = async (req, res) => {
     });
   }
 };
+
+
+
+

@@ -59,6 +59,10 @@ export const forgotPassword = (email: object) => api.post('/auth/forgot-password
 export const resetPassword = (data: object) => api.post('/auth/reset-password', data)
 export const logout = () => api.get('/auth/logout')
 export const userInfo = () => api.get('/auth/user')
+export const speUser = () => api.get('/auth/speUser')
+export const usersSchools = ()=>api.get('/auth/usersschools')
+export const switchSchool = (data:object)=>api.post('/auth/switch-school' , data)
+
 
 // superadin
 export const allSchools = ()=>api.get('/superadmin/allschools')

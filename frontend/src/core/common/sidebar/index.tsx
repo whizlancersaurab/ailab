@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate} from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { SidebarData, superAdminSidebar} from "../../data/json/sidebarData";
+import { SidebarData, superAdminSidebar } from "../../data/json/sidebarData";
 import "../../../style/icon/tabler-icons/webfont/tabler-icons.css";
 import { setExpandMenu } from "../../data/redux/sidebarSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,23 +16,25 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 import "../../../../node_modules/react-perfect-scrollbar/dist/css/styles.css";
 import type { RootState } from "../../data/redux/store";
 import { all_routes } from "../../../router/all_routes";
+import { switchSchool, usersSchools } from "../../../service/api";
+import { toast } from "react-toastify";
 const routes = all_routes;
 
 
 const Sidebar = () => {
-  
+
   const [customSide, setCustomSide] = useState<any[]>([]);
   const navigate = useNavigate()
 
-  const {role} = useSelector((state:RootState)=>state.authSlice)
- 
+  const { role } = useSelector((state: RootState) => state.authSlice)
+
   useEffect(() => {
-   
+
     if (role) {
-  
+
       if (role == "ADMIN") {
         setCustomSide([...SidebarData]);
-        
+
       } else if (role == "SUPER_ADMIN") {
         setCustomSide([...superAdminSidebar])
       }
@@ -152,8 +154,61 @@ const Sidebar = () => {
     dispatch(setExpandMenu(false));
   };
 
-  const {schoolName , schoolLogo} = useSelector((state: RootState) => state.authSlice)
-  
+
+
+
+
+
+
+  const [schools, setSchools] = useState<any[]>([]);
+  const [selectedSchool, setSelectedSchool] = useState<any>(null);
+  const [schoolId , setSchoolId]  = useState(localStorage.getItem('schoolId'));
+ 
+
+
+
+  useEffect(() => {
+    const fetchSchools = async () => {
+      try {
+        const { data } = await usersSchools();
+        if (data?.success && data.data?.length > 0) {
+          setSchools(data.data);
+          setSelectedSchool(data.data[0]);
+         
+        }
+      } catch (error) {
+        console.error("Failed to fetch schools:", error);
+      }
+    };
+
+    fetchSchools();
+  }, []);
+
+
+
+  const handleSchoolSwitch = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const schoolId = e.target.value;
+    localStorage.setItem("schoolId",schoolId)
+    setSchoolId(schoolId)
+
+    try {
+      const {data} = await switchSchool({schoolId }) 
+      console.log(data)
+      if (data.success) {
+        setSelectedSchool({ id: data.data.schoolId, name: data.data.schoolName });
+        toast.success(data.message);
+        window.location.reload();
+      }
+    } catch (error: any) {
+      console.error("Failed to switch school:", error);
+      toast.error(error.response?.data?.message || "Failed to switch school");
+    }
+  };
+
+
+
+ 
+
   return (
     <>
       <div
@@ -165,23 +220,32 @@ const Sidebar = () => {
         <PerfectScrollbar>
           <div className="sidebar-inner slimscroll">
             <div id="sidebar-menu" className="sidebar-menu">
-              <ul>
-                <li>
-                  <Link
-                    to="#"
-                    className="d-flex align-items-center border bg-white rounded p-2 mb-4"
-                  >
-                    <img
-                      src={`${schoolLogo??"assets/img/school.webp"}`}
-                      className="avatar avatar-lg img-fluid rounded"
-                      alt="Profile"
-                    />
-                    <span className="text-dark ms-2 fw-bold">
-                      {schoolName??'WHIZLANCER'}
-                    </span>
-                  </Link>
-                </li>
-              </ul>
+            
+              {/* ======= DISPLAY SELECTED SCHOOL ======= */}
+              {selectedSchool && (
+                <ul>
+                  
+                  <li>
+                  
+                    <select
+                      className="form-select mb-4"
+                      value={schoolId || selectedSchool?.id}
+                      onChange={handleSchoolSwitch}
+                    >
+                      
+                      {schools.map((school) => (
+
+                        <option key={school.id} value={school.id}>
+                       {school.name}
+                        </option>
+
+                      ))}
+                    </select>
+                  </li>
+                </ul>
+
+              )}
+
 
               <ul>
                 {customSide && customSide?.map((mainLabel: any, index: any) => (
@@ -209,7 +273,7 @@ const Sidebar = () => {
                               ) || []),
                             ];
                           }) || []),
-                        ].filter(Boolean); // remove undefined/null
+                        ].filter(Boolean);
 
                         const isActive = flatLinks.includes(Location.pathname);
 

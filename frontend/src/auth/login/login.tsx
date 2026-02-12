@@ -88,13 +88,13 @@ const Login = () => {
     try {
 
       const { data } = await login(loginForm)
-      
+       console.log(data.data.user)
 
       if (data.success) {
         toast.success(data.message)
-        if (data.role === 'ADMIN')
+        if (data.data.user.role === 'ADMIN')
           navigate(routes.adminDashboard)
-        else if (data.role === 'SUPER_ADMIN')
+        else if (data.data.user.role === 'SUPER_ADMIN')
           navigate(routes.superadmindashboard)
       }
 

@@ -6,7 +6,7 @@ import { all_routes } from "../../../../router/all_routes";
 import { allDevices, deleteDevice, speDevice } from "../../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../../handlePopUpmodal";
+// import { handleModalPopUp } from "../../../../handlePopUpmodal";
 import { Spinner } from "../../../../spinner.tsx";
 import DeviceModal from "./DeviceModl.tsx";
 import dayjs from 'dayjs'
@@ -54,6 +54,7 @@ const Device = () => {
 
   // delete class ===================
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [showDeleteModal , setShowDeleteModal] = useState<boolean>(false)
   const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     try {
@@ -62,7 +63,7 @@ const Device = () => {
         setDeleteId(null)
         toast.success(data.message)
         fetchdevices()
-        handleModalPopUp('delete-modal')
+       setShowDeleteModal(false)
 
       }
 
@@ -75,6 +76,7 @@ const Device = () => {
   const cancelDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     setDeleteId(null)
+    setShowDeleteModal(false)
   }
 
   const sortedDevices = useMemo(() => {
@@ -218,9 +220,11 @@ const Device = () => {
                 <li>
                   <button
                     className="dropdown-item rounded-1"
-                    onClick={() => setDeleteId(record.id)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#delete-modal"
+                    onClick={() => {
+                     setDeleteId(record.id)
+                     setShowDeleteModal(true)
+                    }}
+                  
                   >
                     <i className="ti ti-trash-x me-2" />
                     Delete
@@ -329,8 +333,9 @@ const Device = () => {
       </div>
       {/* /Page Wrapper */}
       <>
-        {/* Delete Modal */}
-        <div className="modal fade" id="delete-modal">
+        
+        {
+          showDeleteModal&&(<div className="modal fade show d-block" >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <form>
@@ -363,7 +368,8 @@ const Device = () => {
               </form>
             </div>
           </div>
-        </div>
+        </div>)
+        }
 
 
         {/* /Delete Modal */}

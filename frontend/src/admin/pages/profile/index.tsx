@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { all_routes } from "../../../router/all_routes";
-import { updateProfile, userInfo } from "../../../service/api";
+import { speUser, updateProfile } from "../../../service/api";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import CircleImage from "../../../auth/register/CircleImage";
@@ -46,7 +46,7 @@ const Profile = () => {
     try {
       setLoading2(true)
 
-      const { data } = await userInfo()
+      const { data } = await speUser()
       if (data.success) {
 
         setForm({
@@ -224,7 +224,7 @@ const Profile = () => {
                           {/* Profile Image */}
                           <div className="col-6">
                             <img
-                              src={profilePreview ?? "assets/img/user.jpg"}
+                              src={profilePreview ?? "assets/img/logo.jpg"}
                               alt="Profile"
                               className="img-fluid rounded-3"
                               style={{

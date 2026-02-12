@@ -218,6 +218,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, actualQuantity, setEditId
 
     return (
         <>
+
             <div
                 className="modal fade"
                 id="addDeviceModal"
@@ -336,6 +337,9 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, actualQuantity, setEditId
                     </div>
                 </div>
             </div>
+
+
+
             <div className="modal fade" id="add-quantity" tabIndex={-1} aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content shadow-lg rounded-4">
@@ -384,6 +388,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, actualQuantity, setEditId
                     </div>
                 </div>
             </div>
+            
 
         </>
     );

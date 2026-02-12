@@ -3,23 +3,25 @@ import Table from "../../../core/common/dataTable/index";
 import { Link } from "react-router-dom";
 import TooltipOption from "../../../core/common/tooltipOption";
 import { all_routes } from "../../../router/all_routes";
-import { allSchools,  delSchool, speSchool, updateSchool } from "../../../service/api.ts";
+import { allSchools, changeSchoolStatus, delSchool, speSchool } from "../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
 import { handleModalPopUp } from "../../../handlePopUpmodal";
 import { Spinner } from "../../../spinner.tsx";
 import dayjs from 'dayjs'
 import Select from 'react-select'
+import CircleImage from "../../../auth/register/CircleImage.tsx";
 
 
 export interface schoolData {
     id: number,
+    userId: null,
     firstname: string,
     lastname: string,
     email: string,
     name: string,
-    profileImage:string,
-    schoolLogo:string,
+    profileImage: string,
+    schoolLogo: string,
     status: 'SUSPENDED | ACTIVE',
     created_at: string;
 }
@@ -38,10 +40,11 @@ const School = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const [sortType, setSortType] = useState<"asc" | "desc">("asc");
     const [editId, setEditId] = useState<number | null>(null)
-    const [schoolName, setSchoolName] = useState<string>('')
     const [status, setStatus] = useState<string | 'ACTIVE' | 'SUSPENDED'>('')
-    const [firstname, setFirstname] = useState<string>("")
-    const [lastname, setLastname] = useState<string>("")
+    const [showAddSchoolModal, setShowAddSchoolModal] = useState<boolean>(false)
+    const [addUserId, setAddUserId] = useState<null | number>(null)
+
+
 
 
     const fetchSchools = async () => {
@@ -80,8 +83,6 @@ const School = () => {
                 console.log(data)
                 setStatus(data.data.status)
                 setSchoolName(data.data.name)
-                setFirstname(data.data.firstname)
-                setLastname(data.data.lastname)
                 setEditId(id)
             }
 
@@ -95,8 +96,6 @@ const School = () => {
         e.preventDefault()
         setStatus('')
         setSchoolName('')
-        setFirstname('')
-        setLastname('')
         setEditId(null)
 
 
@@ -105,13 +104,13 @@ const School = () => {
     const handelChageSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!editId || !status || !firstname) {
+        if (!editId || !status) {
             toast.warn('Required fields are neccsary !')
             return
         }
         try {
 
-            const { data } = await updateSchool(editId, { status , firstname , lastname })
+            const { data } = await changeSchoolStatus(editId, { status })
 
             if (data.success) {
                 toast.success(data.message)
@@ -165,7 +164,95 @@ const School = () => {
         return copy;
     }, [schools, sortType]);
 
-    const columns = [
+   
+
+    // 
+      const [schoolName , setSchoolName] = useState<string>("");
+      const [loading2, setLoading2] = useState<boolean>(false)
+    
+      const [profileFile, setProfileFile] = useState<File | null>(null);
+      const [profilePreview, setProfilePreview] = useState<string | null>(null);
+    
+      const [logoFile, setLogoFile] = useState<File | null>(null);
+      const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    
+      // update
+
+      const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+    
+        setProfileFile(file);
+        setProfilePreview(URL.createObjectURL(file));
+      };
+    
+      const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+    
+        setLogoFile(file);
+        setLogoPreview(URL.createObjectURL(file));
+      };
+
+    
+      const resetFormData = () => {
+        setSchoolName("")
+        setShowAddSchoolModal(false)
+        setProfileFile(null)
+        setProfilePreview(null)
+        setLogoFile(null)
+        setLogoPreview(null)
+        // handleModalPopUp('edit_personal_information')
+      }
+    
+    
+    
+      // ✅ Submit
+      const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if(!schoolName){
+            toast.error('School Name is Required !')
+            return
+        }else if(schoolName.length<7){
+            toast.error('School Name at least 7 chracters !')
+            return
+        }
+       
+        setLoading2(true)
+        const formData = new FormData();
+        formData.append("schoolName",schoolName);
+    
+        // image files (IMPORTANT)
+        if (profileFile) {
+          formData.append("profileImage", profileFile);
+        }
+    
+        if (logoFile) {
+          formData.append("schoolLogo", logoFile);
+        }
+    
+        try {
+            console.log(schoolName , addUserId)
+            setShowAddSchoolModal(false)
+            resetFormData()
+        //   const { data } = await updateProfile(formData);
+    
+        //   if (data.success) {
+        //     toast.success(data.message);
+        //     resetFormData()
+        //     fetchUser()
+        //     handleModalPopUp('edit_personal_information')
+    
+        //   }
+        } catch (error: any) {
+          toast.error(error.response?.data?.message || "Registration failed");
+        } finally {
+          setLoading2(false)
+        }
+      };
+
+
+       const columns = [
         {
             title: "ID",
             dataIndex: "id",
@@ -181,7 +268,7 @@ const School = () => {
             title: "School Logo",
             dataIndex: "schoolLogo",
             render: (text: any) => (
-                <img style={{objectFit:'cover' , borderRadius:'100%' , width:'60px' , height:'60px'}} className="text-capitalize" src={text??'assets/img/school.webp'} />
+                <img style={{ objectFit: 'cover', borderRadius: '100%', width: '60px', height: '60px' }} className="text-capitalize" src={text ?? 'assets/img/school.webp'} />
             ),
             sorter: (a: any, b: any) => a.schoolLogo.length - b.schoolLogo.length,
         },
@@ -198,9 +285,9 @@ const School = () => {
             title: "User Image",
             dataIndex: "profileImage",
             render: (text: any) => (
-                <img style={{objectFit:'cover' , borderRadius:'100%' , width:'60px' , height:'60px'}} className="text-capitalize" src={text??'assets/img/user.jpg'} />
+                <img style={{ objectFit: 'cover', borderRadius: '100%', width: '60px', height: '60px' }} className="text-capitalize" src={text ?? 'assets/img/user.jpg'} />
             ),
-            sorter: (a: any, b: any) => a. profileImage.length - b. profileImage.length,
+            sorter: (a: any, b: any) => a.profileImage.length - b.profileImage.length,
         },
         {
             title: "FirstName",
@@ -272,6 +359,19 @@ const School = () => {
                                         Edit
                                     </button>
                                 </li>
+                                <li>
+                                    <button
+                                        className="dropdown-item rounded-1"
+                                        onClick={() => {
+                                            setAddUserId(record.id)
+                                            setShowAddSchoolModal(true)
+                                        }}
+                                       
+                                    >
+                                        <i className="ti ti-edit-circle me-2" />
+                                        Add Another School
+                                    </button>
+                                </li>
 
                                 <li>
                                     <button
@@ -292,8 +392,7 @@ const School = () => {
         },
     ];
 
-
-
+   
     return (
         <div>
             {/* Page Wrapper */}
@@ -420,26 +519,7 @@ const School = () => {
                                         />
 
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">First Name</label>
-                                        <input
-                                            className={`form-control`}
-                                            value={firstname}  
-                                            onChange={(e) => setFirstname(e.target.value)}
-                                            placeholder="First name"
-                                        />
 
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Last Name</label>
-                                        <input
-                                            className={`form-control`}
-                                            value={lastname}   
-                                            onChange={(e) => setLastname(e.target.value)}
-                                            placeholder="Last name"
-                                        />
-
-                                    </div>
 
                                     {/* STATUS */}
                                     <div className="mb-3">
@@ -512,6 +592,98 @@ const School = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* add another school */}
+                {
+                    showAddSchoolModal&&
+                    ( <div className="modal fade show d-block" >
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h4 className="modal-title">Edit Personal Information</h4>
+                                <button
+                                    type="button"
+                                    className="btn-close custom-btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"
+                                // onClick={() => resetFormData()}
+                                >
+                                    <i className="ti ti-x" />
+                                </button>
+                            </div>
+                            <div className="p-3">
+                                <div className="row justify-content-center align-items-center ">
+                                    <div className="">
+                                        <form onSubmit={handleSubmit}>
+
+                                            <div className="card">
+                                                <div className="card-body">
+
+
+                                                    {/* Profile & School Images */}
+                                                    <div className="row mb-4">
+                                                        <div className="col-6">
+                                                            <CircleImage
+                                                                preview={profilePreview}
+                                                                label="User Image"
+                                                                onChange={handleProfileChange}
+                                                            />
+                                                        </div>
+
+                                                        <div className="col-6">
+                                                            <CircleImage
+                                                                preview={logoPreview}
+                                                                label="School Logo"
+                                                                onChange={handleLogoChange}
+                                                            />
+                                                        </div>
+                                                    </div>
+
+
+                                                    {/* First Name */}
+                                                    <div className="mb-3">
+                                                        <label className="form-label">School Name</label>
+                                                        <input
+                                                            name="schoolName"
+                                                            value={schoolName}
+                                                            onChange={(e)=>setSchoolName(e.target.value)}
+                                                            className="form-control mb-2"
+                                                            placeholder="School Name"
+                                                        />
+                                                      
+                                                    </div>
+
+                                                    <div className="d-flex justify-content-end gap-2 mt-4">
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline-secondary"
+                                                             onClick={()=>resetFormData()}
+
+                                                        >
+                                                            Back
+                                                        </button>
+
+                                                        <button
+                                                            type="submit"
+                                                            disabled={loading}
+                                                            className="btn btn-primary px-4"
+                                                        >
+                                                            {loading2 ? 'Adding...' : 'Add'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>)
+                }
             </>
         </div>
     );

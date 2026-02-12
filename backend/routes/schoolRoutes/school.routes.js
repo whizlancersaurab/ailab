@@ -7,10 +7,8 @@ router.get('/allactiveschools' , allow('SUPER_ADMIN'),schoolController.allActive
 router.get('/allsuspendedschools' , allow('SUPER_ADMIN'),schoolController.allSuspendedSchools)
 router.get('/speschool/:id' , allow('SUPER_ADMIN'),schoolController.speSchool)
 router.patch('/updschool/:id' , allow('SUPER_ADMIN'),schoolController.changeStatus)
-router.patch('/updateschool/:id' , allow('SUPER_ADMIN'),schoolController.updateSchool)
 router.delete('/delschool/:id' , allow('SUPER_ADMIN'),schoolController.deleteSchool)
 router.get('/schoolstats' , allow("SUPER_ADMIN") , schoolController.schoolStats)
-
 
 
 module.exports = router

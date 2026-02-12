@@ -2,22 +2,20 @@ import { createSlice, createAsyncThunk ,type PayloadAction} from "@reduxjs/toolk
 import { userInfo } from "../../../service/api";
 
 interface AuthState {
+  userId:number|null,
   user:string;
-  schoolName:string;
   role:string,
   profileImage:string|null,
-  schoolLogo:string|null,
   isAuth: boolean | null; 
-  loading: boolean;
+  loading: boolean
 }
 
 // Initial state
 const initialState: AuthState = {
+  userId:null,
   user:"",
   role:'',
-  schoolName:"",
   profileImage:null,
-  schoolLogo:null,
   isAuth: null,
   loading: true,
 };
@@ -27,7 +25,7 @@ export const fetchAuthStatus = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const { data } = await userInfo();
-      
+    
       if(data?.success) return data.data
     } catch (error) {
       return thunkAPI.rejectWithValue(false);
@@ -40,13 +38,13 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     reset: (state) => {
+      state.userId=null,
       state.isAuth = null;
       state.loading = false;
       state.user="";
-      state.schoolName="",
       state.role="",
-      state.profileImage=null,
-      state.schoolLogo=null
+      state.profileImage=null
+
     },
     setAuth: (state, action: PayloadAction<boolean>) => {
       state.isAuth = action.payload;
@@ -61,19 +59,19 @@ const authSlice = createSlice({
       .addCase(fetchAuthStatus.fulfilled, (state, action: PayloadAction<any>) => {
         
         state.user=`${action.payload.firstname} ${action.payload.lastname??''}`;
-        state.schoolName=action.payload.name
+        state.userId = action.payload.userId
         state.role=action.payload.role
         state.profileImage=action.payload.profileImage
-        state.schoolLogo=action.payload.schoolLogo
+      
         state.isAuth = true
         state.loading = false
       })
       .addCase(fetchAuthStatus.rejected, (state) => {
-        state.schoolName= '';
+       
         state.user='';
         state.role='',
         state.profileImage=null,
-        state.schoolLogo=null,
+       
         state.isAuth = false;
         state.loading = false;
       });
