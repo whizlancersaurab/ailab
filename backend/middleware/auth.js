@@ -49,7 +49,7 @@ exports.refreshTokenMidddlware = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-
+    console.log(decoded ,'2')
     req.user = decoded;
     req.refreshToken = token;
 

@@ -3,7 +3,7 @@ import Select from "react-select";
 import type { OptionType } from "../../../../core/data/interface";
 import { addAiDevice, addQuantityAi, aiCategoryForOption, AiSubcategoryForOption, speAiDevice, updateAiDevice } from "../../../../service/api";
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../../handlePopUpmodal";
+
 
 interface FormErrors {
     deviceName?: string;
@@ -17,13 +17,20 @@ type props = {
     editId?: number | null,
     addQuantityId?: number | null,
     onAdd?: () => void
+    showModal?:boolean
+    addModal2?:boolean
+     manageModal?:boolean
+    setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
+    setAddModal2?: React.Dispatch<React.SetStateAction<boolean>>;
+    setManageModal?: React.Dispatch<React.SetStateAction<boolean>>;
     setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
     setAddQuantityId?: React.Dispatch<React.SetStateAction<number | null>>;
     actualQuantity?:number
 }
 
-const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity,addQuantityId, setAddQuantityId }) => {
+const DeviceModal: React.FC<props> = ({ addModal2 , setAddModal2, showModal , setShowModal, manageModal, setManageModal,onAdd, editId, setEditId, actualQuantity,addQuantityId, setAddQuantityId }) => {
     // FORM STATE
+    const [loading ,setLoading] = useState<boolean>(false)
     const [deviceName, setDeviceName] = useState("");
     const [deviceCode, setDeviceCode] = useState("");
     const [category, setCategory] = useState<number | null>(null);
@@ -68,6 +75,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
         e.preventDefault();
 
         if (!validateForm()) return;
+        setLoading(true)
 
         const payload = {
             device_name: deviceName,
@@ -90,11 +98,14 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
                 setErrors({})
                 if (onAdd) onAdd()
                 if (setEditId) setEditId(null)
-                handleModalPopUp('addDeviceModal')
+                 if(setShowModal) setShowModal(false)
+                     if(setAddModal2) setAddModal2(false)
             }
         } catch (error: any) {
             console.log(error)
             toast.error(error?.response?.data?.message)
+        }finally{
+            setLoading(false)
         }
     };
 
@@ -176,6 +187,8 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
         setDeviceName("")
         setErrors({})
         if (setEditId) setEditId(null)
+        if(setShowModal) setShowModal(false)
+        if(setAddModal2) setAddModal2(false)
 
     }
 
@@ -199,7 +212,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
                
                 if (setAddQuantityId) setAddQuantityId(null)
                 if (onAdd) onAdd()
-                handleModalPopUp('add-quantity')
+                if(setManageModal) setManageModal(false)
             }
 
         } catch (err: any) {
@@ -212,17 +225,19 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
         setQuantity(0)
        
         if (setAddQuantityId) setAddQuantityId(null)
+            if(setManageModal) setManageModal(false)
 
     }
 
 
     return (
         <>
-            <div
-                className="modal fade"
+
+            {
+                (showModal||addModal2)&&( <div
+                className="modal fade d-block show"
                 id="addDeviceModal"
-                tabIndex={-1}
-                aria-hidden="true"
+              
             >
                 <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                     <div className="modal-content">
@@ -231,7 +246,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
                             {/* HEADER */}
                             <div className="modal-header">
                                 <h5 className="modal-title">{`${editId ? "Edit" : "Add"} Device`}</h5>
-                                <button type="button" onClick={cancelEditOrAdd} className="btn-close" data-bs-dismiss="modal" />
+                                <button type="button" onClick={cancelEditOrAdd} className="btn-close"  />
                             </div>
 
                             {/* BODY */}
@@ -320,12 +335,11 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
                                 <button
                                     type="button"
                                     className="btn btn-secondary me-1"
-                                    data-bs-dismiss="modal"
                                     onClick={cancelEditOrAdd}
                                 >
                                     Cancel
                                 </button>
-                                <button type="submit" className="btn btn-primary">
+                                <button disabled={loading} type="submit" className="btn btn-primary">
                                     {`${editId ? "Edit" : "Add"} Device`}
 
                                 </button>
@@ -336,7 +350,13 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
                     </div>
                 </div>
             </div>
-            <div className="modal fade" id="add-quantity" tabIndex={-1} aria-hidden="true">
+)
+            }
+
+
+
+            {
+                manageModal&&(<div className="modal fade show d-block" id="add-quantity">
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content shadow-lg rounded-4">
                         <form onSubmit={handleAddQuantity}>
@@ -369,7 +389,7 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
                                     <button
                                         type="button"
                                         className="btn btn-outline-secondary px-4"
-                                        data-bs-dismiss="modal"
+                                       
                                         onClick={(e) => handleCancelAddQuantity(e)}
                                     >
                                         Cancel
@@ -382,7 +402,8 @@ const DeviceModal: React.FC<props> = ({ onAdd, editId, setEditId, actualQuantity
                         </form>
                     </div>
                 </div>
-            </div>
+            </div>)
+            }
 
         </>
     );

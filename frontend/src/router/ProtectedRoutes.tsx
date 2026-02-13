@@ -9,6 +9,7 @@ const ProtectedRoutes: React.FC = () => {
 
     const dispatch = useDispatch<AppDispatch>()
     const { isAuth, loading } = useSelector((state: RootState) => state.authSlice)
+    
 
     useEffect(() => {
         if (isAuth === null) {

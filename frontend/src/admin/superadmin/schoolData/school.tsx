@@ -6,11 +6,10 @@ import { all_routes } from "../../../router/all_routes";
 import { allSchools, changeSchoolStatus, delSchool, speSchool } from "../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../handlePopUpmodal";
 import { Spinner } from "../../../spinner.tsx";
 import dayjs from 'dayjs'
 import Select from 'react-select'
-import CircleImage from "../../../auth/register/CircleImage.tsx";
+
 
 
 export interface schoolData {
@@ -41,8 +40,8 @@ const School = () => {
     const [sortType, setSortType] = useState<"asc" | "desc">("asc");
     const [editId, setEditId] = useState<number | null>(null)
     const [status, setStatus] = useState<string | 'ACTIVE' | 'SUSPENDED'>('')
-    const [showAddSchoolModal, setShowAddSchoolModal] = useState<boolean>(false)
-    const [addUserId, setAddUserId] = useState<null | number>(null)
+    const [editModal, setEditModal] = useState<boolean>(false)
+    const [schoolName, setSchoolName] = useState<string>("");
 
 
 
@@ -75,15 +74,14 @@ const School = () => {
         if (!id) return
         try {
 
-            const { data } = await speSchool(id)
-            console.log(data.data)
-
-
+        const { data } = await speSchool(id)
+        
             if (data.success) {
                 console.log(data)
                 setStatus(data.data.status)
                 setSchoolName(data.data.name)
                 setEditId(id)
+                setEditModal(true)
             }
 
         } catch (error: any) {
@@ -95,8 +93,8 @@ const School = () => {
     const cancelEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setStatus('')
-        setSchoolName('')
         setEditId(null)
+        setEditModal(false)
 
 
     }
@@ -118,7 +116,7 @@ const School = () => {
                 setEditId(null)
                 setSchoolName('')
                 setStatus('')
-                handleModalPopUp('changeModal')
+                setEditModal(false)
 
             }
 
@@ -131,6 +129,9 @@ const School = () => {
 
     // delete class ===================
     const [deleteId, setDeleteId] = useState<number | null>(null)
+    const [delModal, setDelModal] = useState<boolean>(false)
+
+
     const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         try {
@@ -139,7 +140,7 @@ const School = () => {
                 setDeleteId(null)
                 toast.success(data.message)
                 fetchSchools()
-                handleModalPopUp('delete-modal')
+                setDelModal(false)
 
             }
 
@@ -152,6 +153,7 @@ const School = () => {
     const cancelDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setDeleteId(null)
+        setDelModal(false)
     }
 
     const sortedDevices = useMemo(() => {
@@ -164,95 +166,11 @@ const School = () => {
         return copy;
     }, [schools, sortType]);
 
-   
-
-    // 
-      const [schoolName , setSchoolName] = useState<string>("");
-      const [loading2, setLoading2] = useState<boolean>(false)
-    
-      const [profileFile, setProfileFile] = useState<File | null>(null);
-      const [profilePreview, setProfilePreview] = useState<string | null>(null);
-    
-      const [logoFile, setLogoFile] = useState<File | null>(null);
-      const [logoPreview, setLogoPreview] = useState<string | null>(null);
-    
-      // update
-
-      const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-    
-        setProfileFile(file);
-        setProfilePreview(URL.createObjectURL(file));
-      };
-    
-      const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-    
-        setLogoFile(file);
-        setLogoPreview(URL.createObjectURL(file));
-      };
-
-    
-      const resetFormData = () => {
-        setSchoolName("")
-        setShowAddSchoolModal(false)
-        setProfileFile(null)
-        setProfilePreview(null)
-        setLogoFile(null)
-        setLogoPreview(null)
-        // handleModalPopUp('edit_personal_information')
-      }
-    
-    
-    
-      // ✅ Submit
-      const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if(!schoolName){
-            toast.error('School Name is Required !')
-            return
-        }else if(schoolName.length<7){
-            toast.error('School Name at least 7 chracters !')
-            return
-        }
-       
-        setLoading2(true)
-        const formData = new FormData();
-        formData.append("schoolName",schoolName);
-    
-        // image files (IMPORTANT)
-        if (profileFile) {
-          formData.append("profileImage", profileFile);
-        }
-    
-        if (logoFile) {
-          formData.append("schoolLogo", logoFile);
-        }
-    
-        try {
-            console.log(schoolName , addUserId)
-            setShowAddSchoolModal(false)
-            resetFormData()
-        //   const { data } = await updateProfile(formData);
-    
-        //   if (data.success) {
-        //     toast.success(data.message);
-        //     resetFormData()
-        //     fetchUser()
-        //     handleModalPopUp('edit_personal_information')
-    
-        //   }
-        } catch (error: any) {
-          toast.error(error.response?.data?.message || "Registration failed");
-        } finally {
-          setLoading2(false)
-        }
-      };
+ 
 
 
-       const columns = [
+
+    const columns = [
         {
             title: "ID",
             dataIndex: "id",
@@ -352,33 +270,22 @@ const School = () => {
                                     <button
                                         className="dropdown-item rounded-1"
                                         onClick={() => fetchSpeSchool(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#changeModal"
+
                                     >
                                         <i className="ti ti-edit-circle me-2" />
                                         Edit
                                     </button>
                                 </li>
-                                <li>
-                                    <button
-                                        className="dropdown-item rounded-1"
-                                        onClick={() => {
-                                            setAddUserId(record.id)
-                                            setShowAddSchoolModal(true)
-                                        }}
-                                       
-                                    >
-                                        <i className="ti ti-edit-circle me-2" />
-                                        Add Another School
-                                    </button>
-                                </li>
+                                
 
                                 <li>
                                     <button
                                         className="dropdown-item rounded-1"
-                                        onClick={() => setDeleteId(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#delete-modal"
+                                        onClick={() => {
+                                            setDeleteId(record.id)
+                                            setDelModal(true)
+                                        }}
+
                                     >
                                         <i className="ti ti-trash-x me-2" />
                                         Delete
@@ -392,7 +299,7 @@ const School = () => {
         },
     ];
 
-   
+
     return (
         <div>
             {/* Page Wrapper */}
@@ -488,202 +395,117 @@ const School = () => {
             <>
 
                 {/* change status */}
-                <div
-                    className="modal fade"
-                    id="changeModal"
-                    tabIndex={-1}
-                    aria-hidden="true"
-                >
-                    <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                        <div className="modal-content">
-
-                            <form onSubmit={handelChageSubmit}>
-                                {/* HEADER */}
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Edit</h5>
-                                    <button type="button" onClick={cancelEdit} className="btn-close" data-bs-dismiss="modal" />
-                                </div>
-
-                                {/* BODY */}
-                                <div className="modal-body">
-
-                                    {/* DEVICE NAME */}
-                                    <div className="mb-3">
-                                        <label className="form-label">School Name</label>
-                                        <input
-                                            className={`form-control`}
-                                            value={schoolName}
-                                            disabled={true}
-                                            // onChange={(e) => setDeviceName(e.target.value)}
-                                            placeholder="School name"
-                                        />
-
-                                    </div>
-
-
-                                    {/* STATUS */}
-                                    <div className="mb-3">
-                                        <label className="form-label">Category</label>
-                                        <Select
-                                            options={schoolStatus}
-                                            value={schoolStatus.find((i: any) => i.value === status)}
-                                            onChange={(opt: any) => setStatus(opt.value)}
-                                            placeholder="Select Category"
-
-                                        />
-
-                                    </div>
-
-                                </div>
-
-                                {/* FOOTER */}
-                                <div className="modal-footer">
-                                    <button
-                                        type="button"
-                                        className="btn btn-secondary me-1"
-                                        data-bs-dismiss="modal"
-                                        onClick={cancelEdit}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button type="submit" className="btn btn-primary">
-                                        Save Changes
-
-                                    </button>
-                                </div>
-
-                            </form>
-
-                        </div>
-                    </div>
-                </div>
-                {/* Delete Modal */}
-                <div className="modal fade" id="delete-modal">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <form>
-                                <div className="modal-body text-center">
-                                    <span className="delete-icon">
-                                        <i className="ti ti-trash-x" />
-                                    </span>
-                                    <h4>Confirm Deletion</h4>
-                                    <p>
-                                        You want to delete this items, this cant be undone once
-                                        you delete.
-                                    </p>
-                                    {
-                                        deleteId && (
-                                            <div className="d-flex justify-content-center">
-                                                <button
-                                                    onClick={(e) => cancelDelete(e)}
-                                                    className="btn btn-light me-3"
-                                                    data-bs-dismiss="modal"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
-                                                    Yes, Delete
-                                                </button>
-
-                                            </div>
-                                        )}
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                {/* add another school */}
                 {
-                    showAddSchoolModal&&
-                    ( <div className="modal fade show d-block" >
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Edit Personal Information</h4>
-                                <button
-                                    type="button"
-                                    className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                // onClick={() => resetFormData()}
-                                >
-                                    <i className="ti ti-x" />
-                                </button>
-                            </div>
-                            <div className="p-3">
-                                <div className="row justify-content-center align-items-center ">
-                                    <div className="">
-                                        <form onSubmit={handleSubmit}>
+                    editModal && (<div
+                        className="modal fade show d-block"
+                        id="changeModal"
+                      
+                    >
+                        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div className="modal-content">
 
-                                            <div className="card">
-                                                <div className="card-body">
-
-
-                                                    {/* Profile & School Images */}
-                                                    <div className="row mb-4">
-                                                        <div className="col-6">
-                                                            <CircleImage
-                                                                preview={profilePreview}
-                                                                label="User Image"
-                                                                onChange={handleProfileChange}
-                                                            />
-                                                        </div>
-
-                                                        <div className="col-6">
-                                                            <CircleImage
-                                                                preview={logoPreview}
-                                                                label="School Logo"
-                                                                onChange={handleLogoChange}
-                                                            />
-                                                        </div>
-                                                    </div>
-
-
-                                                    {/* First Name */}
-                                                    <div className="mb-3">
-                                                        <label className="form-label">School Name</label>
-                                                        <input
-                                                            name="schoolName"
-                                                            value={schoolName}
-                                                            onChange={(e)=>setSchoolName(e.target.value)}
-                                                            className="form-control mb-2"
-                                                            placeholder="School Name"
-                                                        />
-                                                      
-                                                    </div>
-
-                                                    <div className="d-flex justify-content-end gap-2 mt-4">
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-outline-secondary"
-                                                             onClick={()=>resetFormData()}
-
-                                                        >
-                                                            Back
-                                                        </button>
-
-                                                        <button
-                                                            type="submit"
-                                                            disabled={loading}
-                                                            className="btn btn-primary px-4"
-                                                        >
-                                                            {loading2 ? 'Adding...' : 'Add'}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </form>
+                                <form onSubmit={handelChageSubmit}>
+                                    {/* HEADER */}
+                                    <div className="modal-header">
+                                        <h5 className="modal-title">Edit</h5>
+                                        <button type="button" onClick={cancelEdit} className="btn-close" />
                                     </div>
-                                </div>
+
+                                    {/* BODY */}
+                                    <div className="modal-body">
+
+                                        {/* DEVICE NAME */}
+                                        <div className="mb-3">
+                                            <label className="form-label">School Name</label>
+                                            <input
+                                                className={`form-control`}
+                                                value={schoolName}
+                                                disabled={true}
+                                                // onChange={(e) => setDeviceName(e.target.value)}
+                                                placeholder="School name"
+                                            />
+
+                                        </div>
+
+
+                                        {/* STATUS */}
+                                        <div className="mb-3">
+                                            <label className="form-label">Category</label>
+                                            <Select
+                                                options={schoolStatus}
+                                                value={schoolStatus.find((i: any) => i.value === status)}
+                                                onChange={(opt: any) => setStatus(opt.value)}
+                                                placeholder="Select Category"
+
+                                            />
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* FOOTER */}
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary me-1"
+                                            data-bs-dismiss="modal"
+                                            onClick={cancelEdit}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            Save Changes
+
+                                        </button>
+                                    </div>
+
+                                </form>
+
                             </div>
-
-
                         </div>
-                    </div>
-                </div>)
+                    </div>)
                 }
+
+
+                {/* Delete Modal */}
+                {
+                    delModal && (<div className="modal fade d-block show" id="delete-modal">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <form>
+                                    <div className="modal-body text-center">
+                                        <span className="delete-icon">
+                                            <i className="ti ti-trash-x" />
+                                        </span>
+                                        <h4>Confirm Deletion</h4>
+                                        <p>
+                                            You want to delete this items, this cant be undone once
+                                            you delete.
+                                        </p>
+                                        {
+                                            deleteId && (
+                                                <div className="d-flex justify-content-center">
+                                                    <button
+                                                        onClick={(e) => cancelDelete(e)}
+                                                        className="btn btn-light me-3"
+
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
+                                                        Yes, Delete
+                                                    </button>
+
+                                                </div>
+                                            )}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>)
+                }
+
+               
             </>
         </div>
     );

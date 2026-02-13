@@ -11,6 +11,7 @@ export const api = axios.create({
 
 
 export const setupAxiosInterceptor = (navigate: Function) => {
+  
   let isRefreshing = false;
   let failedQueue: any[] = [];
 
@@ -29,7 +30,7 @@ export const setupAxiosInterceptor = (navigate: Function) => {
             failedQueue.push({ resolve, reject });
           }).then(() => api(originalRequest));
         }
-
+        console.log("hello")
         originalRequest._retry = true;
         isRefreshing = true;
         try { 
@@ -62,6 +63,8 @@ export const userInfo = () => api.get('/auth/user')
 export const speUser = () => api.get('/auth/speUser')
 export const usersSchools = ()=>api.get('/auth/usersschools')
 export const switchSchool = (data:object)=>api.post('/auth/switch-school' , data)
+export const allUsers = ()=>api.get('/auth/allusers')
+
 
 
 // superadin
@@ -73,6 +76,7 @@ export const changeSchoolStatus = (id:number , data:object)=>api.patch(`/superad
 export const updateSchool = (id:number , data:object)=>api.patch(`/superadmin/updateschool/${id}` , data)
 export const delSchool = (id:number)=>api.delete(`/superadmin/delschool/${id}`)
 export const schoolStats = ()=>api.get('/superadmin/schoolstats')
+export const addNewSchool = (data:object)=>api.post('/superadmin/addnew' ,data)
 
 //classes ==================================================================
 export const addClass = (data: object) => api.post('/class/addclass', data)

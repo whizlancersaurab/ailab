@@ -169,23 +169,35 @@ const Header = () => {
                   data-bs-toggle="dropdown"
                 >
                   <span className="avatar avatar-md rounded">
-                    <img
-                      style={{ objectFit: 'cover' }}
-                      src={`${profileImage??"assets/img/user.jpg"}`} 
-                      alt="Img"
-                      className="img-fluid"
-                    />
+                     {
+                          profileImage?( <img
+                          style={{ objectFit: 'cover' }}
+                          src={profileImage} 
+                          alt="img"
+                        />):( <img
+                          style={{ objectFit: 'cover' }}
+                          src="assets/img/user1.jpg"
+                          alt="img"
+                        />)
+                        }
                   </span>
                 </Link>
                 <div className="dropdown-menu">
                   <div className="d-block">
                     <div className="d-flex align-items-center p-2">
                       <span className="avatar avatar-md me-2 online avatar-rounded">
-                        <img
+                        {
+                          profileImage?( <img
                           style={{ objectFit: 'cover' }}
-                          src={`${profileImage??"assets/img/user.jpg"}`} 
+                          src={profileImage} 
                           alt="img"
-                        />
+                        />):( <img
+                          style={{ objectFit: 'cover' }}
+                          src="assets/img/user1.jpg"
+                          alt="img"
+                        />)
+                        }
+                       
                       </span>
                       <div>
                         <h6 className="text-capitalize">{user}</h6>

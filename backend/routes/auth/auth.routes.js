@@ -9,8 +9,8 @@ const cpUpload = upload.fields([
 ]);
 
 const cpUpload2 = upload.fields([
-  { name: "profileImage", maxCount: 10 }, // allow multiple profile images
-  { name: "schoolLogo", maxCount: 10 }    // allow multiple school logos
+  { name: "profileImage", maxCount: 10 }, 
+  { name: "schoolLogo", maxCount: 10 }   
 ]);
 
 
@@ -22,9 +22,11 @@ router.post('/reset-password', authController.verifyOtpAndUpdatePassword)
 router.post('/register', allow('SUPER_ADMIN') ,cpUpload2,authController.register)
 router.post('/update',cpUpload,authController.update)
 
+
 router.get('/logout' ,authController.logout)
 router.get('/user' , authController.profile)
 router.get('/speUser' , authController.dataForUpdateProfile)
+router.get('/allusers' , authController.allUsers)
 
 router.get('/refresh' , authController.refreshToken)
 router.get('/usersschools' , authController.getUserSchools)

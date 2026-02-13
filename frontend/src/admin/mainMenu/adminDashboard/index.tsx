@@ -84,6 +84,8 @@ const AdminDashboard = () => {
   const [classOptions, setClassOptions] = useState<OptionType[]>([])
   const [className, setClassName] = useState<number | null>(null)
   const [outOfStocks, setOutOfStocks] = useState<number>(0)
+  const [addModal2 , setAddModal2] = useState<boolean>(false)
+
   const [progressData, setProgressData] = useState<ProgressData>({
     totalTasks: 0,
     completedTasks: 0,
@@ -170,10 +172,14 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchClassForOption()
-    fetchAllDeviceStats();
-  
+
   }, []);
 
+   useEffect(() => {
+    
+    fetchAllDeviceStats();
+  
+  }, [setAddModal2 , addModal2]);
 
   useEffect(() => {
 
@@ -206,13 +212,13 @@ const AdminDashboard = () => {
               <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
                 <div className="mb-2">
                   <button
-                    className="btn btn-primary d-flex align-items-center"
-                    data-bs-toggle="modal"
-                    data-bs-target="#addDeviceModal"
-                  >
-                    <i className="ti ti-square-rounded-plus me-2" />
-                    Add Device
-                  </button>
+                
+                  className="btn btn-primary"
+                  onClick={()=>setAddModal2(true)}
+                >
+                  <i className="ti ti-square-rounded-plus-filled me-2" />
+                  Add Device
+                </button>
                 </div>
               </div>
             </div>
@@ -553,7 +559,7 @@ const AdminDashboard = () => {
           </>
         </div>
         
-        <DeviceModal />
+        <DeviceModal addModal2={addModal2} setAddModal2={setAddModal2} />
       </div>
 
 

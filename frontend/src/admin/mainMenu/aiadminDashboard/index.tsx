@@ -87,6 +87,7 @@ const AdminDashboard = () => {
     completedTasks: 0,
     completionPercent: 0
   });
+  const [addModal2 , setAddModal2] = useState<boolean>(false)
    const { user } = useSelector((state: RootState) => state.authSlice)
 
 
@@ -169,8 +170,12 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchClassForOption()
-    fetchAllDeviceStats();
   }, []);
+
+    useEffect(() => {
+    
+    fetchAllDeviceStats();
+  }, [setAddModal2 , addModal2]);
 
 
   useEffect(() => {
@@ -201,11 +206,11 @@ const AdminDashboard = () => {
                 <div className="mb-2">
                   <button
                     className="btn btn-primary d-flex align-items-center"
-                    data-bs-toggle="modal"
-                    data-bs-target="#addDeviceModal"
+                    onClick={()=>(setAddModal2(true))}
+                    
                   >
                     <i className="ti ti-square-rounded-plus me-2" />
-                    Add Device
+                    Add AI Device
                   </button>
                 </div>
               </div>
@@ -537,7 +542,7 @@ const AdminDashboard = () => {
             </div>
           </>
         </div>     
-        <DeviceModal />
+        <DeviceModal addModal2={addModal2} setAddModal2={setAddModal2} />
       </div>
     </>
   );

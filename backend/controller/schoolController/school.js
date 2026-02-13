@@ -241,6 +241,78 @@ exports.schoolStats = async (req, res) => {
   }
 };
 
+exports.addNewSchool = async (req, res) => {
+  const { schoolName, userId } = req.body;
+
+  if (!userId || !schoolName?.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "User ID and School Name are required!"
+    });
+  }
+
+  const profileImage = req.files?.profileImage?.[0]?.path || null;
+  const schoolLogo = req.files?.schoolLogo?.[0]?.path || null;
+
+  const conn = await db.getConnection();
+  await conn.beginTransaction();
+
+  try {
+
+
+    const [users] = await conn.query(
+      "SELECT id FROM users WHERE id = ? LIMIT 1",
+      [userId]
+    );
+
+    if (users.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const [schoolResult] = await conn.query(
+      `INSERT INTO schools (name, status, profileImage, schoolLogo, created_at)
+       VALUES (?, 'ACTIVE', ?, ?, NOW())`,
+      [schoolName.trim(), profileImage, schoolLogo]
+    );
+
+    const schoolId = schoolResult.insertId;
+
+   
+    await conn.query(
+      `INSERT INTO user_schools (user_id, school_id)
+       VALUES (?, ?)`,
+      [userId, schoolId]
+    );
+
+    await conn.commit();
+
+    return res.status(201).json({
+      success: true,
+      message: "New school added successfully",
+      data: {
+        schoolId,
+        schoolName
+      }
+    });
+
+  } catch (error) {
+    await conn.rollback();
+    console.error("❌ Add School Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  } finally {
+    conn.release();
+  }
+};
+
+
 
 
 

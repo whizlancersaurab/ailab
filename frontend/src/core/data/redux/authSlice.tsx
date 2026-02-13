@@ -57,7 +57,7 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(fetchAuthStatus.fulfilled, (state, action: PayloadAction<any>) => {
-        
+       
         state.user=`${action.payload.firstname} ${action.payload.lastname??''}`;
         state.userId = action.payload.userId
         state.role=action.payload.role

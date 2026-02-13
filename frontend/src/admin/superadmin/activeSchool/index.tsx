@@ -6,7 +6,6 @@ import { all_routes } from "../../../router/all_routes";
 import { allActiveSchools, changeSchoolStatus, delSchool, speSchool } from "../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../handlePopUpmodal";
 import { Spinner } from "../../../spinner.tsx";
 import dayjs from 'dayjs'
 import Select from 'react-select'
@@ -40,6 +39,7 @@ const ActiveSchool = () => {
     const [editId, setEditId] = useState<number | null>(null)
     const [schoolName, setSchoolName] = useState<string>('')
     const [status, setStatus] = useState<string | 'ACTIVE' | 'SUSPENDED'>('')
+    const [editModal ,setEditModal] = useState<boolean>(false)
 
     const fetchSchools = async () => {
         setLoading(true)
@@ -77,6 +77,7 @@ const ActiveSchool = () => {
                 setStatus(data.data.status)
                 setSchoolName(data.data.name)
                 setEditId(id)
+                setEditModal(true)
             }
 
         } catch (error: any) {
@@ -90,6 +91,7 @@ const ActiveSchool = () => {
         setStatus('')
         setSchoolName('')
         setEditId(null)
+        setEditModal(false)
 
 
     }
@@ -111,7 +113,7 @@ const ActiveSchool = () => {
                 setEditId(null)
                 setSchoolName('')
                 setStatus('')
-                handleModalPopUp('changeModal')
+                setEditModal(false)
 
             }
 
@@ -124,6 +126,8 @@ const ActiveSchool = () => {
 
     // delete class ===================
     const [deleteId, setDeleteId] = useState<number | null>(null)
+    const [delModal ,setDelModal] =useState<boolean>(false)
+
     const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         try {
@@ -132,7 +136,7 @@ const ActiveSchool = () => {
                 setDeleteId(null)
                 toast.success(data.message)
                 fetchSchools()
-                handleModalPopUp('delete-modal')
+                setDelModal(false)
 
             }
 
@@ -145,6 +149,7 @@ const ActiveSchool = () => {
     const cancelDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setDeleteId(null)
+        setDelModal(false)
     }
 
     const sortedDevices = useMemo(() => {
@@ -258,8 +263,7 @@ const ActiveSchool = () => {
                                     <button
                                         className="dropdown-item rounded-1"
                                         onClick={() => fetchSpeSchool(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#changeModal"
+                                        
                                     >
                                         <i className="ti ti-edit-circle me-2" />
                                         Edit
@@ -269,9 +273,11 @@ const ActiveSchool = () => {
                                 <li>
                                     <button
                                         className="dropdown-item rounded-1"
-                                        onClick={() => setDeleteId(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#delete-modal"
+                                        onClick={() =>{
+                                            setDeleteId(record.id)
+                                            setDelModal(true)
+                                        }}
+                                        
                                     >
                                         <i className="ti ti-trash-x me-2" />
                                         Delete
@@ -382,11 +388,12 @@ const ActiveSchool = () => {
             <>
 
                 {/* change status */}
-                <div
-                    className="modal fade"
+
+                 {
+                    editModal&&(<div
+                    className="modal fade show d-block"
                     id="changeModal"
-                    tabIndex={-1}
-                    aria-hidden="true"
+                   
                 >
                     <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content">
@@ -395,7 +402,7 @@ const ActiveSchool = () => {
                                 {/* HEADER */}
                                 <div className="modal-header">
                                     <h5 className="modal-title">Change status</h5>
-                                    <button type="button" onClick={cancelEdit} className="btn-close" data-bs-dismiss="modal" />
+                                    <button type="button" onClick={cancelEdit} className="btn-close" />
                                 </div>
 
                                 {/* BODY */}
@@ -434,7 +441,7 @@ const ActiveSchool = () => {
                                     <button
                                         type="button"
                                         className="btn btn-secondary me-1"
-                                        data-bs-dismiss="modal"
+                                        
                                         onClick={cancelEdit}
                                     >
                                         Cancel
@@ -449,9 +456,14 @@ const ActiveSchool = () => {
 
                         </div>
                     </div>
-                </div>
+                </div>)
+                 }
+
+
+
                 {/* Delete Modal */}
-                <div className="modal fade" id="delete-modal">
+                 {
+                    delModal&&(<div className="modal fade show d-block" id="delete-modal">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <form>
@@ -470,7 +482,7 @@ const ActiveSchool = () => {
                                                 <button
                                                     onClick={(e) => cancelDelete(e)}
                                                     className="btn btn-light me-3"
-                                                    data-bs-dismiss="modal"
+                                                  
                                                 >
                                                     Cancel
                                                 </button>
@@ -484,7 +496,8 @@ const ActiveSchool = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>)
+                 }
             </>
         </div>
     );

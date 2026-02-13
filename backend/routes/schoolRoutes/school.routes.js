@@ -1,14 +1,25 @@
-const router = require('express').Router()
-const schoolController = require('../../controller/schoolController/school')
-const {allow} = require('../../middleware/auth')
-
-router.get('/allschools' , allow('SUPER_ADMIN'),schoolController.allSchools)
-router.get('/allactiveschools' , allow('SUPER_ADMIN'),schoolController.allActiveSchools)
-router.get('/allsuspendedschools' , allow('SUPER_ADMIN'),schoolController.allSuspendedSchools)
-router.get('/speschool/:id' , allow('SUPER_ADMIN'),schoolController.speSchool)
-router.patch('/updschool/:id' , allow('SUPER_ADMIN'),schoolController.changeStatus)
-router.delete('/delschool/:id' , allow('SUPER_ADMIN'),schoolController.deleteSchool)
-router.get('/schoolstats' , allow("SUPER_ADMIN") , schoolController.schoolStats)
+const router = require('express').Router();
+const schoolController = require('../../controller/schoolController/school');
+const { allow } = require('../../middleware/auth');
+const upload = require('../../middleware/upload');
 
 
-module.exports = router
+const cpUpload = upload.fields([
+  { name: "profileImage", maxCount: 1 },
+  { name: "schoolLogo", maxCount: 1 },
+]);
+
+
+const superAdmin = allow('SUPER_ADMIN');
+
+// Routes
+router.get('/allschools', superAdmin, schoolController.allSchools);
+router.get('/allactiveschools', superAdmin, schoolController.allActiveSchools);
+router.get('/allsuspendedschools', superAdmin, schoolController.allSuspendedSchools);
+router.get('/speschool/:id', superAdmin, schoolController.speSchool);
+router.patch('/updschool/:id', superAdmin, schoolController.changeStatus);
+router.delete('/delschool/:id', superAdmin, schoolController.deleteSchool);
+router.get('/schoolstats', superAdmin, schoolController.schoolStats);
+router.post('/addnew', superAdmin, cpUpload, schoolController.addNewSchool);
+
+module.exports = router;

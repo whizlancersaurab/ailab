@@ -5,7 +5,6 @@ import TooltipOption from "../../../core/common/tooltipOption";
 import { all_routes } from "../../../router/all_routes";
 import { addSubCategory, allSubCategories, categoryForOption, deleteSubCategory, getSpeSubCategory, updateSubCategory } from "../../../service/api";
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../handlePopUpmodal";
 import { Spinner } from "../../../spinner";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
@@ -31,6 +30,8 @@ const SubCategory = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [editId, setEditId] = useState<number | null>(null)
     const [editData, setEditData] = useState<string>("")
+    const [showAddCategoryModal, setShowAddCategoryModal] = useState<boolean>(false)
+    const [showEditCategoryModal, setShowEditCategoryModal] = useState<boolean>(false)
 
 
 
@@ -114,7 +115,7 @@ const SubCategory = () => {
                 setSelectedCategory(null);
                 setSubCategories([]);
                 fetchSubCategories()
-                handleModalPopUp("add-sub-cat"); // close modal
+                setShowAddCategoryModal(false)
             } else {
                 // Server returned success: false
                 toast.error(data.message || "Failed to add sub-categories");
@@ -131,7 +132,7 @@ const SubCategory = () => {
 
 
     const fetchSpecificCategory = async (id: number) => {
-
+         setShowEditCategoryModal(true)
         try {
             const { data } = await getSpeSubCategory(id)
             console.log(data)
@@ -148,6 +149,7 @@ const SubCategory = () => {
         e.preventDefault()
         setSelectedCategory(null)
         setSubCategories([])
+        setShowAddCategoryModal(false)
     }
 
 
@@ -169,7 +171,7 @@ const SubCategory = () => {
                 setEditId(null)
                 setEditData("")
                 fetchSubCategories()
-                handleModalPopUp('edit_sub')
+                setShowEditCategoryModal(false)
             }
 
         } catch (error: any) {
@@ -183,12 +185,14 @@ const SubCategory = () => {
         e.preventDefault()
         setEditId(null)
         setEditData("")
+        setShowEditCategoryModal(false)
     }
 
 
 
     // delete class--------------------------------------------------------------------
     const [deleteId, setDeleteId] = useState<number | null>(null)
+    const [showDelModal ,setShowDelModal] = useState<boolean>(false)
     const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         console.log(id)
@@ -198,7 +202,7 @@ const SubCategory = () => {
                 setDeleteId(null)
                 toast.success(data.message)
                 fetchSubCategories()
-                handleModalPopUp('delete-modal')
+                setShowDelModal(false)
 
             }
 
@@ -211,6 +215,7 @@ const SubCategory = () => {
     const cancelDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setDeleteId(null)
+        setShowDelModal(false)
     }
 
     const columns = [
@@ -266,8 +271,7 @@ const SubCategory = () => {
                                     <button
                                         className="dropdown-item rounded-1"
                                         onClick={() => fetchSpecificCategory(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#edit_sub"
+                                       
                                     >
                                         <i className="ti ti-edit-circle me-2" />
                                         Edit
@@ -276,9 +280,11 @@ const SubCategory = () => {
                                 <li>
                                     <button
                                         className="dropdown-item rounded-1"
-                                        onClick={() => setDeleteId(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#delete-modal"
+                                        onClick={() =>{
+                                             setDeleteId(record.id)
+                                             setShowDelModal(true)
+                                            }}
+                                        
                                     >
                                         <i className="ti ti-trash-x me-2" />
                                         Delete
@@ -320,15 +326,14 @@ const SubCategory = () => {
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
                             <TooltipOption />
                             <div className="mb-2">
-                                <Link
-                                    to="#"
+                                <button
+                                    
                                     className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#add-sub-cat"
+                                     onClick={()=>setShowAddCategoryModal(true)}
                                 >
                                     <i className="ti ti-square-rounded-plus-filled me-2" />
                                     Add Sub-Category
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -382,7 +387,9 @@ const SubCategory = () => {
             {/* /Page Wrapper */}
             <>
                 {/* Add Classes */}
-                <div className="modal fade" id="add-sub-cat">
+
+                {
+                    showAddCategoryModal&&(<div className="modal fade show d-block" id="add-sub-cat">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
 
@@ -392,7 +399,7 @@ const SubCategory = () => {
                                 <button
                                     type="button"
                                     className="btn-close"
-                                    data-bs-dismiss="modal"
+                                     onClick={(e)=>cancelAdd(e)}
                                 ></button>
                             </div>
 
@@ -429,8 +436,7 @@ const SubCategory = () => {
                                     <button
                                         type="button"
                                         onClick={(e) => cancelAdd(e)}
-                                        className="btn btn-light me-1"
-                                        data-bs-dismiss="modal"
+                                        className="btn  btn-secondary me-2"
                                     >
                                         Cancel
                                     </button>
@@ -443,12 +449,15 @@ const SubCategory = () => {
 
                         </div>
                     </div>
-                </div>
+                </div>)
+                }
+
                 {/* /Add Classes */}
 
 
                 {/* Edit Classes */}
-                <div className="modal fade" id="edit_sub">
+                 {
+                    showEditCategoryModal&&(<div className="modal fade show d-block" id="edit_sub">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -456,8 +465,7 @@ const SubCategory = () => {
                                 <button
                                     type="button"
                                     className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
+                                     onClick={(e)=>cancelEdit(e)}
                                 >
                                     <i className="ti ti-x" />
                                 </button>
@@ -489,15 +497,14 @@ const SubCategory = () => {
                                     <button
                                         type="button"
                                         onClick={(e) => cancelEdit(e)}
-                                        className="btn btn-light me-2"
-                                        data-bs-dismiss="modal"
+                                         className="btn  btn-secondary me-2"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         className="btn btn-primary"
-
+                                     
                                     >
                                         Edit SubCategory
                                     </button>
@@ -507,10 +514,12 @@ const SubCategory = () => {
 
                         </div>
                     </div>
-                </div>
+                </div>)
+                 }
                 {/* /Edit category */}
                 {/* Delete Modal */}
-                <div className="modal fade" id="delete-modal">
+                {
+                    showDelModal&&( <div className="modal fade show d-block" id="delete-modal">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <form>
@@ -527,9 +536,10 @@ const SubCategory = () => {
                                         deleteId && (
                                             <div className="d-flex justify-content-center">
                                                 <button
+                                                    type="button"
                                                     onClick={(e) => cancelDelete(e)}
                                                     className="btn btn-light me-3"
-                                                    data-bs-dismiss="modal"
+                                    
                                                 >
                                                     Cancel
                                                 </button>
@@ -543,7 +553,8 @@ const SubCategory = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>)
+                }
                 {/* /Delete Modal */}
 
             </>

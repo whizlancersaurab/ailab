@@ -5,7 +5,6 @@ import TooltipOption from "../../../core/common/tooltipOption";
 import { all_routes } from "../../../router/all_routes";
 import { addAiCategory, allAiCategories, deleteAiCategory, speAiCategory, updateAiCategory } from "../../../service/api";
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../handlePopUpmodal";
 import { Spinner } from "../../../spinner";
 
 
@@ -20,6 +19,9 @@ const Category = () => {
 
     const [allCategory, setAllCategory] = useState<any>([])
     const [loading, setLoading] = useState<boolean>(false)
+    const [showAddCategoryModal, setShowAddCategoryModal] = useState<boolean>(false)
+    const [showEditCategoryModal, setShowEditCategoryModal] = useState<boolean>(false)
+
 
     const fetchCategories = async () => {
         setLoading(true)
@@ -62,7 +64,7 @@ const Category = () => {
     };
 
     const fetchSpecificCategory = async (id: number) => {
-
+        setShowEditCategoryModal(true)
         try {
             const { data } = await speAiCategory(id)
             setFormData({
@@ -74,16 +76,18 @@ const Category = () => {
             console.log(error)
             toast.error(error.response.data.message)
         }
-
     }
+
+
 
     const cancelEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setFormData({
             category: "",
-
         });
         setEditId(null)
+        setShowAddCategoryModal(false)
+        setShowEditCategoryModal(false)
     }
 
     // ✅ Submit handler
@@ -103,7 +107,8 @@ const Category = () => {
 
             if (data.success) {
                 toast.success(data.message)
-                handleModalPopUp(editId ? 'edit_class' : 'add_class')
+                setShowAddCategoryModal(false)
+                setShowEditCategoryModal(false)
                 setEditId(null)
             }
             fetchCategories()
@@ -120,16 +125,19 @@ const Category = () => {
 
     // delete class--------------------------------------------------------------------
     const [deleteId, setDeleteId] = useState<number | null>(null)
+    const [showDelModal , setShowDelModal] = useState<boolean>(false)
+
+
     const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
-        console.log(id)
+      
         try {
             const { data } = await deleteAiCategory(id)
             if (data.success) {
                 setDeleteId(null)
                 toast.success(data.message)
                 fetchCategories()
-                handleModalPopUp('delete-modal')
+                setShowDelModal(false)
 
             }
 
@@ -142,6 +150,7 @@ const Category = () => {
     const cancelDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setDeleteId(null)
+        setShowDelModal(false)
     }
 
     const columns = [
@@ -184,8 +193,7 @@ const Category = () => {
                                     <button
                                         className="dropdown-item rounded-1"
                                         onClick={() => fetchSpecificCategory(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#edit_class"
+                                        
                                     >
                                         <i className="ti ti-edit-circle me-2" />
                                         Edit
@@ -194,9 +202,11 @@ const Category = () => {
                                 <li>
                                     <button
                                         className="dropdown-item rounded-1"
-                                        onClick={() => setDeleteId(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#delete-modal"
+                                        onClick={() => {
+                                             setDeleteId(record.id)
+                                             setShowDelModal(true)
+                                            }}
+                                      
                                     >
                                         <i className="ti ti-trash-x me-2" />
                                         Delete
@@ -237,15 +247,13 @@ const Category = () => {
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
                             <TooltipOption />
                             <div className="mb-2">
-                                <Link
-                                    to="#"
+                                <button
                                     className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#add_class"
+                                    onClick={() => setShowAddCategoryModal(true)}
                                 >
                                     <i className="ti ti-square-rounded-plus-filled me-2" />
                                     Add Category
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -299,106 +307,111 @@ const Category = () => {
             {/* /Page Wrapper */}
             <>
                 {/* Add Classes */}
-                <div className="modal fade" id="add_class">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Add Category</h4>
-                                <button
-                                    type="button"
-                                    className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                >
-                                    <i className="ti ti-x" />
-                                </button>
-                            </div>
-
-
-                            <form onSubmit={handleSubmit}>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <div className="col-md-12">
-                                            {/* Class Name */}
-                                            <div className="mb-3">
-                                                <label className="form-label">Category Name</label>
-                                                <input
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="category"
-                                                    value={formData.category}
-                                                    autoComplete="off"
-                                                    onChange={handleChange}
-                                                />
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Footer */}
-                                <div className="modal-footer">
+                {
+                    showAddCategoryModal && (<div className="modal fade d-block show" id="add_class">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h4 className="modal-title">Add Category</h4>
                                     <button
                                         type="button"
                                         onClick={(e) => cancelEdit(e)}
-                                        className="btn btn-light me-2"
-                                        data-bs-dismiss="modal"
+                                        className="btn-close custom-btn-close"
+                                       
                                     >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary"
-
-                                    >
-                                        Add Category
+                                        <i className="ti ti-x" />
                                     </button>
                                 </div>
-                            </form>
 
 
+                                <form onSubmit={handleSubmit}>
+                                    <div className="modal-body">
+                                        <div className="row">
+                                            <div className="col-md-12">
+                                                {/* Class Name */}
+                                                <div className="mb-3">
+                                                    <label className="form-label">Category Name</label>
+                                                    <input
+                                                        className="form-control"
+                                                        type="text"
+                                                        name="category"
+                                                        value={formData.category}
+                                                        autoComplete="off"
+                                                        onChange={handleChange}
+                                                    />
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => cancelEdit(e)}
+                                            className="btn btn-light me-2"
+
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary"
+
+                                        >
+                                            Add Category
+                                        </button>
+                                    </div>
+                                </form>
+
+
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </div>)
+                }
                 {/* /Add Classes */}
 
 
                 {/* Edit Classes */}
-                <div className="modal fade" id="edit_class">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Edit Category</h4>
-                                <button
-                                    type="button"
-                                    className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                >
-                                    <i className="ti ti-x" />
-                                </button>
-                            </div>
 
-                            <form onSubmit={handleSubmit}>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <div className="col-md-12">
-                                            {/* Class Name */}
-                                            <div className="mb-3">
-                                                <label className="form-label">Category Name</label>
-                                                <input
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="category"
-                                                    value={formData.category}
-                                                    autoComplete="off"
-                                                    onChange={handleChange}
-                                                />
-                                            </div>
 
-                                            {/* Status Switch */}
-                                            {/* <div className="d-flex align-items-center justify-content-between">
+                {
+                    showEditCategoryModal && (<div className="modal fade show d-block" id="edit_class">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h4 className="modal-title">Edit Category</h4>
+                                    <button
+                                        type="button"
+                                            onClick={(e) => cancelEdit(e)}
+                                        className="btn-close custom-btn-close"
+                                        
+                                    >
+                                        <i className="ti ti-x" />
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleSubmit}>
+                                    <div className="modal-body">
+                                        <div className="row">
+                                            <div className="col-md-12">
+                                                {/* Class Name */}
+                                                <div className="mb-3">
+                                                    <label className="form-label">Category Name</label>
+                                                    <input
+                                                        className="form-control"
+                                                        type="text"
+                                                        name="category"
+                                                        value={formData.category}
+                                                        autoComplete="off"
+                                                        onChange={handleChange}
+                                                    />
+                                                </div>
+
+                                                {/* Status Switch */}
+                                                {/* <div className="d-flex align-items-center justify-content-between">
                                                 <div className="status-title">
                                                     <h5>Status</h5>
                                                     <p>Change the Status by toggle</p>
@@ -415,37 +428,43 @@ const Category = () => {
                                                     />
                                                 </div>
                                             </div> */}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Footer */}
-                                <div className="modal-footer">
-                                    <button
-                                        type="button"
-                                        onClick={(e) => cancelEdit(e)}
-                                        className="btn btn-light me-2"
-                                        data-bs-dismiss="modal"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary"
+                                    {/* Footer */}
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => cancelEdit(e)}
+                                            className="btn btn-light me-2"
+                                           
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary"
 
-                                    >
-                                        Edit Category
-                                    </button>
-                                </div>
-                            </form>
+                                        >
+                                            Edit Category
+                                        </button>
+                                    </div>
+                                </form>
 
 
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </div>)
+                }
+
                 {/* /Edit category */}
+
+
+
                 {/* Delete Modal */}
-                <div className="modal fade" id="delete-modal">
+                 {
+                    showDelModal&&(<div className="modal fade d-block show" id="delete-modal">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <form>
@@ -464,7 +483,7 @@ const Category = () => {
                                                 <button
                                                     onClick={(e) => cancelDelete(e)}
                                                     className="btn btn-light me-3"
-                                                    data-bs-dismiss="modal"
+                                                   
                                                 >
                                                     Cancel
                                                 </button>
@@ -478,7 +497,8 @@ const Category = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>)
+                 }
                 {/* /Delete Modal */}
 
             </>

@@ -6,7 +6,6 @@ import { all_routes } from "../../../router/all_routes";
 import { addTask, allMonthsForOptionByClassId, allTasks, classForOption, deleteTask, getSyllabusByClassIdAndId, speTask, updateTask } from "../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../handlePopUpmodal";
 import { Spinner } from "../../../spinner.tsx";
 import type { OptionType, TasksData } from "../../../core/data/interface/index.tsx";
 import Select from "react-select";
@@ -33,6 +32,10 @@ const DailyTask = () => {
     const [status, setStatus] = useState<'IN_PROGRESS' | 'COMPLETED'>("IN_PROGRESS")
     const [editId, setEditId] = useState<number | null>(null)
     const [sortType, setSortType] = useState<"asc" | "desc">("asc");
+
+    const [addModal ,setAddModal] = useState<boolean>(false)
+    const [editModal ,setEditModal] = useState<boolean>(false)
+    const [delModal ,setDelModal] =useState<boolean>(false)
 
 
     const fetchTasks = async () => {
@@ -114,6 +117,8 @@ const DailyTask = () => {
         setStatus("IN_PROGRESS")
         setEditId(null)
         setMonthsOptions([])
+        setAddModal(false)
+        setEditModal(false)
 
     }
 
@@ -139,7 +144,7 @@ const DailyTask = () => {
             toast.success(data.message)
             resetStates()
             fetchTasks()
-            handleModalPopUp('add_task')
+            setAddModal(false)
 
         }
 
@@ -154,6 +159,7 @@ const DailyTask = () => {
     // edit
     const fetchSpecificTask = async (id: number) => {
         if (!id) return
+        setEditModal(true)
         try {
             const { data } = await speTask(id)
             if (data.success) {
@@ -184,7 +190,7 @@ const DailyTask = () => {
                 toast.success(data.message)
                 resetStates()
                 fetchTasks()
-                handleModalPopUp('edit_task')
+                setEditModal(false)
             }
 
         } catch (error: any) {
@@ -204,7 +210,7 @@ const DailyTask = () => {
                 setDeleteId(null)
                 toast.success(data.message)
                 fetchTasks()
-                handleModalPopUp('delete-modal')
+                setDelModal(false)
             }
 
         } catch (error: any) {
@@ -216,6 +222,7 @@ const DailyTask = () => {
     const cancelDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setDeleteId(null)
+        setDelModal(false)
     }
 
     const sortedDevices = useMemo(() => {
@@ -312,8 +319,7 @@ const DailyTask = () => {
                                     <button
                                         className="dropdown-item rounded-1"
                                         onClick={() => fetchSpecificTask(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#edit_task"
+                                        
                                     >
                                         <i className="ti ti-edit-circle me-2" />
                                         Edit
@@ -322,9 +328,12 @@ const DailyTask = () => {
                                 <li>
                                     <button
                                         className="dropdown-item rounded-1"
-                                        onClick={() => setDeleteId(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#delete-modal"
+                                        onClick={() =>{
+                                             setDeleteId(record.id)
+                                             setDelModal(true)
+                                        }
+                                            }
+                                        
                                     >
                                         <i className="ti ti-trash-x me-2" />
                                         Delete
@@ -407,15 +416,14 @@ const DailyTask = () => {
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
                             <TooltipOption />
                             <div className="mb-2">
-                                <Link
-                                    to="#"
+                                <button
+                                    type="button"
                                     className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#add_task"
+                                     onClick={()=>setAddModal(true)}
                                 >
                                     <i className="ti ti-square-rounded-plus-filled me-2" />
                                     Add Task
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -525,7 +533,8 @@ const DailyTask = () => {
             {/* /Page Wrapper */}
             <>
                 {/* Add task */}
-                <div className="modal fade" id="add_task">
+                {
+                    addModal&&( <div className="modal fade d-block show" id="add_task">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -625,7 +634,7 @@ const DailyTask = () => {
                                     <button
                                         type="button"
                                         className="btn btn-light me-2"
-                                        data-bs-dismiss="modal"
+                                        
                                         onClick={cancelAdd}
                                     >
                                         Cancel
@@ -643,10 +652,12 @@ const DailyTask = () => {
 
                         </div>
                     </div>
-                </div>
+                </div>)
+                }
                 {/* /Add task*/}
                 {/* edit task */}
-                <div className="modal fade" id="edit_task">
+                {
+                    editModal&&( <div className="modal fade show d-block" id="edit_task">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -655,8 +666,8 @@ const DailyTask = () => {
                                     type="button"
                                     onClick={cancelAdd}
                                     className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
+                                   
+                                   
                                 >
                                     <i className="ti ti-x" />
                                 </button>
@@ -707,7 +718,7 @@ const DailyTask = () => {
                                     <button
                                         type="button"
                                         className="btn btn-light me-2"
-                                        data-bs-dismiss="modal"
+                                       
                                         onClick={cancelAdd}
                                     >
                                         Cancel
@@ -725,10 +736,12 @@ const DailyTask = () => {
 
                         </div>
                     </div>
-                </div>
+                </div>)
+                }
                 {/* edit task */}
                 {/* Delete Modal */}
-                <div className="modal fade" id="delete-modal">
+                {
+                    delModal&&( <div className="modal fade d-block show" id="delete-modal">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <form>
@@ -747,7 +760,7 @@ const DailyTask = () => {
                                                 <button
                                                     onClick={(e) => cancelDelete(e)}
                                                     className="btn btn-light me-3"
-                                                    data-bs-dismiss="modal"
+                                                   
                                                 >
                                                     Cancel
                                                 </button>
@@ -761,7 +774,8 @@ const DailyTask = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>)
+                }
                 {/* /Delete Modal */}
 
             </>

@@ -6,7 +6,7 @@ import { all_routes } from "../../../../router/all_routes";
 import { allAiDevices, deleteAiDevice, speAiDevice } from "../../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../../handlePopUpmodal";
+
 import { Spinner } from "../../../../spinner.tsx";
 import DeviceModal from "./DeviceModl.tsx";
 import dayjs from 'dayjs'
@@ -29,6 +29,9 @@ const Device = () => {
   const [editId, setEditId] = useState<number | null>(null)
   const [addQuantityId, setAddQuantityId] = useState<number | null>(null)
   const [actualQuantity, setActualQuantity] = useState<number>(0);
+ const [showModal ,setShowModal] = useState<boolean>(false)
+ const [manageModal , setManageModal] = useState<boolean>(false)
+
   const fetchdevices = async () => {
     setLoading(true)
     await new Promise((res) => setTimeout(res, 500))
@@ -54,15 +57,17 @@ const Device = () => {
 
   // delete class ===================
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [showDelModal ,setShowDelModal] = useState<boolean>(false)
   const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
+    console.log(deleteId)
     try {
       const { data } = await deleteAiDevice(id)
       if (data.success) {
         setDeleteId(null)
         toast.success(data.message)
         fetchdevices()
-        handleModalPopUp('delete-modal')
+        setShowDelModal(false)
 
       }
 
@@ -75,6 +80,7 @@ const Device = () => {
   const cancelDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     setDeleteId(null)
+    setShowDelModal(false)
   }
 
   const sortedDevices = useMemo(() => {
@@ -98,6 +104,7 @@ const Device = () => {
                   
                   setActualQuantity(data.data.quantity)
                   setAddQuantityId(id)
+                  setManageModal(true)
                   
   
               }
@@ -199,9 +206,11 @@ const Device = () => {
                 <li>
                   <button
                     className="dropdown-item rounded-1"
-                    onClick={() => setEditId(record.id)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#addDeviceModal"
+                    onClick={() =>{
+                       setEditId(record.id) 
+                       setShowModal(true)
+                      }}
+                 
                   >
                     <i className="ti ti-edit-circle me-2" />
                     Edit
@@ -211,8 +220,7 @@ const Device = () => {
                   <button
                     className="dropdown-item rounded-1"
                     onClick={() => fetchSpeDevice(record.id)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#add-quantity"
+                  
                   >
                     <i className="ti ti-settings me-2" />
                     Manage Quantity
@@ -221,9 +229,11 @@ const Device = () => {
                 <li>
                   <button
                     className="dropdown-item rounded-1"
-                    onClick={() => setDeleteId(record.id)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#delete-modal"
+                    onClick={() => {
+                      setDeleteId(record.id)
+                      setShowDelModal(true)
+                    }}
+                    
                   >
                     <i className="ti ti-trash-x me-2" />
                     Delete
@@ -265,15 +275,14 @@ const Device = () => {
             <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
               <TooltipOption />
               <div className="mb-2">
-                <Link
-                  to="#"
+                <button
+                
                   className="btn btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#addDeviceModal"
+                  onClick={()=>setShowModal(true)}
                 >
                   <i className="ti ti-square-rounded-plus-filled me-2" />
                   Add Device
-                </Link>
+                </button>
               </div>
             </div>
           </div>
@@ -333,7 +342,8 @@ const Device = () => {
       {/* /Page Wrapper */}
       <>
         {/* Delete Modal */}
-        <div className="modal fade" id="delete-modal">
+        {
+          showDelModal&&( <div className="modal fade show d-block" id="delete-modal">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <form>
@@ -352,7 +362,7 @@ const Device = () => {
                         <button
                           onClick={(e) => cancelDelete(e)}
                           className="btn btn-light me-3"
-                          data-bs-dismiss="modal"
+                          
                         >
                           Cancel
                         </button>
@@ -366,11 +376,12 @@ const Device = () => {
               </form>
             </div>
           </div>
-        </div>
+        </div>)
+        }
 
 
         {/* /Delete Modal */}
-        <DeviceModal onAdd={fetchdevices} editId={editId} setEditId={setEditId} addQuantityId={addQuantityId} setAddQuantityId={setAddQuantityId} actualQuantity={actualQuantity} />
+        <DeviceModal manageModal={manageModal} setManageModal={setManageModal} showModal={showModal} setShowModal={setShowModal} onAdd={fetchdevices} editId={editId} setEditId={setEditId} addQuantityId={addQuantityId} setAddQuantityId={setAddQuantityId} actualQuantity={actualQuantity} />
       </>
     </div>
   );

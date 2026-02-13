@@ -6,7 +6,7 @@ import { all_routes } from "../../../../router/all_routes";
 import { allDevices, deleteDevice, speDevice } from "../../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
-// import { handleModalPopUp } from "../../../../handlePopUpmodal";
+
 import { Spinner } from "../../../../spinner.tsx";
 import DeviceModal from "./DeviceModl.tsx";
 import dayjs from 'dayjs'
@@ -23,12 +23,18 @@ export interface deviceData {
 }
 const Device = () => {
   const route = all_routes
+
   const [devices, setDevices] = useState<deviceData[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [sortType, setSortType] = useState<"asc" | "desc">("asc");
   const [editId, setEditId] = useState<number | null>(null)
   const [addQuantityId, setAddQuantityId] = useState<number | null>(null)
-    const [actualQuantity, setActualQuantity] = useState<number>(0);
+  const [actualQuantity, setActualQuantity] = useState<number>(0);
+  const [showAddDeviceModal ,setShowAddDeviceModal] = useState<boolean>(false)
+  const [showManageModal  ,setShowManageModal] = useState<boolean>(false)
+  
+
+
   const fetchdevices = async () => {
     setLoading(true)
     await new Promise((res) => setTimeout(res, 500))
@@ -99,6 +105,7 @@ const Device = () => {
                  
                   setActualQuantity(data.data.quantity)
                   setAddQuantityId(id)
+                  setShowManageModal(true)
   
               }
           } catch (error: any) {
@@ -198,9 +205,11 @@ const Device = () => {
                 <li>
                   <button
                     className="dropdown-item rounded-1"
-                    onClick={() => setEditId(record.id)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#addDeviceModal"
+                    onClick={() =>{ 
+                      setEditId(record.id)
+                      setShowAddDeviceModal(true)
+                    }}
+                    
                   >
                     <i className="ti ti-edit-circle me-2" />
                     Edit
@@ -210,8 +219,7 @@ const Device = () => {
                   <button
                     className="dropdown-item rounded-1"
                     onClick={() => fetchSpeDevice(record.id)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#add-quantity"
+                     
                   >
                     <i className="ti ti-settings me-2" />
                     Manage Quantity
@@ -266,15 +274,15 @@ const Device = () => {
             <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
               <TooltipOption />
               <div className="mb-2">
-                <Link
-                  to="#"
+                <button
+                  type="button"
                   className="btn btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#addDeviceModal"
+                  onClick={()=>setShowAddDeviceModal(true)}
+                  
                 >
                   <i className="ti ti-square-rounded-plus-filled me-2" />
                   Add Device
-                </Link>
+                </button>
               </div>
             </div>
           </div>
@@ -373,7 +381,7 @@ const Device = () => {
 
 
         {/* /Delete Modal */}
-        <DeviceModal onAdd={fetchdevices} editId={editId} setEditId={setEditId} addQuantityId={addQuantityId} setAddQuantityId={setAddQuantityId} actualQuantity={actualQuantity} />
+        <DeviceModal showAddDeviceModal={showAddDeviceModal} setShowAddDeviceModal={setShowAddDeviceModal} showManageModal={showManageModal} setShowManageModal={setShowManageModal} onAdd={fetchdevices} editId={editId} setEditId={setEditId} addQuantityId={addQuantityId} setAddQuantityId={setAddQuantityId} actualQuantity={actualQuantity} />
       </>
     </div>
   );

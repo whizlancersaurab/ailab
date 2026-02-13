@@ -5,7 +5,6 @@ import { speUser, updateProfile } from "../../../service/api";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import CircleImage from "../../../auth/register/CircleImage";
-import { handleModalPopUp } from "../../../handlePopUpmodal";
 import { Spinner } from "../../../spinner";
 
 
@@ -41,6 +40,7 @@ const Profile = () => {
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false)
 
   const fetchUser = async () => {
     try {
@@ -116,7 +116,7 @@ const Profile = () => {
     setProfilePreview(null)
     setLogoFile(null)
     setLogoPreview(null)
-    // handleModalPopUp('edit_personal_information')
+  
   }
 
   // ✅ Validation
@@ -141,7 +141,7 @@ const Profile = () => {
   // ✅ Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-   
+
     if (!validateForm()) return;
     setLoading(true)
     const formData = new FormData();
@@ -168,7 +168,7 @@ const Profile = () => {
         toast.success(data.message);
         resetFormData()
         fetchUser()
-        handleModalPopUp('edit_personal_information')
+        setShowEditModal(false)
 
       }
     } catch (error: any) {
@@ -223,8 +223,10 @@ const Profile = () => {
 
                           {/* Profile Image */}
                           <div className="col-6">
-                            <img
-                              src={profilePreview ?? "assets/img/logo.jpg"}
+
+                            {
+                              profilePreview?( <img
+                              src={profilePreview}
                               alt="Profile"
                               className="img-fluid rounded-3"
                               style={{
@@ -233,16 +235,31 @@ const Profile = () => {
                                 borderRadius: "50%",
                                 border: "2px dashed #ced4da",
                                 objectFit: "cover",
-                                cursor:'pointer'
+                                cursor: 'pointer'
                               }}
-                            />
+                            />):( <img
+                              src={"assets/img/user1.jpg"}
+                              alt="Profile"
+                              className="img-fluid rounded-3"
+                              style={{
+                                width: 120,
+                                height: 120,
+                                borderRadius: "50%",
+                                border: "2px dashed #ced4da",
+                                objectFit: "cover",
+                                cursor: 'pointer'
+                              }}
+                            />)
+                            }
+
                             <p className="mt-2 fw-semibold">Profile Image</p>
                           </div>
 
                           {/* Logo Image */}
                           <div className="col-6">
-                            <img
-                              src={logoPreview ?? "assets/img/school.webp"}
+                           {
+                            logoPreview?( <img
+                              src={logoPreview}
                               alt="Logo"
                               className="img-fluid rounded-3"
                               style={{
@@ -251,9 +268,22 @@ const Profile = () => {
                                 borderRadius: "50%",
                                 border: "2px dashed #ced4da",
                                 objectFit: "cover",
-                                cursor:'pointer'
+                                cursor: 'pointer'
                               }}
-                            />
+                            />):( <img
+                              src={"assets/img/school.webp"}
+                              alt="Logo"
+                              className="img-fluid rounded-3"
+                              style={{
+                                width: 120,
+                                height: 120,
+                                borderRadius: "50%",
+                                border: "2px dashed #ced4da",
+                                objectFit: "cover",
+                                cursor: 'pointer'
+                              }}
+                            />)
+                           }
                             <p className="mt-2 fw-semibold">School Logo</p>
                           </div>
 
@@ -270,15 +300,14 @@ const Profile = () => {
                           <div className="card">
                             <div className="card-header d-flex justify-content-between align-items-center">
                               <h5>Personal Information</h5>
-                              <Link
-                                to="#"
+                              <button
+                                type="button"
                                 className="btn btn-primary btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#edit_personal_information"
+                                onClick={() => setShowEditModal(true)}
                               >
                                 <i className="ti ti-edit me-2" />
                                 Edit
-                              </Link>
+                              </button>
                             </div>
                             <div className="card-body pb-0">
                               <div className="d-block d-xl-flex">
@@ -336,138 +365,138 @@ const Profile = () => {
         </div>
         {/* /Page Wrapper */}
         {/* Edit Profile */}
-        <div className="modal fade" id="edit_personal_information">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h4 className="modal-title">Edit Personal Information</h4>
-                <button
-                  type="button"
-                  className="btn-close custom-btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                // onClick={() => resetFormData()}
-                >
-                  <i className="ti ti-x" />
-                </button>
-              </div>
-              <div className="p-3">
-                <div className="row justify-content-center align-items-center ">
-                  <div className="">
-                    <form onSubmit={handleSubmit}>
+        {
+          showEditModal && (<div className="modal fade show d-block" id="edit_personal_information">
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h4 className="modal-title">Edit Personal Information</h4>
+                  <button
+                    type="button"
+                    className="btn-close custom-btn-close"
+                     
+                  onClick={() => setShowEditModal(false)}
+                  >
+                    <i className="ti ti-x" />
+                  </button>
+                </div>
+                <div className="p-3">
+                  <div className="row justify-content-center align-items-center ">
+                    <div className="">
+                      <form onSubmit={handleSubmit}>
 
-                      <div className="card">
-                        <div className="card-body">
+                        <div className="card">
+                          <div className="card-body">
 
 
-                          {/* Profile & School Images */}
-                          <div className="row mb-4">
-                            <div className="col-6">
-                              <CircleImage
-                                preview={profilePreview}
-                                label="User Image"
-                                onChange={handleProfileChange}
+                            {/* Profile & School Images */}
+                            <div className="row mb-4">
+                              <div className="col-6">
+                                <CircleImage
+                                  preview={profilePreview}
+                                  label="User Image"
+                                  onChange={handleProfileChange}
+                                />
+                              </div>
+
+                              <div className="col-6">
+                                <CircleImage
+                                  preview={logoPreview}
+                                  label="School Logo"
+                                  onChange={handleLogoChange}
+                                />
+                              </div>
+                            </div>
+
+
+                            {/* First Name */}
+                            <div className="mb-3">
+                              <label className="form-label">School Name</label>
+                              <input
+                                name="schoolName"
+                                value={form.schoolName}
+                                onChange={handleChange}
+                                className="form-control mb-2"
+                                placeholder="School Name"
+                              />
+                              {errors.schoolName && (
+                                <p className="text-danger">{errors.schoolName}</p>
+                              )}
+                            </div>
+                            <div className="mb-3">
+                              <label className="form-label">FirstName</label>
+                              <input
+                                name="firstName"
+                                value={form.firstName}
+                                onChange={handleChange}
+                                className="form-control mb-2"
+                                placeholder="First Name"
+                              />
+                              {errors.firstName && (
+                                <p className="text-danger">{errors.firstName}</p>
+                              )}
+                            </div>
+
+                            {/* Last Name */}
+                            <div className="mb-3">
+                              <label className="form-label">LastName</label>
+                              <input
+                                name="lastName"
+                                value={form.lastName}
+                                onChange={handleChange}
+                                className="form-control mb-2"
+                                placeholder="Last Name"
                               />
                             </div>
 
-                            <div className="col-6">
-                              <CircleImage
-                                preview={logoPreview}
-                                label="School Logo"
-                                onChange={handleLogoChange}
+
+                            {/* Email */}
+                            <div className="mb-3">
+                              <label className="form-label">Email</label>
+                              <input
+                                name="email"
+                                value={form.email}
+                                onChange={handleChange}
+                                className="form-control mb-2"
+                                placeholder="Email"
                               />
+                              {errors.email && (
+                                <p className="text-danger">{errors.email}</p>
+                              )}
                             </div>
-                          </div>
 
 
-                          {/* First Name */}
-                          <div className="mb-3">
-                            <label className="form-label">School Name</label>
-                            <input
-                              name="schoolName"
-                              value={form.schoolName}
-                              onChange={handleChange}
-                              className="form-control mb-2"
-                              placeholder="School Name"
-                            />
-                            {errors.schoolName && (
-                              <p className="text-danger">{errors.schoolName}</p>
-                            )}
-                          </div>
-                          <div className="mb-3">
-                            <label className="form-label">FirstName</label>
-                            <input
-                              name="firstName"
-                              value={form.firstName}
-                              onChange={handleChange}
-                              className="form-control mb-2"
-                              placeholder="First Name"
-                            />
-                            {errors.firstName && (
-                              <p className="text-danger">{errors.firstName}</p>
-                            )}
-                          </div>
+                            <div className="d-flex justify-content-end gap-2 mt-4">
+                              <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => setShowEditModal(false)}
 
-                          {/* Last Name */}
-                          <div className="mb-3">
-                            <label className="form-label">LastName</label>
-                            <input
-                              name="lastName"
-                              value={form.lastName}
-                              onChange={handleChange}
-                              className="form-control mb-2"
-                              placeholder="Last Name"
-                            />
-                          </div>
-                       
+                              >
+                                Back
+                              </button>
 
-                          {/* Email */}
-                          <div className="mb-3">
-                            <label className="form-label">Email</label>
-                            <input
-                              name="email"
-                              value={form.email}
-                              onChange={handleChange}
-                              className="form-control mb-2"
-                              placeholder="Email"
-                            />
-                            {errors.email && (
-                              <p className="text-danger">{errors.email}</p>
-                            )}
-                          </div>
-
-
-                          <div className="d-flex justify-content-end gap-2 mt-4">
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary"
-                              data-bs-dismiss="modal"
-                              aria-label="Close"
-
-                            >
-                              Back
-                            </button>
-
-                            <button
-                              type="submit"
-                              disabled={loading}
-                              className="btn btn-primary px-4"
-                            >
-                              {loading ? 'Updating...' : 'Update'}
-                            </button>
+                              <button
+                                type="submit"
+                                disabled={loading}
+                                className="btn btn-primary px-4"
+                              >
+                                {loading ? 'Updating...' : 'Update'}
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                    </form>
+                      </form>
+                    </div>
                   </div>
                 </div>
+
+
               </div>
-
-
             </div>
-          </div>
-        </div>
+          </div>)
+        }
         {/* /Edit Profile */}
 
         {/* /Change Password */}

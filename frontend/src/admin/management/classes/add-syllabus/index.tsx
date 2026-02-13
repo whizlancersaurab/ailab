@@ -6,7 +6,6 @@ import { all_routes } from "../../../../router/all_routes";
 
 // allClasses
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../../handlePopUpmodal";
 import { addSyllabus, allClassSyllabus, classForOption, deleteSpeSyllabus, speSyllabus, updateSyllabus } from "../../../../service/api";
 import type { OptionType, syllabusData } from "../../../../core/data/interface";
 import Select from "react-select";
@@ -63,6 +62,9 @@ const AddSyllabus = () => {
 
     const [editId, setEditId] = useState<number | null>(null)
     const [sortType, setSortType] = useState<"asc" | "desc">("asc");
+    const [showAddModal , setShowAddModal] = useState<boolean>(false)
+    const [showEditModal ,setShowEditModal] = useState<boolean>(false)
+    const [viewModal ,setViewModal] = useState<boolean>(false)
 
 
 
@@ -155,7 +157,7 @@ const AddSyllabus = () => {
                 toast.success(data.message)
                 setFormData({ className: "", months: [{ month_no: 1, title: "", activity: "", description: "", status: 'PENDING' }] });
                 fetchAllClassSyllabus()
-                handleModalPopUp('add_syllabus')
+                setShowAddModal(false)
             }
         } catch (error: any) {
             console.error(error);
@@ -169,6 +171,7 @@ const AddSyllabus = () => {
             toast.warn('Syllabus Id is required !')
             return
         }
+        setViewModal(true)
         try {
 
             const { data } = await speSyllabus(id)
@@ -188,6 +191,7 @@ const AddSyllabus = () => {
             toast.warn('Id is required !')
             return
         }
+        setShowEditModal(true)
         try {
 
             const { data } = await speSyllabus(id)
@@ -240,6 +244,7 @@ const AddSyllabus = () => {
             status: ""
         });
         setEditId(null)
+        setShowEditModal(false)
     };
 
 
@@ -314,7 +319,7 @@ const AddSyllabus = () => {
                 });
                 setEditId(null)
                 fetchAllClassSyllabus()
-                handleModalPopUp('edit_syllabus')
+                setShowEditModal(false)
 
             }
 
@@ -327,6 +332,8 @@ const AddSyllabus = () => {
 
     // delete class--------------------------------------------------------------------
     const [deleteId, setDeleteId] = useState<number | null>(null)
+    const [showDelModal ,setShowDelModal] = useState<boolean>(false)
+
     const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         try {
@@ -335,7 +342,7 @@ const AddSyllabus = () => {
                 setDeleteId(null)
                 toast.success(data.message)
                 fetchAllClassSyllabus()
-                handleModalPopUp('delete-modal')
+              setShowDelModal(false)
 
             }
 
@@ -348,6 +355,7 @@ const AddSyllabus = () => {
     const cancelDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setDeleteId(null)
+        setShowDelModal(false)
     }
 
     const columns = [
@@ -465,8 +473,7 @@ const AddSyllabus = () => {
                                         <button
                                             className="dropdown-item rounded-1"
                                             onClick={() => fetchEditData(record.id)}
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#edit_syllabus"
+                                            
                                         >
                                             <i className="ti ti-edit-circle me-2" />
                                             Edit
@@ -479,8 +486,7 @@ const AddSyllabus = () => {
                                     <button
                                         className="dropdown-item rounded-1"
                                         onClick={() => fetchSpeSyllabus(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#view_syllabus"
+                                       
                                     >
                                         <i className="ti ti-edit-circle me-2" />
                                         View
@@ -490,9 +496,12 @@ const AddSyllabus = () => {
                                 <li>
                                     <button
                                         className="dropdown-item rounded-1"
-                                        onClick={() => setDeleteId(record.id)}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#delete-modal"
+                                        onClick={() =>{   
+                                            setDeleteId(record.id)
+                                            setShowDelModal(true)
+                                        }
+                                        }
+                                        
                                     >
                                         <i className="ti ti-trash-x me-2" />
                                         Delete
@@ -604,15 +613,14 @@ const AddSyllabus = () => {
 
 
                             <div className="mb-">
-                                <Link
-                                    to="#"
+                                <button
+                                    
                                     className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#add_syllabus"
+                                    onClick={()=>setShowAddModal(true)}
                                 >
                                     <i className="ti ti-square-rounded-plus-filled me-2" />
                                     Add Class Syllabus
-                                </Link>
+                                </button>
                             </div>
 
                         </div>
@@ -728,7 +736,8 @@ const AddSyllabus = () => {
             {/* /Page Wrapper */}
             <>
                 {/* Add Classes */}
-                <div className="modal fade" id="add_syllabus">
+                 {
+                    showAddModal&&(<div className="modal fade show d-block" id="add_syllabus">
                     <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -736,8 +745,7 @@ const AddSyllabus = () => {
                                 <button
                                     type="button"
                                     className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
+                                    onClick={()=>setShowAddModal(false)}
                                 >
                                     <i className="ti ti-x" />
                                 </button>
@@ -855,7 +863,7 @@ const AddSyllabus = () => {
                                 </div>
 
                                 <div className="modal-footer">
-                                    <button type="button" className="btn btn-light me-2" data-bs-dismiss="modal">
+                                    <button type="button" className="btn btn-light me-2" onClick={()=>setShowAddModal(false)}>
                                         Cancel
                                     </button>
                                     <button type="submit" className="btn btn-primary">
@@ -865,11 +873,13 @@ const AddSyllabus = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>)
+                 }
                 {/* /Add Classes */}
 
                 {/* Edit Classes */}
-                <div className="modal fade" id="edit_syllabus">
+                 {
+                    showEditModal&&(<div className="modal fade show d-block" id="edit_syllabus">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -877,8 +887,7 @@ const AddSyllabus = () => {
                                 <button
                                     type="button"
                                     className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
+                                    onClick={(e) =>cancelEditDataSubmit(e)}
                                 >
                                     <i className="ti ti-x" />
                                 </button>
@@ -956,7 +965,7 @@ const AddSyllabus = () => {
                                         type="button"
                                         onClick={(e) => cancelEditDataSubmit(e)}
                                         className="btn btn-light me-2"
-                                        data-bs-dismiss="modal"
+                                        
                                     >
                                         Cancel
                                     </button>
@@ -973,10 +982,12 @@ const AddSyllabus = () => {
 
                         </div>
                     </div>
-                </div>
+                </div>)
+                 }
                 {/* /Edit Classes */}
                 {/* Delete Modal */}
-                <div className="modal fade" id="delete-modal">
+                 {
+                    showDelModal&&(<div className="modal fade show d-block" id="delete-modal">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <form>
@@ -995,7 +1006,7 @@ const AddSyllabus = () => {
                                                 <button
                                                     onClick={(e) => cancelDelete(e)}
                                                     className="btn btn-light me-3"
-                                                    data-bs-dismiss="modal"
+                                                    
                                                 >
                                                     Cancel
                                                 </button>
@@ -1009,18 +1020,19 @@ const AddSyllabus = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>)
+                 }
                 {/* /Delete Modal */}
 
             </>
 
             {/* view modal */}
-            <div
-                className="modal fade"
+            {
+                viewModal&&(<div
+                className="modal fade show d-block"
                 id="view_syllabus"
-                tabIndex={-1}
-                aria-labelledby="viewSyllabusModalLabel"
-                aria-hidden="true"
+               
+              
             >
                 <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
                     <div className="modal-content shadow-lg border-0 rounded-4">
@@ -1038,8 +1050,7 @@ const AddSyllabus = () => {
                             <button
                                 type="button"
                                 className="btn-close btn-close-white"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
+                                 onClick={()=>setViewModal(false)}
                             />
                         </div>
 
@@ -1136,8 +1147,7 @@ const AddSyllabus = () => {
                             <button
                                 type="button"
                                 className="btn btn-outline-secondary"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
+                                 onClick={()=>setViewModal(false)}
                             >
                                 Close
                             </button>
@@ -1145,7 +1155,8 @@ const AddSyllabus = () => {
 
                     </div>
                 </div>
-            </div>
+            </div>)
+            }
         </div>
     );
 };

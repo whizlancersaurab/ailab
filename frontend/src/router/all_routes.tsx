@@ -60,5 +60,6 @@ export const all_routes = {
   superadmindashboard:'/super_admin_dashboard',
   schools:'/all_schools',
   activeschools:'/active_schools',
-  suspendedschools:'/suspended_schools'
+  suspendedschools:'/suspended_schools',
+  addednewschool:'/added-new-school'
 };

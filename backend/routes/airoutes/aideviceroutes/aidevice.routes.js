@@ -3,9 +3,10 @@ const deviceController = require('../../../controller/aicontrollers/ai-devices/a
 
 router.post('/add', deviceController.addDevice);
 router.get('/all', deviceController.getAllDevices);
+router.delete('/delete/:id', deviceController.deleteDevice);
 router.get('/spe/:id', deviceController.getDeviceById);
 router.patch('/update/:id', deviceController.updateDevice);
-router.delete('/delete/:id', deviceController.deleteDevice);
+
 
 router.get('/outofstock' , deviceController.OutOfStockDevices)
 router.patch('/addquantity/:id' , deviceController.addQuantityInDevice)

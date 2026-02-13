@@ -3,11 +3,12 @@ import Table from "../../../../core/common/dataTable/index";
 import { Link } from "react-router-dom";
 // import TooltipOption from "../../../../core/common/tooltipOption";
 import { all_routes } from "../../../../router/all_routes";
-import { addClass, allClasses, deleteClass, editClass} from "../../../../service/api.ts";
+import { addClass, allClasses, deleteClass, editClass, speClass } from "../../../../service/api.ts";
 // allClasses
 import { toast } from "react-toastify";
-import { handleModalPopUp } from "../../../../handlePopUpmodal";
 import { Spinner } from "../../../../spinner.tsx";
+import type { RootState } from "../../../../core/data/redux/store.tsx";
+import { useSelector } from "react-redux";
 
 
 
@@ -15,9 +16,13 @@ const Classes = () => {
     const route = all_routes
     const [classList, setClassList] = useState<any>([])
     const [loading, setLoading] = useState<boolean>(false)
+    const [addModal, setAddModal] = useState<boolean>(false)
+
+    const { role } = useSelector((state: RootState) => state.authSlice)
+
+
     const fetchClasses = async () => {
         setLoading(true)
-        await new Promise((res) => setTimeout(res, 500))
         try {
             const { data } = await allClasses()
             // console.log(data)
@@ -50,6 +55,7 @@ const Classes = () => {
 
     });
     const [editId, setEditId] = useState<number | null>(null)
+    const [editModal, setEditModal] = useState<boolean>(false)
 
 
     // ✅ Generic handleChange for inputs
@@ -63,21 +69,24 @@ const Classes = () => {
         }));
     };
 
-    // const fetchSpecificClass = async (id: number) => {
+    const fetchSpecificClass = async (id: number) => {
 
-    //     try {
-    //         const { data } = await speClass(id)
-    //         setFormData({
-    //             className: data.data.className,
+        try {
+            const { data } = await speClass(id)
+            if (data.success) {
+                setFormData({
+                    className: data.data.className,
+                }
+                )
+                setEditId(id)
+                setEditModal(true)
+            }
 
-    //         }
-    //         )
-    //         setEditId(id)
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
+        } catch (error) {
+            console.log(error)
+        }
 
-    // }
+    }
 
     const cancelEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
@@ -86,6 +95,7 @@ const Classes = () => {
         });
         // setErrors({});
         setEditId(null)
+        setEditModal(false)
     }
 
     // ✅ Submit handler
@@ -101,7 +111,7 @@ const Classes = () => {
 
                 if (data.success) {
                     toast.success(data.message)
-                    handleModalPopUp('edit_class')
+
                     setEditId(null)
                 }
 
@@ -110,7 +120,6 @@ const Classes = () => {
                 const { data } = await addClass(formData)
                 if (data.success) {
                     toast.success(data.message)
-                    handleModalPopUp('add_class')
 
                 }
             }
@@ -119,6 +128,9 @@ const Classes = () => {
                 className: "",
 
             })
+            setEditModal(false)
+            setAddModal(false)
+
 
         } catch (error) {
             console.log(error)
@@ -129,6 +141,8 @@ const Classes = () => {
 
     // delete class--------------------------------------------------------------------
     const [deleteId, setDeleteId] = useState<number | null>(null)
+    const [delModal, setDelModal] = useState<boolean>(false)
+
     const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         try {
@@ -137,7 +151,7 @@ const Classes = () => {
                 setDeleteId(null)
                 toast.success(data.message)
                 fetchClasses()
-                handleModalPopUp('delete-modal')
+                setDelModal(false)
 
             }
 
@@ -150,75 +164,71 @@ const Classes = () => {
     const cancelDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setDeleteId(null)
+        setDelModal(false)
     }
+
 
     const columns = [
         {
             title: "ID",
             dataIndex: "id",
             render: (text: any) => (
-                <>
-                    <Link to="#" className="link-primary">
-                        CL{text}
-                    </Link>
-                </>
+                <Link to="#" className="link-primary">
+                    CL{text}
+                </Link>
             ),
         },
-
         {
             title: "Class",
             dataIndex: "className",
-            render: (text: any) => (
-                <span>{`Class-${text}`}</span>
-            ),
+            render: (text: any) => <span>{`Class-${text}`}</span>,
             sorter: (a: any, b: any) => a.className.length - b.className.length,
-        }
-
-
-        // {
-        //     title: "Action",
-        //     dataIndex: "action",
-        //     render: (_: any, record: any) => (
-        //         <>
-        //             <div className="d-flex align-items-center">
-        //                 <div className="dropdown">
-        //                     <Link
-        //                         to="#"
-        //                         className="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0"
-        //                         data-bs-toggle="dropdown"
-        //                         aria-expanded="false"
-        //                     >
-        //                         <i className="ti ti-dots-vertical fs-14" />
-        //                     </Link>
-        //                     <ul className="dropdown-menu dropdown-menu-right p-3">
-        //                         <li>
-        //                             <button
-        //                                 className="dropdown-item rounded-1"
-        //                                 onClick={() => fetchSpecificClass(record.id)}
-        //                                 data-bs-toggle="modal"
-        //                                 data-bs-target="#edit_class"
-        //                             >
-        //                                 <i className="ti ti-edit-circle me-2" />
-        //                                 Edit
-        //                             </button>
-        //                         </li>
-        //                         <li>
-        //                             <button
-        //                                 className="dropdown-item rounded-1"
-        //                                 onClick={() => setDeleteId(record.id)}
-        //                                 data-bs-toggle="modal"
-        //                                 data-bs-target="#delete-modal"
-        //                             >
-        //                                 <i className="ti ti-trash-x me-2" />
-        //                                 Delete
-        //                             </button>
-        //                         </li>
-        //                     </ul>
-        //                 </div>
-        //             </div>
-        //         </>
-        //     ),
-        // },
+        },
+        ...(role === "SUPER_ADMIN"
+            ? [
+                {
+                    title: "Action",
+                    dataIndex: "action",
+                    render: (_: any, record: any) => (
+                        <div className="d-flex align-items-center">
+                            <div className="dropdown">
+                                <Link
+                                    to="#"
+                                    className="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <i className="ti ti-dots-vertical fs-14" />
+                                </Link>
+                                <ul className="dropdown-menu dropdown-menu-right p-3">
+                                    <li>
+                                        <button
+                                            className="dropdown-item rounded-1"
+                                            onClick={() => fetchSpecificClass(record.id)}
+                                        >
+                                            <i className="ti ti-edit-circle me-2" />
+                                            Edit
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="dropdown-item rounded-1"
+                                            onClick={() => {
+                                                setDeleteId(record.id);
+                                                setDelModal(true);
+                                            }}
+                                        >
+                                            <i className="ti ti-trash-x me-2" />
+                                            Delete
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    ),
+                },
+            ]
+            : []),
     ];
 
 
@@ -248,17 +258,18 @@ const Classes = () => {
                         </div>
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
                             {/* <TooltipOption /> */}
-                            {/* <div className="mb-2">
-                                <Link
-                                    to="#"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#add_class"
-                                >
-                                    <i className="ti ti-square-rounded-plus-filled me-2" />
-                                    Add Class
-                                </Link>
-                            </div> */}
+                            <div className="mb-2">
+                                {
+                                    role === 'SUPER_ADMIN' && (<button
+                                        onClick={() => setEditModal(true)}
+                                        className="btn btn-primary"
+                                    >
+                                        <i className="ti ti-square-rounded-plus-filled me-2" />
+                                        Add Class
+                                    </button>)
+                                }
+
+                            </div>
                         </div>
                     </div>
                     {/* /Page Header */}
@@ -319,167 +330,172 @@ const Classes = () => {
             {/* /Page Wrapper */}
             <>
                 {/* Add Classes */}
-                <div className="modal fade" id="add_class">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Add Class</h4>
-                                <button
-                                    type="button"
-                                    className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                >
-                                    <i className="ti ti-x" />
-                                </button>
-                            </div>
-
-
-                            <form onSubmit={handleSubmit}>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <div className="col-md-12">
-                                            {/* Class Name */}
-                                            <div className="mb-3">
-                                                <label className="form-label">Class Name</label>
-                                                <input
-                                                    className="form-control"
-                                                    type="number"
-                                                    name="className"
-                                                    value={formData.className}
-                                                    autoComplete="off"
-                                                    onChange={handleChange}
-                                                />
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Footer */}
-                                <div className="modal-footer">
-                                    <Link
-                                        to="#"
-                                        className="btn btn-light me-2"
-                                        data-bs-dismiss="modal"
-                                    >
-                                        Cancel
-                                    </Link>
+                {
+                    addModal && (<div className="modal fade" id="add_class">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h4 className="modal-title">Add Class</h4>
                                     <button
-                                        type="submit"
-                                        className="btn btn-primary"
-
+                                        type="button"
+                                        className="btn-close custom-btn-close"
+                                        onClick={() => setAddModal(false)}
                                     >
-                                        Add Class
+                                        <i className="ti ti-x" />
                                     </button>
                                 </div>
-                            </form>
 
 
+                                <form onSubmit={handleSubmit}>
+                                    <div className="modal-body">
+                                        <div className="row">
+                                            <div className="col-md-12">
+                                                {/* Class Name */}
+                                                <div className="mb-3">
+                                                    <label className="form-label">Class Name</label>
+                                                    <input
+                                                        className="form-control"
+                                                        type="number"
+                                                        name="className"
+                                                        value={formData.className}
+                                                        autoComplete="off"
+                                                        onChange={handleChange}
+                                                    />
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            className="btn btn-light me-2"
+                                            onClick={() => setAddModal(false)}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary"
+
+                                        >
+                                            Add Class
+                                        </button>
+                                    </div>
+                                </form>
+
+
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </div>)
+                }
                 {/* /Add Classes */}
 
 
                 {/* Edit Classes */}
-                <div className="modal fade" id="edit_class">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Edit Class</h4>
-                                <button
-                                    type="button"
-                                    className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                >
-                                    <i className="ti ti-x" />
-                                </button>
-                            </div>
+                {
+                    editModal && (<div className="modal fade show d-block" id="edit_class">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h4 className="modal-title">Edit Class</h4>
+                                    <button
+                                        type="button"
+                                        className="btn-close custom-btn-close"
+                                        onClick={(e) => cancelEdit(e)}
+                                    >
+                                        <i className="ti ti-x" />
+                                    </button>
+                                </div>
 
 
-                            <form onSubmit={handleSubmit}>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <div className="col-md-12">
-                                            {/* Class Name */}
-                                            <div className="mb-3">
-                                                <label className="form-label">Class Name</label>
-                                                <input
-                                                    className="form-control"
-                                                    type="number"
-                                                    name="className"
-                                                    value={formData.className}
-                                                    autoComplete="off"
-                                                    onChange={handleChange}
-                                                />
+                                <form onSubmit={handleSubmit}>
+                                    <div className="modal-body">
+                                        <div className="row">
+                                            <div className="col-md-12">
+                                                {/* Class Name */}
+                                                <div className="mb-3">
+                                                    <label className="form-label">Class Name</label>
+                                                    <input
+                                                        className="form-control"
+                                                        type="number"
+                                                        name="className"
+                                                        value={formData.className}
+                                                        autoComplete="off"
+                                                        onChange={handleChange}
+                                                    />
+                                                </div>
+
                                             </div>
-
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Footer */}
-                                <div className="modal-footer">
-                                    <button
-                                        onClick={(e) => cancelEdit(e)}
-                                        className="btn btn-light me-2"
-                                        data-bs-dismiss="modal"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary"
+                                    {/* Footer */}
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => cancelEdit(e)}
+                                            className="btn btn-light me-2"
 
-                                    >
-                                        Save Changes
-                                    </button>
-                                </div>
-                            </form>
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary"
+
+                                        >
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </form>
 
 
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </div>)
+                }
                 {/* /Edit Classes */}
                 {/* Delete Modal */}
-                <div className="modal fade" id="delete-modal">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <form>
-                                <div className="modal-body text-center">
-                                    <span className="delete-icon">
-                                        <i className="ti ti-trash-x" />
-                                    </span>
-                                    <h4>Confirm Deletion</h4>
-                                    <p>
-                                        You want to delete this items, this cant be undone once
-                                        you delete.
-                                    </p>
-                                    {
-                                        deleteId && (
-                                            <div className="d-flex justify-content-center">
-                                                <button
-                                                    onClick={(e) => cancelDelete(e)}
-                                                    className="btn btn-light me-3"
-                                                    data-bs-dismiss="modal"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
-                                                    Yes, Delete
-                                                </button>
+                {
+                    delModal && (<div className="modal fade show d-block" id="delete-modal">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <form>
+                                    <div className="modal-body text-center">
+                                        <span className="delete-icon">
+                                            <i className="ti ti-trash-x" />
+                                        </span>
+                                        <h4>Confirm Deletion</h4>
+                                        <p>
+                                            You want to delete this items, this cant be undone once
+                                            you delete.
+                                        </p>
+                                        {
+                                            deleteId && (
+                                                <div className="d-flex justify-content-center">
+                                                    <button
+                                                        onClick={(e) => cancelDelete(e)}
+                                                        className="btn btn-light me-3"
 
-                                            </div>
-                                        )}
-                                </div>
-                            </form>
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
+                                                        Yes, Delete
+                                                    </button>
+
+                                                </div>
+                                            )}
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </div>)
+                }
                 {/* /Delete Modal */}
 
             </>

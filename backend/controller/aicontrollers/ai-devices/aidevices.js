@@ -141,11 +141,13 @@ exports.updateDevice = async (req, res) => {
 exports.deleteDevice = async (req, res) => {
     const { id } = req.params;
       const schoolId =  req.schoolId
+      console.log(id,schoolId)
 
     try {
         if (!id || isNaN(id)) throw "Invalid device ID";
 
-        const [device] = await db.query(`SELECT id FROM devices WHERE id = ? AND school_id=?`, [id , schoolId]);
+        const [device] = await db.query(`SELECT id FROM ai_devices WHERE id = ? AND school_id=?`, [id , schoolId]);
+       
         if (device.length === 0)
             return res.status(404).json({ success: false, message: "Device not found" });
 
