@@ -313,7 +313,7 @@ const SuspendedSchool = () => {
                             <nav>
                                 <ol className="breadcrumb mb-0">
                                     <li className="breadcrumb-item">
-                                        <Link to={route.adminDashboard}>Dashboard</Link>
+                                        <Link to={route.superadmindashboard}>Dashboard</Link>
                                     </li>
                                     <li className="breadcrumb-item">
                                         <Link to="#">Schools</Link>

@@ -232,6 +232,7 @@ const Classes = () => {
     ];
 
 
+    
 
     return (
         <div>
@@ -245,7 +246,7 @@ const Classes = () => {
                             <nav>
                                 <ol className="breadcrumb mb-0">
                                     <li className="breadcrumb-item">
-                                        <Link to={route.adminDashboard}>Dashboard</Link>
+                                        {role==='SUPER_ADMIN'?(<Link to={route.superadmindashboard}>Dashboard</Link>):(<Link to={route.adminDashboard}>Dashboard</Link>)}
                                     </li>
                                     <li className="breadcrumb-item">
                                         <Link to="#">Classes </Link>

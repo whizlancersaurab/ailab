@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 
 const TooltipOption = () => {
   return (
     <>
       <div className="dropdown me-2 mb-2">
-        <Link
+        {/* <Link
           to="#"
           className="dropdown-toggle btn btn-light fw-medium d-inline-flex align-items-center"
           data-bs-toggle="dropdown"
@@ -25,7 +25,7 @@ const TooltipOption = () => {
               Export as Excel{" "}
             </Link>
           </li>
-        </ul>
+        </ul> */}
       </div>
     </>
   );

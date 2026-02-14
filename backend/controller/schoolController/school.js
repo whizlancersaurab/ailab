@@ -1,12 +1,9 @@
 const db = require('../../config/db')
-
+const bcrypt = require("bcryptjs");
 
 exports.allSchools = async (req, res) => {
 
   try {
-
-
-
     const sql = `
     SELECT
     s.id,
@@ -16,13 +13,13 @@ exports.allSchools = async (req, res) => {
     u.id AS userId,
     s.name,
     s.status,
-    s.profileImage,
+    us.profileImage,
     s.schoolLogo,
     s.created_at
 FROM users u
 LEFT JOIN user_schools us ON us.user_id = u.id
 LEFT JOIN schools s ON s.id = us.school_id
-WHERE u.role != 'SUPER_ADMIN'
+WHERE u.role = 'ADMIN'
 
         `
 
@@ -48,13 +45,13 @@ exports.allActiveSchools = async (req, res) => {
     u.email,
     s.name,
     s.status,
-    s.profileImage,
+    us.profileImage,
     s.schoolLogo,
     s.created_at
 FROM users u
 LEFT JOIN user_schools us ON us.user_id = u.id
 LEFT JOIN schools s ON s.id = us.school_id
-     WHERE u.role !='SUPER_ADMIN' AND s.status="ACTIVE"
+     WHERE u.role ='ADMIN' AND s.status="ACTIVE"
         `
 
     const [rows] = await db.query(sql)
@@ -77,13 +74,13 @@ exports.allSuspendedSchools = async (req, res) => {
     u.email,
     s.name,
     s.status,
-    s.profileImage,
+    us.profileImage,
     s.schoolLogo,
     s.created_at
 FROM users u
 LEFT JOIN user_schools us ON us.user_id = u.id
 LEFT JOIN schools s ON s.id = us.school_id
-     WHERE u.role !='SUPER_ADMIN' AND s.status="SUSPENDED"
+     WHERE u.role ='ADMIN' AND s.status="SUSPENDED"
         `
 
     const [rows] = await db.query(sql)
@@ -242,61 +239,113 @@ exports.schoolStats = async (req, res) => {
 };
 
 exports.addNewSchool = async (req, res) => {
-  const { schoolName, userId } = req.body;
+  const { schoolName, userId, teacher } = req.body;
 
-  if (!userId || !schoolName?.trim()) {
+  if (!userId || !schoolName?.trim() || !teacher) {
     return res.status(400).json({
       success: false,
-      message: "User ID and School Name are required!"
+      message: "School name, userId and teacher details are required!"
+    });
+  }
+
+  let teacherData;
+
+  try {
+    teacherData = JSON.parse(teacher);
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid teacher data format"
+    });
+  }
+
+  const { firstName, lastName, email } = teacherData;
+
+  if (!firstName?.trim() || !email?.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "Teacher first name and email are required"
     });
   }
 
   const profileImage = req.files?.profileImage?.[0]?.path || null;
   const schoolLogo = req.files?.schoolLogo?.[0]?.path || null;
+  const teacherProfileImage = req.files?.teacherProfileImage?.[0]?.path || null;
 
   const conn = await db.getConnection();
   await conn.beginTransaction();
 
   try {
 
-
-    const [users] = await conn.query(
+    // ✅ 1. Check Owner exists
+    const [owner] = await conn.query(
       "SELECT id FROM users WHERE id = ? LIMIT 1",
       [userId]
     );
 
-    if (users.length === 0) {
+    if (owner.length === 0) {
       await conn.rollback();
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "Owner user not found"
       });
     }
 
+    // ✅ 2. Insert School
     const [schoolResult] = await conn.query(
-      `INSERT INTO schools (name, status, profileImage, schoolLogo, created_at)
-       VALUES (?, 'ACTIVE', ?, ?, NOW())`,
-      [schoolName.trim(), profileImage, schoolLogo]
+      `INSERT INTO schools (name, status, schoolLogo, created_at)
+       VALUES (?, 'ACTIVE', ?, NOW())`,
+      [schoolName.trim(), schoolLogo]
     );
 
     const schoolId = schoolResult.insertId;
 
-   
+    // ✅ 3. Link Owner with School
     await conn.query(
-      `INSERT INTO user_schools (user_id, school_id)
-       VALUES (?, ?)`,
-      [userId, schoolId]
+      `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
+       VALUES (?, ?, ?, NOW())`,
+      [userId, schoolId, profileImage]
+    );
+
+    // ✅ 4. Check Teacher Email Exists
+    const [existingTeacher] = await conn.query(
+      "SELECT id FROM users WHERE email = ? LIMIT 1",
+      [email.trim()]
+    );
+
+    if (existingTeacher.length > 0) {
+      throw new Error("Teacher email already exists");
+    }
+
+    // ✅ 5. Create Teacher
+    const hashedPassword = await bcrypt.hash("12345678", 10);
+
+    const [teacherResult] = await conn.query(
+      `INSERT INTO users 
+       (firstname, lastname, email, password, role, created_at)
+       VALUES (?, ?, ?, ?, 'TEACHER', NOW())`,
+      [
+        firstName.trim(),
+        lastName?.trim() || null,
+        email.trim(),
+        hashedPassword
+      ]
+    );
+
+    const teacherId = teacherResult.insertId;
+
+    // ✅ 6. Link Teacher with School
+    await conn.query(
+      `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
+       VALUES (?, ?, ?, NOW())`,
+      [teacherId, schoolId, teacherProfileImage]
     );
 
     await conn.commit();
 
     return res.status(201).json({
       success: true,
-      message: "New school added successfully",
-      data: {
-        schoolId,
-        schoolName
-      }
+      message: "School and teacher added successfully"
     });
 
   } catch (error) {
@@ -305,12 +354,13 @@ exports.addNewSchool = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: error.message || "Internal server error"
     });
   } finally {
     conn.release();
   }
 };
+
 
 
 

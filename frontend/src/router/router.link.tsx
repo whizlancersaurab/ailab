@@ -1,7 +1,7 @@
 import { Navigate, Route } from "react-router";
 import { all_routes } from "./all_routes.tsx";
 import Login from "../auth/login/login";
-import Register from "../auth/register/register";
+import Register from "../auth/register/register.tsx";
 import ResetPassword from "../auth/resetPassword/resetPassword";
 import ForgotPassword from "../auth/forgotPassword/forgotPassword";
 import ResetPasswordSuccess from "../auth/resetPasswordSuccess/resetPasswordSuccess";

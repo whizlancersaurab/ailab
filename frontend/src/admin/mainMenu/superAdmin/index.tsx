@@ -103,31 +103,32 @@ const SuperAdminDashboard = () => {
                 <nav>
                   <ol className="breadcrumb mb-0">
                     <li className="breadcrumb-item">
-                      <Link to={routes.adminDashboard}>Dashboard</Link>
+                      <Link to={routes.superadmindashboard}>Dashboard</Link>
                     </li>
 
                   </ol>
                 </nav>
               </div>
               <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-                <div className="mb-2">
-                  <Link
-                  to={`/${routes.register}`}
+                <div className="mb-2 d-flex align-items-center gap-2">
+                 
+                   <Link
+                    to={routes.addednewschool}
+                    className="btn btn-secondary d-flex align-items-center"
+                    // data-bs-toggle="modal"
+                    // data-bs-target="#addDeviceModal"
+                  >
+                    <i className="ti ti-square-rounded-plus me-2" />
+                    New School
+                  </Link>
+                   <Link
+                  to={routes.register}
                     className="btn btn-primary d-flex align-items-center"
                     // data-bs-toggle="modal"
                     // data-bs-target="#addDeviceModal"
                   >
                     <i className="ti ti-square-rounded-plus me-2" />
                     New Register
-                  </Link>
-                   <Link
-                    to={routes.addednewschool}
-                    className="btn btn-primary d-flex align-items-center"
-                    // data-bs-toggle="modal"
-                    // data-bs-target="#addDeviceModal"
-                  >
-                    <i className="ti ti-square-rounded-plus me-2" />
-                    New Existence
                   </Link>
                 </div>
               </div>

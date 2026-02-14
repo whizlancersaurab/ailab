@@ -196,7 +196,7 @@ const AdminDashboard = () => {
                 <nav>
                   <ol className="breadcrumb mb-0">
                     <li className="breadcrumb-item">
-                      <Link to={routes.adminDashboard}>Dashboard</Link>
+                      <Link to={routes.aidashboard}>Dashboard</Link>
                     </li>
 
                   </ol>

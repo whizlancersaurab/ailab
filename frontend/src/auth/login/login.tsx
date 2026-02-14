@@ -40,7 +40,7 @@ const Login = () => {
     password: ''
   })
   const [error, setError] = useState<Errors>({})
-  const [loading , setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,20 +88,21 @@ const Login = () => {
     try {
 
       const { data } = await login(loginForm)
-       console.log(data.data.user)
+      console.log(data.data.user)
 
       if (data.success) {
         toast.success(data.message)
-        if (data.data.user.role === 'ADMIN')
-          navigate(routes.adminDashboard)
-        else if (data.data.user.role === 'SUPER_ADMIN')
+        if (data.data.user.role === 'SUPER_ADMIN')
           navigate(routes.superadmindashboard)
+        else {
+          navigate(routes.adminDashboard)
+        }
       }
 
     } catch (error: any) {
       console.log(error)
       toast.error(error?.response?.data?.message)
-    }finally{
+    } finally {
       setLoading(false)
     }
   };
@@ -198,7 +199,7 @@ const Login = () => {
                             disabled={loading}
                             className="btn btn-primary w-100"
                           >
-                           {loading?'Signing...':' Sign In'}
+                            {loading ? 'Signing...' : ' Sign In'}
                           </button>
                         </div>
                         {/* <p className="text-center mt-3">

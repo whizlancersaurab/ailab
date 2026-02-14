@@ -172,9 +172,9 @@ export const superAdminSidebar = [
 
       },
          {
-        label: "new school",
+        label: "New school",
         link: routes.addednewschool,
-        icon: "ti ti-layout-dashboard",
+        icon: "ti ti-square-rounded-plus",
         submenu: false,
         showSubRoute: false,
 

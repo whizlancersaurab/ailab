@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation} from "react-router-dom";
 
 import { SidebarData, superAdminSidebar } from "../../data/json/sidebarData";
 import "../../../style/icon/tabler-icons/webfont/tabler-icons.css";
@@ -15,16 +15,16 @@ import "../../../../node_modules/react-perfect-scrollbar/dist/css/styles.css";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import "../../../../node_modules/react-perfect-scrollbar/dist/css/styles.css";
 import type { RootState } from "../../data/redux/store";
-import { all_routes } from "../../../router/all_routes";
+
 import { switchSchool, usersSchools } from "../../../service/api";
 import { toast } from "react-toastify";
-const routes = all_routes;
+
 
 
 const Sidebar = () => {
 
   const [customSide, setCustomSide] = useState<any[]>([]);
-  const navigate = useNavigate()
+ 
 
   const { role } = useSelector((state: RootState) => state.authSlice)
 
@@ -32,14 +32,11 @@ const Sidebar = () => {
 
     if (role) {
 
-      if (role == "ADMIN") {
-        setCustomSide([...SidebarData]);
-
-      } else if (role == "SUPER_ADMIN") {
+      if (role == "SUPER_ADMIN") {
         setCustomSide([...superAdminSidebar])
       }
       else {
-        navigate(`${routes.login}`)
+        setCustomSide([...SidebarData]);
       }
     }
   }, []);

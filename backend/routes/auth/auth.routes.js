@@ -10,7 +10,8 @@ const cpUpload = upload.fields([
 
 const cpUpload2 = upload.fields([
   { name: "profileImage", maxCount: 10 }, 
-  { name: "schoolLogo", maxCount: 10 }   
+  { name: "schoolLogo", maxCount: 10 }   ,
+   { name: "teacherProfileImage", maxCount: 10 } 
 ]);
 
 

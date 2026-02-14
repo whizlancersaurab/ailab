@@ -7,6 +7,7 @@ const upload = require('../../middleware/upload');
 const cpUpload = upload.fields([
   { name: "profileImage", maxCount: 1 },
   { name: "schoolLogo", maxCount: 1 },
+  { name: "teacherProfileImage", maxCount: 1 },
 ]);
 
 

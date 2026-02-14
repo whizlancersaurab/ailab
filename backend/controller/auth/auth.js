@@ -4,6 +4,255 @@ const transporter = require('../../utils/sendEmail');
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 
+
+
+
+exports.register = async (req, res) => {
+  const { firstName, lastName, email, password } = req.body;
+  console.log('new register')
+
+  let schools = [];
+
+if (req.body.schools) {
+  if (Array.isArray(req.body.schools)) {
+    // multiple schools
+    schools = req.body.schools.map(s => JSON.parse(s));
+  } else {
+    // single school
+    schools = [JSON.parse(req.body.schools)];
+  }
+}
+
+ 
+  const adminImages = req.files?.profileImage || [];
+  const schoolLogos = req.files?.schoolLogo || [];
+  const teacherImages = req.files?.teacherProfileImage || [];
+
+  if (!firstName || !email || !password || schools.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "All required fields must be provided"
+    });
+  }
+
+  const conn = await db.getConnection();
+  await conn.beginTransaction();
+
+  try {
+
+    const [existingUser] = await conn.query(
+      "SELECT id FROM users WHERE email = ? LIMIT 1",
+      [email.trim()]
+    );
+
+    if (existingUser.length > 0) {
+      await conn.rollback();
+      return res.status(409).json({
+        success: false,
+        message: "Email already exists"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const [adminResult] = await conn.query(
+      `INSERT INTO users (firstname, lastname, email, password, role, created_at)
+       VALUES (?, ?, ?, ?, 'ADMIN', NOW())`,
+      [
+        firstName.trim(),
+        lastName?.trim() || null,
+        email.trim(),
+        hashedPassword
+      ]
+    );
+
+    const adminId = adminResult.insertId;
+    console.log('all schools' , schools)
+
+
+    for (let i = 0; i < schools.length; i++) {
+      const schoolData = schools[i];
+      console.log(schoolData)
+      const schoolLogo = schoolLogos[i]?.path || null;
+      const adminProfileImage = adminImages[i]?.path || null;
+      const teacherProfileImage = teacherImages[i]?.path || null;
+
+    
+      const [schoolResult] = await conn.query(
+        `INSERT INTO schools (name, status, schoolLogo, created_at)
+         VALUES (?, 'ACTIVE', ?, NOW())`,
+        [schoolData.schoolName.trim(), schoolLogo]
+      );
+
+      const schoolId = schoolResult.insertId;
+
+      await conn.query(
+        `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
+         VALUES (?, ?, ?, NOW())`,
+        [adminId, schoolId, adminProfileImage]
+      );
+
+  
+      const [existingTeacher] = await conn.query(
+        "SELECT id FROM users WHERE email = ? LIMIT 1",
+        [schoolData.teacher.email]
+      );
+
+      if (existingTeacher.length > 0) {
+        throw new Error(
+          `Teacher email ${schoolData.teacher.email} already exists`
+        );
+      }
+
+
+      const teacherPassword = await bcrypt.hash("12345678", 10);
+
+      const [teacherResult] = await conn.query(
+        `INSERT INTO users 
+         (firstname, lastname, email, password, role, created_at)
+         VALUES (?, ?, ?, ?, 'TEACHER', NOW())`,
+        [
+          schoolData.teacher.firstName.trim(),
+          schoolData.teacher.lastName?.trim() || null,
+          schoolData.teacher.email.trim(),
+          teacherPassword
+        ]
+      );
+
+      const teacherId = teacherResult.insertId;
+
+   
+      await conn.query(
+        `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
+         VALUES (?, ?, ?, NOW())`,
+        [teacherId, schoolId, teacherProfileImage]
+      );
+    }
+
+    await conn.commit();
+
+    return res.status(201).json({
+      success: true,
+      message: "Admin, schools, and teachers registered successfully"
+    });
+
+  } catch (error) {
+    await conn.rollback();
+    console.error("❌ Register Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error"
+    });
+  } finally {
+    conn.release();
+  }
+};
+
+
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
+
+  const [users] = await db.query(
+    `SELECT u.id, u.firstname, u.lastname, u.email, u.password, u.role
+     FROM users u WHERE email = ?`,
+    [email]
+  );
+
+  if (!users.length) return res.status(400).json({ success: false, message: "Invalid email or password" });
+
+  const user = users[0];
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+  if (!isPasswordMatch) return res.status(400).json({ success: false, message: "Invalid email or password" });
+
+
+  const [schools] = await db.query(
+    `SELECT s.id, s.name FROM schools s
+     JOIN user_schools us ON s.id = us.school_id
+     WHERE us.user_id = ?`,
+    [user.id]
+  );
+
+  if (!schools.length) return res.status(403).json({ success: false, message: "No school assigned" });
+
+  const defaultSchool = schools[0];
+
+
+  const accessToken = jwt.sign(
+    { id: user.id, email: user.email, role: user.role, schoolId: defaultSchool.id },
+    process.env.JWT_ACCESS_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  const refreshToken = jwt.sign({ id: user.id, role: user.role, schoolId: defaultSchool.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+
+
+  await db.query(
+    `INSERT INTO refresh_token (user_id, token, expires_at)
+     VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))
+     ON DUPLICATE KEY UPDATE token=VALUES(token), expires_at=VALUES(expires_at)`,
+    [user.id, refreshToken]
+  );
+
+  res.cookie("access_token", accessToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 15 * 60 * 1000 });
+  res.cookie("refresh_token", refreshToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+
+  res.status(200).json({
+    success: true,
+    message: "Login successful",
+    data: { user, schools, currentSchool: defaultSchool }
+  });
+};
+
+exports.switchSchool = async (req, res) => {
+  const userId = req.user.id;
+  const { schoolId } = req.body;
+  const currentRefreshToken = req.cookies.refresh_token;
+
+  if (!schoolId) return res.status(400).json({ success: false, message: "School ID is required" });
+
+  const [schools] = await db.query(
+    `SELECT s.id, s.name , schoolLogo
+     FROM schools s
+     JOIN user_schools us ON s.id = us.school_id
+     WHERE us.user_id = ? AND s.id = ?`,
+    [userId, schoolId]
+  );
+
+  if (!schools.length) return res.status(403).json({ success: false, message: "Access denied to this school" });
+
+  const school = schools[0];
+
+
+  if (currentRefreshToken) {
+    await db.query(`DELETE FROM refresh_token WHERE user_id = ? AND token = ?`, [userId, currentRefreshToken]);
+  }
+
+
+  const accessToken = jwt.sign({ id: userId, email: req.user.email, role: req.user.role, schoolId: school.id }, process.env.JWT_ACCESS_SECRET, { expiresIn: "15m" });
+  const refreshToken = jwt.sign({ id: userId, role: req.user.role }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+
+  await db.query(
+    `INSERT INTO refresh_token (user_id, token, expires_at)
+     VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))
+     ON DUPLICATE KEY UPDATE token=VALUES(token), expires_at=VALUES(expires_at)`,
+    [userId, refreshToken]
+  );
+
+
+  res.cookie("access_token", accessToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 15 * 60 * 1000 });
+  res.cookie("refresh_token", refreshToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+  return res.status(200).json({
+    success: true,
+    message: `Switched to school ${school.name}`,
+    data: { schoolId: school.id, schoolName: school.name }
+  });
+};
+
+
 exports.update = async (req, res) => {
   const userId = req.user.id;
   const { schoolId } = req.user;
@@ -23,7 +272,7 @@ exports.update = async (req, res) => {
   await conn.beginTransaction();
 
   try {
-   
+
     if (!firstName?.trim() || !email?.trim() || !schoolName?.trim()) {
       return res.status(400).json({
         success: false,
@@ -31,7 +280,7 @@ exports.update = async (req, res) => {
       });
     }
 
-   
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -40,7 +289,7 @@ exports.update = async (req, res) => {
       });
     }
 
-    
+
     const [existingUser] = await conn.query(
       "SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1",
       [email.trim(), userId]
@@ -54,8 +303,8 @@ exports.update = async (req, res) => {
       });
     }
 
-    
-    const [schoolRows] = await conn.query("SELECT profileImage, schoolLogo FROM schools WHERE id = ?", [schoolId]);
+
+    const [schoolRows] = await conn.query("SELECT schoolLogo FROM schools WHERE id = ?", [schoolId]);
     if (schoolRows.length === 0) {
       await conn.rollback();
       return res.status(404).json({
@@ -64,25 +313,44 @@ exports.update = async (req, res) => {
       });
     }
 
-    const existingProfileImage = schoolRows[0].profileImage;
+       const [schoolRows2] = await conn.query("SELECT profileImage FROM user_schools WHERE id = ?", [schoolId]);
+    if (schoolRows.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "School not found",
+      });
+    }
+
+    const existingProfileImage = schoolRows2[0].profileImage;
     const existingSchoolLogo = schoolRows[0].schoolLogo;
 
- 
+
     await conn.query(
       `UPDATE schools 
-       SET name = ?, profileImage = ?, schoolLogo = ?, updated_at = NOW()
+       SET name = ?,  schoolLogo = ?, updated_at = NOW()
        WHERE id = ?`,
       [
         schoolName.trim(),
-        profileImage || existingProfileImage,
         schoolLogo || existingSchoolLogo,
+        schoolId
+      ]
+    );
+
+    
+    await conn.query(
+      `UPDATE user_schools 
+       SET  profileImage = ?,  updated_at = NOW()
+       WHERE id = ?`,
+      [  
+        profileImage || existingProfileImage,
         schoolId
       ]
     );
 
 
 
-  
+
     await conn.query(
       `UPDATE users
        SET firstname = ?, lastname = ?, email = ?
@@ -208,7 +476,7 @@ exports.dataForUpdateProfile = async (req, res) => {
      u.email,
      u.role,
      s.name,
-     s.profileImage,
+     us.profileImage,
      s.schoolLogo
       FROM users u
       LEFT JOIN user_schools us ON us.user_id = u.id
@@ -217,7 +485,7 @@ exports.dataForUpdateProfile = async (req, res) => {
     `
     const [rows] = await db.query(
       sql,
-      [id , schoolId]
+      [id, schoolId]
     );
 
 
@@ -246,7 +514,7 @@ exports.dataForUpdateProfile = async (req, res) => {
 exports.profile = async (req, res) => {
   try {
     const userId = req.user.id;
-     const { schoolId } = req.user;
+    const { schoolId } = req.user;
     const sql = `
       SELECT 
         u.id AS userId,
@@ -254,14 +522,13 @@ exports.profile = async (req, res) => {
         u.lastname,
         u.email,
         u.role,
-        s.profileImage
+        us.profileImage
       FROM users u
       LEFT JOIN user_schools us ON us.user_id = u.id
-      LEFT JOIN schools s ON s.id = us.school_id
-      WHERE u.id = ? AND s.id=?
+      WHERE u.id = ? AND us.school_id=?
     `;
 
-    const [rows] = await db.query(sql, [userId , schoolId]);
+    const [rows] = await db.query(sql, [userId, schoolId]);
 
     if (rows.length === 0) {
       return res.status(404).json({
@@ -298,7 +565,7 @@ exports.logout = async (req, res) => {
 
     const cookieOptions = {
       httpOnly: true,
-      secure: true,    
+      secure: true,
       sameSite: "None"
     };
 
@@ -323,10 +590,8 @@ exports.logout = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   try {
     const { id } = req.user;
-     const { schoolId } = req.user;
+    const { schoolId } = req.user;
     const refreshToken = req.refreshToken;
-    console.log(id ,schoolId)
-
 
 
     const [rows] = await db.query(
@@ -391,174 +656,7 @@ exports.refreshToken = async (req, res) => {
 };
 
 
-exports.login= async (req, res) => {
-  const { email, password } = req.body;
 
- 
-  const [users] = await db.query(
-    `SELECT u.id, u.firstname, u.lastname, u.email, u.password, u.role
-     FROM users u WHERE email = ?`,
-    [email]
-  );
-
-  if (!users.length) return res.status(400).json({ success: false, message: "Invalid email or password" });
-
-  const user = users[0];
-  const isPasswordMatch = await bcrypt.compare(password, user.password);
-  if (!isPasswordMatch) return res.status(400).json({ success: false, message: "Invalid email or password" });
-
-
-  const [schools] = await db.query(
-    `SELECT s.id, s.name FROM schools s
-     JOIN user_schools us ON s.id = us.school_id
-     WHERE us.user_id = ?`,
-    [user.id]
-  );
-
-  if (!schools.length) return res.status(403).json({ success: false, message: "No school assigned" });
-
-  const defaultSchool = schools[0];
-
-
-  const accessToken = jwt.sign(
-    { id: user.id, email: user.email, role: user.role, schoolId: defaultSchool.id },
-    process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" }
-  );
-
-  const refreshToken = jwt.sign({ id: user.id, role: user.role, schoolId: defaultSchool.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
-
- 
-  await db.query(
-    `INSERT INTO refresh_token (user_id, token, expires_at)
-     VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))
-     ON DUPLICATE KEY UPDATE token=VALUES(token), expires_at=VALUES(expires_at)`,
-    [user.id, refreshToken]
-  );
-
-  res.cookie("access_token", accessToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 1* 60 * 1000 });
-  res.cookie("refresh_token", refreshToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-
-  res.status(200).json({
-    success: true,
-    message: "Login successful",
-    data: { user, schools, currentSchool: defaultSchool }
-  });
-};
-
-exports.switchSchool = async (req, res) => {
-  const userId = req.user.id;
-  const { schoolId } = req.body;
-  const currentRefreshToken = req.cookies.refresh_token;
-
-  if (!schoolId) return res.status(400).json({ success: false, message: "School ID is required" });
-
-  const [schools] = await db.query(
-    `SELECT s.id, s.name , schoolLogo
-     FROM schools s
-     JOIN user_schools us ON s.id = us.school_id
-     WHERE us.user_id = ? AND s.id = ?`,
-    [userId, schoolId]
-  );
-
-  if (!schools.length) return res.status(403).json({ success: false, message: "Access denied to this school" });
-
-  const school = schools[0];
-
-
-  if (currentRefreshToken) {
-    await db.query(`DELETE FROM refresh_token WHERE user_id = ? AND token = ?`, [userId, currentRefreshToken]);
-  }
-
- 
-  const accessToken = jwt.sign({ id: userId, email: req.user.email, role: req.user.role, schoolId: school.id }, process.env.JWT_ACCESS_SECRET, { expiresIn: "15m" });
-  const refreshToken = jwt.sign({ id: userId, role: req.user.role }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
-
-  await db.query(
-    `INSERT INTO refresh_token (user_id, token, expires_at)
-     VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))
-     ON DUPLICATE KEY UPDATE token=VALUES(token), expires_at=VALUES(expires_at)`,
-    [userId, refreshToken]
-  );
-
-
-  res.cookie("access_token", accessToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 15 * 60 * 1000 });
-  res.cookie("refresh_token", refreshToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-  return res.status(200).json({
-    success: true,
-    message: `Switched to school ${school.name}`,
-    data: { schoolId: school.id, schoolName: school.name }
-  });
-};
-
-
-exports.register = async (req, res) => {
-  const { firstName, lastName, email, password, schoolName } = req.body;
-  const profileImages = req.files.profileImage; // array
-  const schoolLogos = req.files.schoolLogo;     // array
-
-  if (!firstName?.trim() || !email?.trim() || !password?.trim() || !schoolName?.length) {
-    return res.status(400).json({ success: false, message: "All fields are required" });
-  }
-
-  const conn = await db.getConnection();
-  await conn.beginTransaction();
-
-  try {
-   
-    const [existingUser] = await conn.query("SELECT id FROM users WHERE email=? LIMIT 1", [email.trim()]);
-    if (existingUser.length > 0) {
-      await conn.rollback();
-      return res.status(409).json({ success: false, message: "Email already exists" });
-    }
-
-   
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const [userResult] = await conn.query(
-      `INSERT INTO users (firstname, lastname, email, password, role, created_at)
-       VALUES (?, ?, ?, ?, 'ADMIN', NOW())`,
-      [firstName.trim(), lastName?.trim() || null, email.trim(), hashedPassword]
-    );
-    const userId = userResult.insertId;
-
-  
-    for (let i = 0; i < schoolName.length; i++) {
-      const name = schoolName[i];
-      const profileImage = profileImages?.[i]?.path || null;
-      const schoolLogo = schoolLogos?.[i]?.path || null;
-
-      const [schoolResult] = await conn.query(
-        `INSERT INTO schools (name, status, profileImage, schoolLogo, created_at)
-         VALUES (?, 'ACTIVE', ?, ?, NOW())`,
-        [name.trim(), profileImage, schoolLogo]
-      );
-
-      const schoolId = schoolResult.insertId;
-
-      
-      await conn.query(
-        `INSERT INTO user_schools (user_id, school_id) VALUES (?, ?)`,
-        [userId, schoolId]
-      );
-    }
-
-    await conn.commit();
-
-    return res.status(201).json({
-      success: true,
-      message: "User and schools registered successfully"
-    });
-
-  } catch (error) {
-    await conn.rollback();
-    console.error("❌ Register Error:", error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
-  } finally {
-    conn.release();
-  }
-};
 
 exports.getUserSchools = async (req, res) => {
   const userId = req.user.id;
