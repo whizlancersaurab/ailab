@@ -19,9 +19,10 @@ const cpUpload2 = upload.fields([
 router.post('/login', authController.login)
 router.post('/forgot-password', authController.forgotPassword)
 router.post('/reset-password', authController.verifyOtpAndUpdatePassword)
+router.post('/update',cpUpload,authController.update)
 
 router.post('/register', allow('SUPER_ADMIN') ,cpUpload2,authController.register)
-router.post('/update',cpUpload,authController.update)
+
 
 
 router.get('/logout' ,authController.logout)

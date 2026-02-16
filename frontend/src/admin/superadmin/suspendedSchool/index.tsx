@@ -400,8 +400,7 @@ const SuspendedSchool = () => {
                 editModal&&(   <div
                     className="modal fade show d-block"
                     id="changeModal"
-                    tabIndex={-1}
-                    aria-hidden="true"
+                   
                 >
                     <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content">

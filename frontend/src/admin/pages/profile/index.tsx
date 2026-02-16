@@ -160,9 +160,14 @@ const Profile = () => {
     if (logoFile) {
       formData.append("schoolLogo", logoFile);
     }
+    for (let pair of formData.entries()) {
+  console.log(pair[0] + ": ", pair[1]);
+}
+
 
     try {
       const { data } = await updateProfile(formData);
+      console.log(data)
 
       if (data.success) {
         toast.success(data.message);
@@ -172,7 +177,7 @@ const Profile = () => {
 
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Registration failed");
+      toast.error(error.response?.data?.message || "Updated failed !");
     } finally {
       setLoading(false)
     }

@@ -20,6 +20,7 @@ FROM users u
 LEFT JOIN user_schools us ON us.user_id = u.id
 LEFT JOIN schools s ON s.id = us.school_id
 WHERE u.role = 'ADMIN'
+ORDER BY u.id
 
         `
 
@@ -34,9 +35,6 @@ WHERE u.role = 'ADMIN'
 exports.allActiveSchools = async (req, res) => {
 
   try {
-
-
-
     const sql = `
      SELECT
     s.id,
@@ -216,9 +214,12 @@ exports.schoolStats = async (req, res) => {
     const sql = `
       SELECT
         COUNT(*) AS totalSchools,
-        COUNT(CASE WHEN status = 'ACTIVE' THEN 1 END) AS activeSchools,
-        COUNT(CASE WHEN status = 'SUSPENDED' THEN 1 END) AS suspendedSchools
-      FROM schools
+        COUNT(CASE WHEN s.status = 'ACTIVE' THEN 1 END) AS activeSchools,
+        COUNT(CASE WHEN s.status = 'SUSPENDED' THEN 1 END) AS suspendedSchools
+      FROM schools s
+      LEFT JOIN user_schools us ON us.school_id = s.id
+      LEFT JOIN users u ON us.user_id = u.id
+      WHERE role='ADMIN'
     `;
 
     const [rows] = await db.query(sql);
@@ -277,7 +278,7 @@ exports.addNewSchool = async (req, res) => {
 
   try {
 
-    // ✅ 1. Check Owner exists
+  
     const [owner] = await conn.query(
       "SELECT id FROM users WHERE id = ? LIMIT 1",
       [userId]
@@ -291,7 +292,6 @@ exports.addNewSchool = async (req, res) => {
       });
     }
 
-    // ✅ 2. Insert School
     const [schoolResult] = await conn.query(
       `INSERT INTO schools (name, status, schoolLogo, created_at)
        VALUES (?, 'ACTIVE', ?, NOW())`,
@@ -300,14 +300,14 @@ exports.addNewSchool = async (req, res) => {
 
     const schoolId = schoolResult.insertId;
 
-    // ✅ 3. Link Owner with School
+    
     await conn.query(
       `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
        VALUES (?, ?, ?, NOW())`,
       [userId, schoolId, profileImage]
     );
 
-    // ✅ 4. Check Teacher Email Exists
+
     const [existingTeacher] = await conn.query(
       "SELECT id FROM users WHERE email = ? LIMIT 1",
       [email.trim()]
@@ -317,7 +317,6 @@ exports.addNewSchool = async (req, res) => {
       throw new Error("Teacher email already exists");
     }
 
-    // ✅ 5. Create Teacher
     const hashedPassword = await bcrypt.hash("12345678", 10);
 
     const [teacherResult] = await conn.query(
@@ -334,7 +333,7 @@ exports.addNewSchool = async (req, res) => {
 
     const teacherId = teacherResult.insertId;
 
-    // ✅ 6. Link Teacher with School
+    
     await conn.query(
       `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
        VALUES (?, ?, ?, NOW())`,

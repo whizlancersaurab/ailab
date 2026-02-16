@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken')
 
 exports.register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
-  console.log('new register')
+  
 
   let schools = [];
 
@@ -254,9 +254,12 @@ exports.switchSchool = async (req, res) => {
 
 
 exports.update = async (req, res) => {
+  console.log("dsfjsl")
   const userId = req.user.id;
   const { schoolId } = req.user;
   const { firstName, lastName, email, schoolName } = req.body;
+
+
 
   if (!userId || !schoolId) {
     return res.status(400).json({
@@ -267,6 +270,8 @@ exports.update = async (req, res) => {
 
   const profileImage = req.files?.profileImage?.[0]?.path;
   const schoolLogo = req.files?.schoolLogo?.[0]?.path;
+
+ 
 
   const conn = await db.getConnection();
   await conn.beginTransaction();
@@ -313,7 +318,8 @@ exports.update = async (req, res) => {
       });
     }
 
-       const [schoolRows2] = await conn.query("SELECT profileImage FROM user_schools WHERE id = ?", [schoolId]);
+       const [schoolRows2] = await conn.query("SELECT profileImage FROM user_schools WHERE user_id = ? AND school_id=?", [userId,schoolId]);
+       console.log(schoolRows2[0])
     if (schoolRows.length === 0) {
       await conn.rollback();
       return res.status(404).json({
@@ -341,10 +347,10 @@ exports.update = async (req, res) => {
     await conn.query(
       `UPDATE user_schools 
        SET  profileImage = ?,  updated_at = NOW()
-       WHERE id = ?`,
+       WHERE user_id = ? AND school_id=?`,
       [  
         profileImage || existingProfileImage,
-        schoolId
+        userId, schoolId
       ]
     );
 
