@@ -58,6 +58,9 @@ app.use('/api/task', require('./routes/daily-tasks/tasks.routes'))
 app.use('/api/chat', require('./routes/chat/chat.routes'))
 app.use('/api/event', require('./routes/event/event.routes'))
 
+// teacher
+app.use('/api/teacher' , require('./routes/teacherRoutes/teacher.routes'))
+
 // super admin
 app.use('/api/superadmin' , require('./routes/schoolRoutes/school.routes'))
 

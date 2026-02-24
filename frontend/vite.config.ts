@@ -8,5 +8,11 @@ export default defineConfig({
   proxy:{
     '/api':'http://localhost:3004'
   }
- }
+ },
+preview: {
+    host: true,
+    port: 5173,
+    allowedHosts: ['lab.botixbo.com']
+  }
+
 })

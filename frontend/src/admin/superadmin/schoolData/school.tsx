@@ -177,7 +177,7 @@ const School = () => {
             render: (text: any) => (
                 <>
                     <Link to="#" className="link-primary">
-                        SC-{text}
+                       SC-{text}
                     </Link>
                 </>
             ),

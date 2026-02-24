@@ -76,6 +76,14 @@ export const SidebarData = [
         showSubRoute: false,
 
       },
+      {
+        label: "Teachers",
+        link: routes.schoolteachers,
+        icon: "ti ti-layout-dashboard",
+        submenu: false,
+        showSubRoute: false,
+
+      },
 
     ],
   },

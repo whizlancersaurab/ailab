@@ -65,7 +65,10 @@ export const usersSchools = ()=>api.get('/auth/usersschools')
 export const switchSchool = (data:object)=>api.post('/auth/switch-school' , data)
 export const allUsers = ()=>api.get('/auth/allusers')
 
-
+// teachers api
+export const speSchoolTeachers = ()=>api.get('/teacher/speschoolteachers')
+export const deleteTeacher = (id:number)=>api.delete(`/teacher/delteacher/${id}`)
+export const addNewTeacher = (data:object)=>api.post('/teacher/addteacher' , data)
 
 // superadin
 export const allSchools = ()=>api.get('/superadmin/allschools')

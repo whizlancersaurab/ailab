@@ -5,25 +5,23 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 
 
-
-
 exports.register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
-  
+
 
   let schools = [];
 
-if (req.body.schools) {
-  if (Array.isArray(req.body.schools)) {
-    // multiple schools
-    schools = req.body.schools.map(s => JSON.parse(s));
-  } else {
-    // single school
-    schools = [JSON.parse(req.body.schools)];
+  if (req.body.schools) {
+    if (Array.isArray(req.body.schools)) {
+      // multiple schools
+      schools = req.body.schools.map(s => JSON.parse(s));
+    } else {
+      // single school
+      schools = [JSON.parse(req.body.schools)];
+    }
   }
-}
 
- 
+
   const adminImages = req.files?.profileImage || [];
   const schoolLogos = req.files?.schoolLogo || [];
   const teacherImages = req.files?.teacherProfileImage || [];
@@ -67,7 +65,7 @@ if (req.body.schools) {
     );
 
     const adminId = adminResult.insertId;
-    console.log('all schools' , schools)
+    console.log('all schools', schools)
 
 
     for (let i = 0; i < schools.length; i++) {
@@ -77,7 +75,7 @@ if (req.body.schools) {
       const adminProfileImage = adminImages[i]?.path || null;
       const teacherProfileImage = teacherImages[i]?.path || null;
 
-    
+
       const [schoolResult] = await conn.query(
         `INSERT INTO schools (name, status, schoolLogo, created_at)
          VALUES (?, 'ACTIVE', ?, NOW())`,
@@ -92,7 +90,7 @@ if (req.body.schools) {
         [adminId, schoolId, adminProfileImage]
       );
 
-  
+
       const [existingTeacher] = await conn.query(
         "SELECT id FROM users WHERE email = ? LIMIT 1",
         [schoolData.teacher.email]
@@ -121,7 +119,7 @@ if (req.body.schools) {
 
       const teacherId = teacherResult.insertId;
 
-   
+
       await conn.query(
         `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
          VALUES (?, ?, ?, NOW())`,
@@ -148,7 +146,6 @@ if (req.body.schools) {
     conn.release();
   }
 };
-
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -252,7 +249,6 @@ exports.switchSchool = async (req, res) => {
   });
 };
 
-
 exports.update = async (req, res) => {
   console.log("dsfjsl")
   const userId = req.user.id;
@@ -271,7 +267,7 @@ exports.update = async (req, res) => {
   const profileImage = req.files?.profileImage?.[0]?.path;
   const schoolLogo = req.files?.schoolLogo?.[0]?.path;
 
- 
+
 
   const conn = await db.getConnection();
   await conn.beginTransaction();
@@ -318,8 +314,8 @@ exports.update = async (req, res) => {
       });
     }
 
-       const [schoolRows2] = await conn.query("SELECT profileImage FROM user_schools WHERE user_id = ? AND school_id=?", [userId,schoolId]);
-       console.log(schoolRows2[0])
+    const [schoolRows2] = await conn.query("SELECT profileImage FROM user_schools WHERE user_id = ? AND school_id=?", [userId, schoolId]);
+    console.log(schoolRows2[0])
     if (schoolRows.length === 0) {
       await conn.rollback();
       return res.status(404).json({
@@ -343,12 +339,12 @@ exports.update = async (req, res) => {
       ]
     );
 
-    
+
     await conn.query(
       `UPDATE user_schools 
        SET  profileImage = ?,  updated_at = NOW()
        WHERE user_id = ? AND school_id=?`,
-      [  
+      [
         profileImage || existingProfileImage,
         userId, schoolId
       ]
@@ -409,7 +405,7 @@ exports.forgotPassword = async (req, res) => {
       [otp, Date.now() + 10 * 60 * 1000, email]
     );
 
-    // Send OTP email
+
     await transporter.sendMail({
       from: process.env.SMTP_USER,
       to: email,
@@ -559,7 +555,6 @@ exports.profile = async (req, res) => {
   }
 };
 
-
 exports.logout = async (req, res) => {
   try {
     const id = req.user.id;
@@ -591,7 +586,6 @@ exports.logout = async (req, res) => {
     });
   }
 };
-
 
 exports.refreshToken = async (req, res) => {
   try {
@@ -661,9 +655,6 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
-
-
-
 exports.getUserSchools = async (req, res) => {
   const userId = req.user.id;
 
@@ -715,6 +706,9 @@ exports.allUsers = async (req, res) => {
     });
   }
 };
+
+
+
 
 
 

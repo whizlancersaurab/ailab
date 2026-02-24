@@ -88,8 +88,6 @@ const Login = () => {
     try {
 
       const { data } = await login(loginForm)
-      console.log(data.data.user)
-
       if (data.success) {
         toast.success(data.message)
         if (data.data.user.role === 'SUPER_ADMIN')

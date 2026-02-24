@@ -61,5 +61,9 @@ export const all_routes = {
   schools:'/all_schools',
   activeschools:'/active_schools',
   suspendedschools:'/suspended_schools',
-  addednewschool:'/added-new-school'
+  addednewschool:'/added-new-school',
+
+
+  // teachers
+  schoolteachers:'/school-teachers'
 };

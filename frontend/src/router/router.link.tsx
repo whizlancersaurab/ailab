@@ -43,6 +43,9 @@ import SuspendedSchool from "../admin/superadmin/suspendedSchool/index.tsx";
 import SuperAdminDashboard from "../admin/mainMenu/superAdmin/index.tsx";
 import NewSchool from "../admin/superadmin/registerExistence/index.tsx";
 
+// teachers
+import Teacher from "../admin/management/teachers/index.tsx";
+
 const routes = all_routes;
 
 export const publicRoutes = [
@@ -88,7 +91,7 @@ export const publicRoutes = [
     element: <AdminDashboard />,
     route: Route,
   },
-   {
+  {
     path: routes.userProfile,
     element: < UserProfile />,
     route: Route,
@@ -195,11 +198,17 @@ export const publicRoutes = [
     route: Route
   },
   {
-     path: routes.addednewschool,
-     element: <NewSchool />,
+    path: routes.addednewschool,
+    element: <NewSchool />,
+    route: Route
+  },
+
+  // teachers
+{
+    path: routes.schoolteachers,
+    element: <Teacher />,
     route: Route
   }
-
 ];
 
 export const authRoutes = [

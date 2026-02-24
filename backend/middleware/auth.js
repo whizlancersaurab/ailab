@@ -12,7 +12,7 @@ exports.authMiddleware = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-   
+  
 
     req.user = decoded;             
     req.schoolId = decoded.schoolId; 
@@ -49,7 +49,6 @@ exports.refreshTokenMidddlware = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-    console.log(decoded ,'2')
     req.user = decoded;
     req.refreshToken = token;
 
@@ -92,7 +91,7 @@ exports.tenant = (req, res, next) => {
 
 exports.allow = (role) => {
   return (req, res, next) => {
-    if (req.role === 'ADMIN') { 
+    if (req.role !== 'SUPER_ADMIN') { 
       return res.status(403).json({ message: "Forbidden" });
     }
     next();
