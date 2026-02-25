@@ -29,9 +29,7 @@ const Sidebar = () => {
   const { role } = useSelector((state: RootState) => state.authSlice)
 
   useEffect(() => {
-
     if (role) {
-
       if (role == "SUPER_ADMIN") {
         setCustomSide([...superAdminSidebar])
       }
@@ -152,11 +150,6 @@ const Sidebar = () => {
   };
 
 
-
-
-
-
-
   const [schools, setSchools] = useState<any[]>([]);
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
   const [schoolId , setSchoolId]  = useState(localStorage.getItem('schoolId'));
@@ -190,7 +183,7 @@ const Sidebar = () => {
 
     try {
       const {data} = await switchSchool({schoolId }) 
-      console.log(data)
+    
       if (data.success) {
         setSelectedSchool({ id: data.data.schoolId, name: data.data.schoolName });
         toast.success(data.message);
@@ -217,33 +210,24 @@ const Sidebar = () => {
         <PerfectScrollbar>
           <div className="sidebar-inner slimscroll">
             <div id="sidebar-menu" className="sidebar-menu">
-            
               {/* ======= DISPLAY SELECTED SCHOOL ======= */}
               {selectedSchool && (
-                <ul>
-                  
-                  <li>
-                  
+                <ul>            
+                  <li>             
                     <select
                       className="form-select mb-4"
                       value={schoolId || selectedSchool?.id}
                       onChange={handleSchoolSwitch}
-                    >
-                      
+                    >           
                       {schools.map((school) => (
-
                         <option key={school.id} value={school.id}>
                        {school.name}
                         </option>
-
                       ))}
                     </select>
                   </li>
                 </ul>
-
               )}
-
-
               <ul>
                 {customSide && customSide?.map((mainLabel: any, index: any) => (
                   <li key={index}>

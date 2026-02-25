@@ -387,32 +387,23 @@ exports.update = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-
-
     const [users] = await db.query("SELECT * FROM users WHERE email = ?", [email,]);
     if (!users || users.length === 0) {
       return res
         .status(403)
         .json({ message: "Please provide a valid email!", success: false });
     }
-
-
     const otp = Math.floor(100000 + Math.random() * 900000);
-
-
     await db.query(
       "UPDATE users SET reset_otp=?, reset_otp_expiry=? WHERE email=?",
       [otp, Date.now() + 10 * 60 * 1000, email]
     );
-
-
     await transporter.sendMail({
       from: process.env.SMTP_USER,
       to: email,
       subject: "Password Reset OTP",
       text: `Your OTP is ${otp}. It is valid for 10 minutes.`,
     });
-
     return res.status(200).json({
       message: "OTP sent to email",
       success: true,

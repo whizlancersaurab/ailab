@@ -3,7 +3,9 @@ const db = require('../../config/db')
 const bcrypt = require("bcryptjs");
 
 exports.speSchoolTeachers = async (req, res) => {
+
   const  {schoolId}  = req.user;
+  
   try {
 
     const sql = `
@@ -36,7 +38,9 @@ ORDER BY u.id
 
 
 exports.deleteTeacher = async (req, res) => {
+
   const connection = await db.getConnection()
+
   try {
     const { id } = req.params
     const { schoolId } = req.user
@@ -107,6 +111,7 @@ exports.addNewTeacher = async (req, res) => {
   const conn = await db.getConnection();
   await conn.beginTransaction();
 
+  // check school exist or not
   try {
     const [school] = await conn.query(
       "SELECT id FROM schools WHERE id = ? LIMIT 1",
@@ -145,6 +150,7 @@ exports.addNewTeacher = async (req, res) => {
         hashedPassword
       ]
     );
+
 
     const teacherId = teacherResult.insertId;
 
