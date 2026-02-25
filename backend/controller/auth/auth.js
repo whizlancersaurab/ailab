@@ -3,24 +3,28 @@ const bcrypt = require("bcryptjs");
 const transporter = require('../../utils/sendEmail');
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
+const crypto = require("crypto");
 
+
+function generatePassword(length = 8) {
+  return crypto.randomBytes(length).toString("base64").slice(0, length);
+}
 
 exports.register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
-
+  
 
   let schools = [];
-
-  if (req.body.schools) {
-    if (Array.isArray(req.body.schools)) {
-      // multiple schools
-      schools = req.body.schools.map(s => JSON.parse(s));
-    } else {
-      // single school
-      schools = [JSON.parse(req.body.schools)];
-    }
+if (req.body.schools) {
+  if (Array.isArray(req.body.schools)) {
+    schools = req.body.schools.map((s) =>
+      typeof s === "string" ? JSON.parse(s) : s
+    );
+  } else {
+    // Single school
+    schools = [typeof req.body.schools === "string" ? JSON.parse(req.body.schools) : req.body.schools];
   }
-
+}
 
   const adminImages = req.files?.profileImage || [];
   const schoolLogos = req.files?.schoolLogo || [];
@@ -51,7 +55,8 @@ exports.register = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const adminPlainPassword = password;
+    const adminHashedPassword = await bcrypt.hash(adminPlainPassword, 10);
 
     const [adminResult] = await conn.query(
       `INSERT INTO users (firstname, lastname, email, password, role, created_at)
@@ -60,22 +65,20 @@ exports.register = async (req, res) => {
         firstName.trim(),
         lastName?.trim() || null,
         email.trim(),
-        hashedPassword
+        adminHashedPassword
       ]
     );
 
     const adminId = adminResult.insertId;
-    console.log('all schools', schools)
-
+    const teachersToEmail = [];
 
     for (let i = 0; i < schools.length; i++) {
+
       const schoolData = schools[i];
-      console.log(schoolData)
+
       const schoolLogo = schoolLogos[i]?.path || null;
       const adminProfileImage = adminImages[i]?.path || null;
       const teacherProfileImage = teacherImages[i]?.path || null;
-
-
       const [schoolResult] = await conn.query(
         `INSERT INTO schools (name, status, schoolLogo, created_at)
          VALUES (?, 'ACTIVE', ?, NOW())`,
@@ -83,17 +86,15 @@ exports.register = async (req, res) => {
       );
 
       const schoolId = schoolResult.insertId;
-
       await conn.query(
         `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
          VALUES (?, ?, ?, NOW())`,
         [adminId, schoolId, adminProfileImage]
       );
 
-
       const [existingTeacher] = await conn.query(
         "SELECT id FROM users WHERE email = ? LIMIT 1",
-        [schoolData.teacher.email]
+        [schoolData.teacher.email.trim()]
       );
 
       if (existingTeacher.length > 0) {
@@ -102,8 +103,8 @@ exports.register = async (req, res) => {
         );
       }
 
-
-      const teacherPassword = await bcrypt.hash("12345678", 10);
+      const teacherPlainPassword = generatePassword(8);
+      const teacherHashedPassword = await bcrypt.hash(teacherPlainPassword, 10);
 
       const [teacherResult] = await conn.query(
         `INSERT INTO users 
@@ -113,7 +114,7 @@ exports.register = async (req, res) => {
           schoolData.teacher.firstName.trim(),
           schoolData.teacher.lastName?.trim() || null,
           schoolData.teacher.email.trim(),
-          teacherPassword
+          teacherHashedPassword
         ]
       );
 
@@ -125,9 +126,47 @@ exports.register = async (req, res) => {
          VALUES (?, ?, ?, NOW())`,
         [teacherId, schoolId, teacherProfileImage]
       );
+
+
+      teachersToEmail.push({
+        name: schoolData.teacher.firstName,
+        email: schoolData.teacher.email,
+        password: teacherPlainPassword
+      });
     }
 
     await conn.commit();
+
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: email.trim(),
+      subject: "Admin Account Created",
+      text: `Hello ${firstName},
+
+Your Admin account has been created.
+
+Email: ${email}
+Password: ${adminPlainPassword}
+
+Please login and change your password.`
+    });
+
+    // Send Teacher Emails
+    for (const teacher of teachersToEmail) {
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: teacher.email.trim(),
+        subject: "Teacher Account Created",
+        text: `Hello ${teacher.name},
+
+Your Teacher account has been created.
+
+Email: ${teacher.email}
+Password: ${teacher.password}
+
+Please login and change your password.`
+      });
+    }
 
     return res.status(201).json({
       success: true,
@@ -135,17 +174,169 @@ exports.register = async (req, res) => {
     });
 
   } catch (error) {
+
     await conn.rollback();
-    console.error("❌ Register Error:", error);
+    console.error("Register Error:", error);
 
     return res.status(500).json({
       success: false,
       message: error.message || "Internal server error"
     });
+
   } finally {
     conn.release();
   }
 };
+
+
+// exports.register = async (req, res) => {
+//   const { firstName, lastName, email, password } = req.body;
+
+
+//   let schools = [];
+
+//   if (req.body.schools) {
+//     if (Array.isArray(req.body.schools)) {
+//       // multiple schools
+//       schools = req.body.schools.map(s => JSON.parse(s));
+//     } else {
+//       // single school
+//       schools = [JSON.parse(req.body.schools)];
+//     }
+//   }
+
+
+//   const adminImages = req.files?.profileImage || [];
+//   const schoolLogos = req.files?.schoolLogo || [];
+//   const teacherImages = req.files?.teacherProfileImage || [];
+
+//   if (!firstName || !email || !password || schools.length === 0) {
+//     return res.status(400).json({
+//       success: false,
+//       message: "All required fields must be provided"
+//     });
+//   }
+
+//   const conn = await db.getConnection();
+//   await conn.beginTransaction();
+
+//   try {
+
+//     const [existingUser] = await conn.query(
+//       "SELECT id FROM users WHERE email = ? LIMIT 1",
+//       [email.trim()]
+//     );
+
+//     if (existingUser.length > 0) {
+//       await conn.rollback();
+//       return res.status(409).json({
+//         success: false,
+//         message: "Email already exists"
+//       });
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const [adminResult] = await conn.query(
+//       `INSERT INTO users (firstname, lastname, email, password, role, created_at)
+//        VALUES (?, ?, ?, ?, 'ADMIN', NOW())`,
+//       [
+//         firstName.trim(),
+//         lastName?.trim() || null,
+//         email.trim(),
+//         hashedPassword
+//       ]
+//     );
+
+//     const adminId = adminResult.insertId;
+
+//     for (let i = 0; i < schools.length; i++) {
+//       const schoolData = schools[i];
+//       const schoolLogo = schoolLogos[i]?.path || null;
+//       const adminProfileImage = adminImages[i]?.path || null;
+//       const teacherProfileImage = teacherImages[i]?.path || null;
+
+
+//       const [schoolResult] = await conn.query(
+//         `INSERT INTO schools (name, status, schoolLogo, created_at)
+//          VALUES (?, 'ACTIVE', ?, NOW())`,
+//         [schoolData.schoolName.trim(), schoolLogo]
+//       );
+
+//       const schoolId = schoolResult.insertId;
+
+//       await conn.query(
+//         `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
+//          VALUES (?, ?, ?, NOW())`,
+//         [adminId, schoolId, adminProfileImage]
+//       );
+
+
+//       const [existingTeacher] = await conn.query(
+//         "SELECT id FROM users WHERE email = ? LIMIT 1",
+//         [schoolData.teacher.email]
+//       );
+
+//       if (existingTeacher.length > 0) {
+//         throw new Error(
+//           `Teacher email ${schoolData.teacher.email} already exists`
+//         );
+//       }
+
+
+//       const teacherPassword = await bcrypt.hash("12345678", 10);
+
+//       const [teacherResult] = await conn.query(
+//         `INSERT INTO users 
+//          (firstname, lastname, email, password, role, created_at)
+//          VALUES (?, ?, ?, ?, 'TEACHER', NOW())`,
+//         [
+//           schoolData.teacher.firstName.trim(),
+//           schoolData.teacher.lastName?.trim() || null,
+//           schoolData.teacher.email.trim(),
+//           teacherPassword
+//         ]
+//       );
+
+//       const teacherId = teacherResult.insertId;
+
+
+//       await conn.query(
+//         `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
+//          VALUES (?, ?, ?, NOW())`,
+//         [teacherId, schoolId, teacherProfileImage]
+//       );
+//     }
+
+//     transporter
+//       .sendMail({
+//         from: process.env.SMTP_USER,
+//         to: email,
+//         subject: "Your account has been created",
+//         text: `Hello ${firstName},\n\nYour account has been created.\nEmail: ${email}\nPassword: ${password}`,
+//       })
+//       .catch((err) => console.error("Email error:", err));
+//     await conn.commit();
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Admin, schools, and teachers registered successfully"
+//     });
+
+//   } catch (error) {
+//     await conn.rollback();
+//     console.error("Register Error:", error);
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message || "Internal server error"
+//     });
+//   } finally {
+//     conn.release();
+//   }
+// };
+
+
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;

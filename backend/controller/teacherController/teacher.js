@@ -1,6 +1,8 @@
 // spefic teachers for a schhol
 const db = require('../../config/db')
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const transporter = require("../../utils/sendEmail"); 
 
 exports.speSchoolTeachers = async (req, res) => {
 
@@ -34,8 +36,6 @@ ORDER BY u.id
     return res.status(500).json({ message: error.message, success: false })
   }
 }
-
-
 
 exports.deleteTeacher = async (req, res) => {
 
@@ -96,6 +96,10 @@ exports.deleteTeacher = async (req, res) => {
   }
 }
 
+function generatePassword(length = 8) {
+  return crypto.randomBytes(length).toString("base64").slice(0, length);
+}
+
 exports.addNewTeacher = async (req, res) => {
   const { firstName, lastName, email } = req.body;
   const { schoolId } = req.user;
@@ -106,13 +110,14 @@ exports.addNewTeacher = async (req, res) => {
       message: "First name and email are required!"
     });
   }
+
   const teacherProfileImage = req.file ? req.file.path : null;
 
   const conn = await db.getConnection();
   await conn.beginTransaction();
 
-  // check school exist or not
   try {
+
     const [school] = await conn.query(
       "SELECT id FROM schools WHERE id = ? LIMIT 1",
       [schoolId]
@@ -137,8 +142,9 @@ exports.addNewTeacher = async (req, res) => {
         message: "Teacher email already exists"
       });
     }
-    const hashedPassword = await bcrypt.hash("12345678", 10);
 
+    const teacherPlainPassword = generatePassword(8);
+    const teacherHashedPassword = await bcrypt.hash(teacherPlainPassword, 10);
     const [teacherResult] = await conn.query(
       `INSERT INTO users 
        (firstname, lastname, email, password, role, created_at)
@@ -147,13 +153,11 @@ exports.addNewTeacher = async (req, res) => {
         firstName.trim(),
         lastName?.trim() || null,
         email.trim(),
-        hashedPassword
+        teacherHashedPassword
       ]
     );
 
-
     const teacherId = teacherResult.insertId;
-
     await conn.query(
       `INSERT INTO user_schools 
        (user_id, school_id, profileImage, created_at)
@@ -163,12 +167,30 @@ exports.addNewTeacher = async (req, res) => {
 
     await conn.commit();
 
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: email.trim(),
+      subject: "Teacher Account Created",
+      text: `Hello ${firstName},
+
+Your Teacher account has been created successfully.
+
+Login Details:
+Email: ${email}
+Password: ${teacherPlainPassword}
+
+Please login and change your password immediately.
+
+Thank you.`
+    });
+
     return res.status(201).json({
       success: true,
-      message: "Teacher added successfully"
+      message: "Teacher added successfully and email sent"
     });
 
   } catch (error) {
+
     await conn.rollback();
     console.error("Add Teacher Error:", error);
 
@@ -176,7 +198,93 @@ exports.addNewTeacher = async (req, res) => {
       success: false,
       message: error.message || "Internal server error"
     });
+
   } finally {
     conn.release();
   }
 };
+
+// exports.addNewTeacher = async (req, res) => {
+//   const { firstName, lastName, email } = req.body;
+//   const { schoolId } = req.user;
+
+//   if (!firstName?.trim() || !email?.trim()) {
+//     return res.status(400).json({
+//       success: false,
+//       message: "First name and email are required!"
+//     });
+//   }
+//   const teacherProfileImage = req.file ? req.file.path : null;
+
+//   const conn = await db.getConnection();
+//   await conn.beginTransaction();
+
+//   // check school exist or not
+//   try {
+//     const [school] = await conn.query(
+//       "SELECT id FROM schools WHERE id = ? LIMIT 1",
+//       [schoolId]
+//     );
+
+//     if (school.length === 0) {
+//       await conn.rollback();
+//       return res.status(404).json({
+//         success: false,
+//         message: "School not found"
+//       });
+//     }
+//     const [existingTeacher] = await conn.query(
+//       "SELECT id FROM users WHERE email = ? LIMIT 1",
+//       [email.trim()]
+//     );
+
+//     if (existingTeacher.length > 0) {
+//       await conn.rollback();
+//       return res.status(400).json({
+//         success: false,
+//         message: "Teacher email already exists"
+//       });
+//     }
+//     const hashedPassword = await bcrypt.hash("12345678", 10);
+
+//     const [teacherResult] = await conn.query(
+//       `INSERT INTO users 
+//        (firstname, lastname, email, password, role, created_at)
+//        VALUES (?, ?, ?, ?, 'TEACHER', NOW())`,
+//       [
+//         firstName.trim(),
+//         lastName?.trim() || null,
+//         email.trim(),
+//         hashedPassword
+//       ]
+//     );
+
+
+//     const teacherId = teacherResult.insertId;
+
+//     await conn.query(
+//       `INSERT INTO user_schools 
+//        (user_id, school_id, profileImage, created_at)
+//        VALUES (?, ?, ?, NOW())`,
+//       [teacherId, schoolId, teacherProfileImage]
+//     );
+
+//     await conn.commit();
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Teacher added successfully"
+//     });
+
+//   } catch (error) {
+//     await conn.rollback();
+//     console.error("Add Teacher Error:", error);
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message || "Internal server error"
+//     });
+//   } finally {
+//     conn.release();
+//   }
+// };
