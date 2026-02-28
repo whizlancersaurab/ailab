@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
 // import { FaFacebook, FaGoogle } from "react-icons/fa";
@@ -18,9 +17,7 @@ const Login = () => {
   useEffect(() => {
     localStorage.setItem("menuOpened", "Dashboard");
   }, []);
-  const date = () => {
-    return new Date().getFullYear();
-  };
+ 
 
 
 
@@ -118,11 +115,12 @@ const Login = () => {
               <div className="col-md-8 mx-auto p-4">
                 <form onSubmit={handleSubmit}>
                   <div>
-                    <div className=" mx-auto mb-5 text-center">
-                      <ImageWithBasePath
-                        src="assets/img/authentication/authentication-logo.svg"
+                    <div className=" mx-auto mb-4 text-center">
+                      <img
+                        src="assets/img/logo2.png"
                         className="img-fluid"
                         alt="Logo"
+                        style={{width:'100%' , maxWidth:'220px'}}
                       />
                     </div>
                     <div className="card">
@@ -208,7 +206,7 @@ const Login = () => {
                       </div>
                     </div>
                     <div className="mt-5 text-center">
-                      <p className="mb-0 ">Copyright © {date()} - Whizlancer</p>
+                      <p className="mb-0 ">Copyright © 2026 -  BOTIXBO</p>
                     </div>
                   </div>
                 </form>

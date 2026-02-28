@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
-import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import { resetPassword } from "../../service/api";
 import { toast } from "react-toastify";
 import WhatsNew from "../whatsnew";
@@ -82,11 +81,12 @@ const ResetPassword = () => {
               <div className="col-md-8 mx-auto p-4">
                 <form onSubmit={handleSubmit}>
                   <div>
-                    <div className=" mx-auto mb-5 text-center">
-                      <ImageWithBasePath
-                        src="assets/img/authentication/authentication-logo.svg"
+                    <div className=" mx-auto mb-3 text-center">
+                       <img
+                        src="assets/img/logo2.png"
                         className="img-fluid"
                         alt="Logo"
+                        style={{width:'100%' , maxWidth:'220px'}}
                       />
                     </div>
                     <div className="card">
@@ -191,7 +191,7 @@ const ResetPassword = () => {
                       </div>
                     </div>
                     <div className="mt-5 text-center">
-                      <p className="mb-0 ">Copyright © 2024 - Preskool</p>
+                      <p className="mb-0 ">Copyright © 2026 - BOTIXBO</p>
                     </div>
                   </div>
                 </form>

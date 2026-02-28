@@ -1,7 +1,6 @@
 
 import { Link } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
-import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import WhatsNew from "../whatsnew";
 
 const ResetPasswordSuccess = () => {
@@ -16,12 +15,13 @@ const ResetPasswordSuccess = () => {
             <div className="col-lg-6 col-md-12 col-sm-12">
               <div className="row justify-content-center align-items-center vh-100 overflow-auto flex-wrap ">
                 <div className="col-md-8 mx-auto p-4">
-                  <div className=" mx-auto mb-5 text-center">
-                    <ImageWithBasePath
-                      src="assets/img/authentication/authentication-logo.svg"
-                      className="img-fluid"
-                      alt="Logo"
-                    />
+                  <div className=" mx-auto mb-3 text-center">
+                     <img
+                        src="assets/img/logo2.png"
+                        className="img-fluid"
+                        alt="Logo"
+                        style={{width:'100%' , maxWidth:'220px'}}
+                      />
                   </div>
                   <div className="card">
                     <div className="card-body text-center">
@@ -36,7 +36,7 @@ const ResetPasswordSuccess = () => {
                     </div>
                   </div>
                   <div className="mt-5 text-center">
-                    <p className="mb-0 ">Copyright © 2024 - Preskool</p>
+                    <p className="mb-0 ">Copyright © 2026 -  BOTIXBO</p>
                   </div>
                 </div>
               </div>

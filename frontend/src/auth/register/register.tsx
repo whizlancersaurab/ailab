@@ -320,7 +320,7 @@ const Register: React.FC = () => {
                     </div>
                   </div>
 
-                  <p className="text-center mt-4">Copyright © {new Date().getFullYear()} - Whizlancer</p>
+                  <p className="text-center mt-4"> Copyright © 2026 -  BOTIXBO</p>
                 </form>
               </div>
             </div>

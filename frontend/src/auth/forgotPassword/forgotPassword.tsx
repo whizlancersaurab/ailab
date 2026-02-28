@@ -1,7 +1,6 @@
 
 import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
-import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { forgotPassword } from "../../service/api";
@@ -50,12 +49,13 @@ const ForgotPassword = () => {
                 <div className="col-md-8 mx-auto p-4">
                   <form onSubmit={handleSubmit}>
                     <div>
-                      <div className=" mx-auto mb-5 text-center">
-                        <ImageWithBasePath
-                          src="assets/img/authentication/authentication-logo.svg"
-                          className="img-fluid"
-                          alt="Logo"
-                        />
+                      <div className=" mx-auto mb-4 text-center">
+                         <img
+                        src="assets/img/logo2.png"
+                        className="img-fluid"
+                        alt="Logo"
+                        style={{width:'100%' , maxWidth:'220px'}}
+                      />
                       </div>
                       <div className="card">
                         <div className="card-body p-4">
@@ -100,7 +100,7 @@ const ForgotPassword = () => {
                         </div>
                       </div>
                       <div className="mt-5 text-center">
-                        <p className="mb-0 ">Copyright © 2024 - Preskool</p>
+                        <p className="mb-0 ">Copyright © 2026 - BOTIXBO</p>
                       </div>
                     </div>
                   </form>
