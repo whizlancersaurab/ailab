@@ -504,6 +504,44 @@ Thank you.`
 
 
 
+// exports.allPrinciples = async (req, res) => {
+//   try {
+
+//     const sql = `
+//       SELECT
+//         u.id AS userId,
+//         u.firstname,
+//         u.lastname,
+//         u.email,
+//         COUNT(s.id) AS totalSchools,
+//         GROUP_CONCAT(s.name) AS schoolNames
+//       FROM users u
+//       LEFT JOIN user_schools us ON us.user_id = u.id
+//       LEFT JOIN schools s ON s.id = us.school_id
+//       WHERE u.role = 'ADMIN'
+//       GROUP BY u.id
+//       ORDER BY u.id
+//     `;
+
+//     const [rows] = await db.query(sql);
+
+//     return res.status(200).json({
+//       message: "All admin school count fetched successfully!",
+//       data: rows,
+//       success: true
+//     });
+
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).json({
+//       message: error.message,
+//       success: false
+//     });
+//   }
+// };
+
+
+
 
 
 

@@ -81,6 +81,14 @@ export const delSchool = (id:number)=>api.delete(`/superadmin/delschool/${id}`)
 export const schoolStats = ()=>api.get('/superadmin/schoolstats')
 export const addNewSchool = (data:object)=>api.post('/superadmin/addnew' ,data)
 
+// whats new in school
+export const addTopic = (data:object)=>api.post('/topic/addtopic' , data)
+export const allTopics = ()=>api.get('/topic/alltopics')
+export const newTopics = ()=>api.get('/topic/newtopics')
+export const deleteTopic = (id:number)=>api.delete(`/topic/deltopic/${id}`)
+export const speTopic = (id:number)=>api.get(`/topic/spetopic/${id}`)
+export const updateTopic = (data:object , id:number)=>api.patch(`/topic/updatetopic/${id}` ,data)
+
 //classes ==================================================================
 export const addClass = (data: object) => api.post('/class/addclass', data)
 export const allClasses = () => api.get('/class/allclasses')

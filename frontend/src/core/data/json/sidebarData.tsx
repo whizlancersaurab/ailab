@@ -188,15 +188,15 @@ export const superAdminSidebar = [
 
 
       },
-      // {
-      //   label: "Class Syllabus",
-      //   link: routes.syllabus,
-      //   icon: "ti ti-layout-dashboard",
-      //   submenu: false,
-      //   showSubRoute: false,
+      {
+        label: "What's New",
+        link: routes.whatsnew,
+        icon: "ti ti-layout-dashboard",
+        submenu: false,
+        showSubRoute: false,
 
 
-      // },
+      },
 
     ],
   },

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {newTopics } from "../../service/api";
 
 const WhatsNew = () => {
   const [selectedTopic, setSelectedTopic] = useState<null | {
@@ -7,38 +8,57 @@ const WhatsNew = () => {
     description: string;
   }>(null);
 
-  const aiTopics = [
-    {
-      id: 1,
-      title: "AI-Powered Automation",
-      description:
-        "AI and robotics are transforming industries through smart automation and innovation.",
-    },
-    {
-      id: 2,
-      title: "Robotics in Healthcare",
-      description:
-        "Robotics and AI help doctors in surgery, diagnosis, and patient care.",
-    },
-    {
-      id: 3,
-      title: "AI in Education",
-      description:
-        "AI personalizes learning, helps teachers, and improves student outcomes.",
-    },
-    {
-      id: 4,
-      title: "Robots in Space Missions",
-      description:
-        "Robots explore space, collect data, and assist astronauts in missions.",
-    },
-    {
-      id: 5,
-      title: "Smart Homes with AI",
-      description:
-        "AI-powered smart homes improve comfort, security, and energy efficiency.",
-    },
-  ];
+  const [aiTopics, setAiTopic] = useState<any[]>([])
+
+  const fetchAiTopics = async () => {
+    try {
+
+      const { data } = await newTopics()
+      if (data.success) {
+        setAiTopic(data.data)
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  useEffect(() => {
+    fetchAiTopics()
+  }, [])
+
+
+  // const aiTopics = [
+  //   {
+  //     id: 1,
+  //     title: "AI-Powered Automation",
+  //     description:
+  //       "AI and robotics are transforming industries through smart automation and innovation.",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Robotics in Healthcare",
+  //     description:
+  //       "Robotics and AI help doctors in surgery, diagnosis, and patient care.",
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "AI in Education",
+  //     description:
+  //       "AI personalizes learning, helps teachers, and improves student outcomes.",
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Robots in Space Missions",
+  //     description:
+  //       "Robots explore space, collect data, and assist astronauts in missions.",
+  //   },
+  //   {
+  //     id: 5,
+  //     title: "Smart Homes with AI",
+  //     description:
+  //       "AI-powered smart homes improve comfort, security, and energy efficiency.",
+  //   },
+  // ];
 
   // Text truncate helper
   const truncateText = (text: string, limit = 60) =>

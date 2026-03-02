@@ -43,6 +43,9 @@ import SuspendedSchool from "../admin/superadmin/suspendedSchool/index.tsx";
 import SuperAdminDashboard from "../admin/mainMenu/superAdmin/index.tsx";
 import NewSchool from "../admin/superadmin/registerExistence/index.tsx";
 
+// whats new in school
+import WhatsNew from "../admin/superadmin/whatsnew/index.tsx";
+
 // teachers
 import Teacher from "../admin/management/teachers/index.tsx";
 
@@ -200,6 +203,11 @@ export const publicRoutes = [
   {
     path: routes.addednewschool,
     element: <NewSchool />,
+    route: Route
+  },
+   {
+    path: routes.whatsnew,
+    element: <WhatsNew/>,
     route: Route
   },
 

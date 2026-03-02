@@ -22,6 +22,7 @@ const publicRoutes = [
     '/api/auth/login',
     '/api/auth/forgot-password',
     '/api/auth/reset-password',
+    '/api/topic/newtopics'
 
 ];
 
@@ -63,6 +64,7 @@ app.use('/api/teacher' , require('./routes/teacherRoutes/teacher.routes'))
 
 // super admin
 app.use('/api/superadmin' , require('./routes/schoolRoutes/school.routes'))
+app.use('/api/topic' , require('./routes/topicRoutes/topics.routes'))
 
 // robotics
 app.use('/api/admin', require('./routes/adminRoutes/admin.routes'))
