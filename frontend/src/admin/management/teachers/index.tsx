@@ -8,8 +8,7 @@ import { toast } from "react-toastify";
 import { Spinner } from "../../../spinner.tsx";
 import dayjs from 'dayjs'
 import CircleImage from "../../../auth/register/CircleImage.tsx";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../../core/data/redux/store.tsx";
+
 
 
 
@@ -166,8 +165,8 @@ const Teacher = () => {
         return copy;
     }, [teachers, sortType]);
 
-      const { role } = useSelector((state: RootState) => state.authSlice)
-      
+   
+
     const columns = [
         {
             title: "ID",
@@ -237,43 +236,40 @@ const Teacher = () => {
             )
         },
 
+        {
+            title: "Action",
+            dataIndex: "action",
+            render: (_: any, record: any) => (
+                <div className="dropdown">
+                    <button
+                        className="btn btn-white btn-sm"
+                        data-bs-toggle="dropdown"
+                    >
+                        <i className="ti ti-dots-vertical" />
+                    </button>
 
-        ...(role === 'ADMIN'
-            ? [{
-                title: "Action",
-                dataIndex: "action",
-                render: (_: any, record: any) => (
-                    <div className="dropdown">
-                        <button
-                            className="btn btn-white btn-sm"
-                            data-bs-toggle="dropdown"
-                        >
-                            <i className="ti ti-dots-vertical" />
-                        </button>
-
-                        <ul className="dropdown-menu">
-                            <li>
-                                <button
-                                    className="dropdown-item"
-                                    onClick={() => {
-                                        setDeleteId(record.userId)
-                                        setDelModal(true)
-                                    }}
-                                >
-                                    <i className="ti ti-trash-x me-2" />
-                                    Delete
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                ),
-            }]
-            : [])
+                    <ul className="dropdown-menu">
+                        <li>
+                            <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                    setDeleteId(record.userId)
+                                    setDelModal(true)
+                                }}
+                            >
+                                <i className="ti ti-trash-x me-2" />
+                                Delete
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            ),
+        }
 
     ];
 
 
-   
+
 
 
     return (
@@ -301,19 +297,18 @@ const Teacher = () => {
                         </div>
                         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
                             {/* <TooltipOption /> */}
-                            {
-                                role === 'ADMIN' && (<div className="mb-2">
-                                    <button
-                                        type="button"
-                                        className="btn btn-primary"
-                                        onClick={() => setAddModal(true)}
+                            <div className="mb-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => setAddModal(true)}
 
-                                    >
-                                        <i className="ti ti-square-rounded-plus-filled me-2" />
-                                        Add Teacher
-                                    </button>
-                                </div>)
-                            }
+                                >
+                                    <i className="ti ti-square-rounded-plus-filled me-2" />
+                                    Add Teacher
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                     {/* /Page Header */}

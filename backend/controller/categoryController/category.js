@@ -1,4 +1,3 @@
-
 const db = require('../../config/db')
 
 exports.addCategory = async (req, res) => {

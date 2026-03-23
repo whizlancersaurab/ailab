@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation} from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
-import { SidebarData, superAdminSidebar } from "../../data/json/sidebarData";
+import { SidebarData, superAdminSidebar, TeacherSidebarData } from "../../data/json/sidebarData";
 import "../../../style/icon/tabler-icons/webfont/tabler-icons.css";
 import { setExpandMenu } from "../../data/redux/sidebarSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,23 +18,24 @@ import type { RootState } from "../../data/redux/store";
 
 import { switchSchool, usersSchools } from "../../../service/api";
 import { toast } from "react-toastify";
-
+import Select from "react-select";
 
 
 const Sidebar = () => {
 
   const [customSide, setCustomSide] = useState<any[]>([]);
- 
-
   const { role } = useSelector((state: RootState) => state.authSlice)
+
 
   useEffect(() => {
     if (role) {
       if (role == "SUPER_ADMIN") {
         setCustomSide([...superAdminSidebar])
+      } else if (role == "ADMIN") {
+        setCustomSide([...SidebarData]);
       }
       else {
-        setCustomSide([...SidebarData]);
+        setCustomSide([...TeacherSidebarData]);
       }
     }
   }, []);
@@ -152,19 +153,25 @@ const Sidebar = () => {
 
   const [schools, setSchools] = useState<any[]>([]);
   const [selectedSchool, setSelectedSchool] = useState<any>(null);
-  const [schoolId , setSchoolId]  = useState(localStorage.getItem('schoolId'));
- 
-
+  const [schoolId, setSchoolId] = useState(localStorage.getItem('schoolId'));
 
 
   useEffect(() => {
     const fetchSchools = async () => {
       try {
         const { data } = await usersSchools();
+
         if (data?.success && data.data?.length > 0) {
           setSchools(data.data);
-          setSelectedSchool(data.data[0]);
-         
+
+          // ✅ ADD THIS HERE
+          const savedId = localStorage.getItem("schoolId");
+
+          const defaultSchool =
+            data.data.find((s: any) => s.id == savedId) || data.data[0];
+
+          setSelectedSchool(defaultSchool);
+          setSchoolId(defaultSchool.id);
         }
       } catch (error) {
         console.error("Failed to fetch schools:", error);
@@ -173,31 +180,29 @@ const Sidebar = () => {
 
     fetchSchools();
   }, []);
+  const schoolOptions = schools.map((school) => ({
+    value: school.id,
+    label: school.name,
+    logo: school.schoolLogo,
+  }));
 
 
-
-  const handleSchoolSwitch = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const schoolId = e.target.value;
-    localStorage.setItem("schoolId",schoolId)
-    setSchoolId(schoolId)
+  const handleCustomSchoolSwitch = async (school: any) => {
+    localStorage.setItem("schoolId", school.id);
+    setSchoolId(school.id);
 
     try {
-      const {data} = await switchSchool({schoolId }) 
-    
+      const { data } = await switchSchool({ schoolId: school.id });
+
       if (data.success) {
-        setSelectedSchool({ id: data.data.schoolId, name: data.data.schoolName });
+        setSelectedSchool(school);
         toast.success(data.message);
         window.location.reload();
       }
     } catch (error: any) {
-      console.error("Failed to switch school:", error);
       toast.error(error.response?.data?.message || "Failed to switch school");
     }
   };
-
-
-
- 
 
   return (
     <>
@@ -210,21 +215,36 @@ const Sidebar = () => {
         <PerfectScrollbar>
           <div className="sidebar-inner slimscroll">
             <div id="sidebar-menu" className="sidebar-menu">
-              {/* ======= DISPLAY SELECTED SCHOOL ======= */}
+             
               {selectedSchool && (
-                <ul>            
-                  <li>             
-                    <select
-                      className="form-select mb-4"
-                      value={schoolId || selectedSchool?.id}
-                      onChange={handleSchoolSwitch}
-                    >           
-                      {schools.map((school) => (
-                        <option key={school.id} value={school.id}>
-                       {school.name}
-                        </option>
-                      ))}
-                    </select>
+                <ul>
+                  <li>
+                    <Select
+                      className="mb-4"
+                      options={schoolOptions}
+                      value={schoolOptions.find(
+                        (opt) => opt.value === (schoolId || selectedSchool?.id)
+                      )}
+                      onChange={(selected: any) =>
+                        handleCustomSchoolSwitch({
+                          id: selected.value,
+                          name: selected.label,
+                          schoolLogo: selected.logo,
+                        })
+                      }
+                      formatOptionLabel={(option: any) => (
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <img
+                            src={option.logo}
+                            alt=""
+                            width={25}
+                            height={25}
+                            style={{ marginRight: 8, borderRadius: "50%" }}
+                          />
+                          {option.label}
+                        </div>
+                      )}
+                    />
                   </li>
                 </ul>
               )}

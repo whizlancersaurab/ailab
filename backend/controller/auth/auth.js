@@ -119,8 +119,6 @@ if (req.body.schools) {
       );
 
       const teacherId = teacherResult.insertId;
-
-
       await conn.query(
         `INSERT INTO user_schools (user_id, school_id, profileImage, created_at)
          VALUES (?, ?, ?, NOW())`,
@@ -133,6 +131,8 @@ if (req.body.schools) {
         email: schoolData.teacher.email,
         password: teacherPlainPassword
       });
+
+
     }
 
     await conn.commit();

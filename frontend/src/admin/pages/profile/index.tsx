@@ -321,7 +321,7 @@ const Profile = () => {
                                   <input
                                     type="text"
                                     className="form-control"
-
+                                         disabled={true}
                                     value={form.firstName}
                                   />
                                 </div>
@@ -330,7 +330,7 @@ const Profile = () => {
                                   <input
                                     type="text"
                                     className="form-control"
-
+                                    disabled={true}
                                     value={form.lastName}
                                   />
                                 </div>
@@ -340,7 +340,7 @@ const Profile = () => {
                                 <input
                                   type="email"
                                   className="form-control"
-
+                                     disabled={true}
                                   value={form.email}
                                 />
                               </div>
@@ -350,7 +350,7 @@ const Profile = () => {
                                   <input
                                     type="text"
                                     className="form-control"
-
+                                       disabled={true}
                                     value={form.schoolName}
                                   />
                                 </div>

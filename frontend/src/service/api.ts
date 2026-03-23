@@ -30,7 +30,6 @@ export const setupAxiosInterceptor = (navigate: Function) => {
             failedQueue.push({ resolve, reject });
           }).then(() => api(originalRequest));
         }
-        console.log("hello")
         originalRequest._retry = true;
         isRefreshing = true;
         try { 

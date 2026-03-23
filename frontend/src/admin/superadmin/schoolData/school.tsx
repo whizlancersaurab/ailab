@@ -166,9 +166,6 @@ const School = () => {
         return copy;
     }, [schools, sortType]);
 
- 
-
-
 
     const columns = [
         {

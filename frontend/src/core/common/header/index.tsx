@@ -129,8 +129,8 @@ const Header = () => {
           <div className="nav user-menu">
             {/* Search */}
             <div className="mx-auto d-flex g-2 align-items-center justify-content-center">
-              <div className="mx-2"><img  width={45} src="assets/img/logo.jpg" alt="" /></div>
-              <div style={{color:'#0061FC'}} className="fw-bold fs-3">ROBOTICS & AI LAB MANAGEMENT</div>
+              {/* <div className="mx-2"><img  width={45} src="assets/img/logo.jpg" alt="" /></div> */}
+              <div style={{color:'#0061FC'}} className="fw-bold fs-3">LAB MANAGEMENT SYSTEM</div>
             </div>
             {/* /Search */}
             <div className="d-flex align-items-center  justify-content-end">
