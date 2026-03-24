@@ -176,7 +176,7 @@ const Feature = () => {
             {!location.pathname.includes("layout") && <ThemeSettings />}
           </div>
         </>
-      ) : ( */} mine
+      ) : ( */} 
         <>
           <div
             className={`main-wrapper 

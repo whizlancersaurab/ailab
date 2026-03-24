@@ -6,25 +6,24 @@ exports.addDevice = async (req, res) => {
     const schoolId = req.schoolId;
 
     try {
-        // Validation
+        
         if (!category_id || isNaN(category_id)) throw "Invalid category ID";
         if (!sub_category_id || isNaN(sub_category_id)) throw "Invalid sub-category ID";
         if (!device_name?.trim()) throw "Device name is required";
         if (!device_code?.trim()) throw "Device code is required";
         if (!Number.isInteger(quantity) || quantity < 0) throw "Invalid quantity";
 
-        // Check if category exists
+        
         const [cat] = await db.query(`SELECT id FROM category WHERE id = ?`, [category_id]);
         if (cat.length === 0) throw "Category not found";
 
-        // Check if sub-category exists
+        
         const [sub] = await db.query(
             `SELECT id FROM sub_categories WHERE id = ? AND category_id = ?`,
             [sub_category_id, category_id]
         );
         if (sub.length === 0) throw "Sub-category not found";
 
-        // Insert device
         const sql = `
             INSERT INTO devices (device_name, device_code, category_id, sub_category_id, quantity, school_id)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -39,7 +38,7 @@ exports.addDevice = async (req, res) => {
     }
 };
 
-// ✅ Get all devices for the school
+
 exports.getAllDevices = async (req, res) => {
     const schoolId = req.schoolId;
     try {
@@ -67,7 +66,7 @@ exports.getAllDevices = async (req, res) => {
     }
 };
 
-// ✅ Get device by ID (school-restricted)
+
 exports.getDeviceById = async (req, res) => {
     const { id } = req.params;
     const schoolId = req.schoolId;
@@ -98,7 +97,7 @@ exports.getDeviceById = async (req, res) => {
     }
 };
 
-// ✅ Update device (school-restricted)
+
 exports.updateDevice = async (req, res) => {
     const { id } = req.params;
     const schoolId = req.schoolId;
@@ -143,7 +142,7 @@ exports.updateDevice = async (req, res) => {
     }
 };
 
-// ✅ Delete device (school-restricted)
+
 exports.deleteDevice = async (req, res) => {
     const { id } = req.params;
     const schoolId = req.schoolId;
@@ -164,7 +163,7 @@ exports.deleteDevice = async (req, res) => {
     }
 };
 
-// ✅ Out-of-stock devices
+
 exports.OutOfStockDevices = async (req, res) => {
     const schoolId = req.schoolId;
 
@@ -192,7 +191,7 @@ exports.OutOfStockDevices = async (req, res) => {
     }
 };
 
-// ✅ Add quantity to device
+
 exports.addQuantityInDevice = async (req, res) => {
     const { id } = req.params;
     const schoolId = req.schoolId;
@@ -215,7 +214,7 @@ exports.addQuantityInDevice = async (req, res) => {
     }
 };
 
-// ✅ Device type & subcategory count
+
 exports.deviceTypeCount = async (req, res) => {
     const schoolId = req.schoolId;
 

@@ -441,7 +441,7 @@ exports.switchSchool = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  console.log("dsfjsl")
+  
   const userId = req.user.id;
   const { schoolId } = req.user;
   const { firstName, lastName, email, schoolName } = req.body;
@@ -706,7 +706,8 @@ exports.profile = async (req, res) => {
         u.lastname,
         u.email,
         u.role,
-        us.profileImage
+        us.profileImage,
+        us.school_id AS schoolId
       FROM users u
       LEFT JOIN user_schools us ON us.user_id = u.id
       WHERE u.id = ? AND us.school_id=?

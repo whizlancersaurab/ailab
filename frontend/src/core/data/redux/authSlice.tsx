@@ -3,6 +3,7 @@ import { userInfo } from "../../../service/api";
 
 interface AuthState {
   userId:number|null,
+  schoolId:number|null,
   user:string;
   role:string,
   profileImage:string|null,
@@ -13,6 +14,7 @@ interface AuthState {
 // Initial state
 const initialState: AuthState = {
   userId:null,
+  schoolId:null,
   user:"",
   role:'',
   profileImage:null,
@@ -39,6 +41,7 @@ const authSlice = createSlice({
   reducers: {
     reset: (state) => {
       state.userId=null,
+      state.schoolId=null,
       state.isAuth = null;
       state.loading = false;
       state.user="";
@@ -60,6 +63,7 @@ const authSlice = createSlice({
        
         state.user=`${action.payload.firstname} ${action.payload.lastname??''}`;
         state.userId = action.payload.userId
+        state.schoolId=action.payload.schoolId
         state.role=action.payload.role
         state.profileImage=action.payload.profileImage
       
@@ -70,6 +74,7 @@ const authSlice = createSlice({
        
         state.user='';
         state.role='',
+        state.schoolId=null,
         state.profileImage=null,
        
         state.isAuth = false;

@@ -173,7 +173,7 @@ const School = () => {
             dataIndex: "id",
             render: (text: any) => (
                 <>
-                    <Link to="#" className="link-primary">
+                    <Link to={`${route.schooldashboard}/${text}`} className="link-primary">
                        SC-{text}
                     </Link>
                 </>
@@ -182,8 +182,8 @@ const School = () => {
         {
             title: "School Logo",
             dataIndex: "schoolLogo",
-            render: (text: any) => (
-                <img style={{ objectFit: 'cover', borderRadius: '100%', width: '60px', height: '60px' }} className="text-capitalize" src={text ?? 'assets/img/school.webp'} />
+            render: (text: any ,record: any) => (
+                <Link className="cursor-pointer" to={`${route.schooldashboard}/${record.id}`} ><img style={{ objectFit: 'cover', borderRadius: '100%', width: '60px', height: '60px' }} className="text-capitalize" src={text ?? 'assets/img/school.webp'} /></Link>
             ),
             sorter: (a: any, b: any) => a.schoolLogo.length - b.schoolLogo.length,
         },

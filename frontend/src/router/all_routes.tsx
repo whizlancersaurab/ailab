@@ -66,5 +66,15 @@ export const all_routes = {
 
 
   // teachers
-  schoolteachers:'/school-teachers'
+  schoolteachers:'/school-teachers',
+
+  // super admin extra features
+  schooldashboard:'/school-dashboard',
+  robodevices:'/robo-devices',
+  robodevicestype:'/robo-devicestype',
+  robotoutofstocks:'/robo-outofstocks-devices',
+
+  aidevices:'/ai-devices',
+  aidevicestype:'/ai-devicestype',
+  aidevicesoutofstock:'/ai-outofstocks-devices'
 };

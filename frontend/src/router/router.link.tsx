@@ -48,6 +48,15 @@ import WhatsNew from "../admin/superadmin/whatsnew/index.tsx";
 
 // teachers
 import Teacher from "../admin/management/teachers/index.tsx";
+import SchoolDashboard from "../admin/mainMenu/SchoolDashboard/index.tsx";
+
+import RoboticsDevice from "../admin/superadmin/roboticsData/RoboticsDevices/index.tsx";
+import RoboticsDeviceTypeList from "../admin/superadmin/roboticsData/RoboticsDeviceType/index.tsx";
+import RoboOutOfStockDevice from "../admin/superadmin/roboticsData/RoboticsOutOfStocks/index.tsx";
+
+import AiDeviceForSchoolDas from "../admin/superadmin/AiData/AiDevices/index.tsx";
+import AiDeviceTypeListForSchoolDas from "../admin/superadmin/AiData/AiDeviceType/index.tsx";
+import AiOutOfStockDeviceForSchoolDas from "../admin/superadmin/AiData/AiOutOfStocks/index.tsx";
 
 const routes = all_routes;
 
@@ -205,9 +214,46 @@ export const publicRoutes = [
     element: <NewSchool />,
     route: Route
   },
-   {
+  {
     path: routes.whatsnew,
-    element: <WhatsNew/>,
+    element: <WhatsNew />,
+    route: Route
+  },
+
+  // some extra feature in school
+  {
+    path: `${routes.schooldashboard}/:schoolId`,
+    element: <SchoolDashboard />,
+    route: Route
+  },
+  {
+    path: `${routes.robodevices}/:schoolId`,
+    element: <RoboticsDevice />,
+    route: Route
+  },
+   {
+    path: `${routes.robodevicestype}/:schoolId`,
+    element: <RoboticsDeviceTypeList />,
+    route: Route
+  },
+  {
+    path: `${routes.robotoutofstocks}/:schoolId`,
+    element: <RoboOutOfStockDevice />,
+    route: Route
+  },
+  {
+    path: `${routes.aidevices}/:schoolId`,
+    element: <AiDeviceForSchoolDas />,
+    route: Route
+  },
+  {
+    path: `${routes.aidevicestype}/:schoolId`,
+    element: <AiDeviceTypeListForSchoolDas />,
+    route: Route
+  },
+  {
+    path: `${routes.aidevicesoutofstock}/:schoolId`,
+    element: <AiOutOfStockDeviceForSchoolDas />,
     route: Route
   },
 

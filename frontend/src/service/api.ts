@@ -80,6 +80,24 @@ export const delSchool = (id:number)=>api.delete(`/superadmin/delschool/${id}`)
 export const schoolStats = ()=>api.get('/superadmin/schoolstats')
 export const addNewSchool = (data:object)=>api.post('/superadmin/addnew' ,data)
 
+// super admin extra feature for school
+export const deviceCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/devicescountforschooldas/${schoolId}`)
+export const deviceTypeCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/totaldevicetypecountforschooldas/${schoolId}`)
+export const getOutOfStockCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/outofstockcountforschooldas/${schoolId}`)
+
+export const aiDeviceCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/aidevicescountforschooldas/${schoolId}`)
+export const aiDeviceTypeCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/aitotaldevicetypecountforschooldas/${schoolId}`)
+export const AIgetOutOfStockCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/aioutofstockcountforschooldas/${schoolId}`)
+
+export const roboAllDevicesForSchoolDas = (schoolId:number) => api.get(`/superadmin/all/${schoolId}`)
+export const roboDeviceTypeCountWithDataForSchoolDas = (schoolId:number) => api.get(`/superadmin/devicecount/${schoolId}`)
+export const roboOutOfStockDevicesForSchoolDas = (schoolId:number) => api.get(`/superadmin/outofstock/${schoolId}`)
+
+export const AIDevicesForSchoolDas = (schoolId:number) => api.get(`/superadmin/allai/${schoolId}`)
+export const AiDeviceTypeCountWithDataForSchoolDas = (schoolId:number) => api.get(`/superadmin/aidevicecount/${schoolId}`)
+export const AiOutOfStockDevicesForSchoolDas = (schoolId:number) => api.get(`/superadmin/aioutofstock/${schoolId}`)
+
+
 // whats new in school
 export const addTopic = (data:object)=>api.post('/topic/addtopic' , data)
 export const allTopics = ()=>api.get('/topic/alltopics')

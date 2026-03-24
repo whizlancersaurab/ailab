@@ -644,7 +644,7 @@ const DailyTask = () => {
                                         className="btn btn-primary"
 
                                     >
-                                        Add Class
+                                        Add Task
                                     </button>
                                 </div>
                             </form>
@@ -728,7 +728,7 @@ const DailyTask = () => {
                                         className="btn btn-primary"
 
                                     >
-                                        Add Class
+                                        Save Changes
                                     </button>
                                 </div>
                             </form>

@@ -1,17 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import ReactApexChart from "react-apexcharts";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import CountUp from "react-countup";
-import { Calendar } from "primereact/calendar";
-import type { Nullable } from "primereact/ts-helpers";
 import "bootstrap-daterangepicker/daterangepicker.css";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
 import { all_routes } from "../../../router/all_routes";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import DeviceModal from "../../management/devices/device-list/DeviceModl";
-import { classForOption, classProgressData, deviceCount, deviceTypeCount, getOutOfStockCount} from "../../../service/api";
+import { aiDeviceCountForSchoolDas, aiDeviceTypeCountForSchoolDas, AIgetOutOfStockCountForSchoolDas, classForOption, classProgressData, deviceCountForSchoolDas, deviceTypeCountForSchoolDas, getOutOfStockCountForSchoolDas } from "../../../service/api";
 import type { OptionType } from "../../../core/data/interface";
 import Select from 'react-select'
 import type { RootState } from "../../../core/data/redux/store";
@@ -26,10 +23,12 @@ interface ProgressData {
 
 
 
-const AdminDashboard = () => {
+const SchoolDashboard = () => {
 
   const routes = all_routes;
-  const [date, setDate] = useState<Nullable<Date>>(null);
+  const { schoolId } = useParams()
+
+
 
   const settings = {
     dots: false,
@@ -77,31 +76,40 @@ const AdminDashboard = () => {
       },
     ],
   };
-  
+
 
   const [deviceNo, setDeviceNo] = useState<number>(0);
   const [deviceTypeNo, setDeviceTypeNo] = useState<number>(0);
+  const [outOfStocks, setOutOfStocks] = useState<number>(0)
+
+  const [aiDeviceNo, setAiDeviceNo] = useState<number>(0);
+  const [aiDeviceTypeNo, setAiDeviceTypeNo] = useState<number>(0);
+  const [aiOutOfStocks, setAiOutOfStocks] = useState<number>(0)
+
   const [classOptions, setClassOptions] = useState<OptionType[]>([])
   const [className, setClassName] = useState<number | null>(null)
-  const [outOfStocks, setOutOfStocks] = useState<number>(0)
-  const [addModal2 , setAddModal2] = useState<boolean>(false)
+
+  const [addModal2, setAddModal2] = useState<boolean>(false)
 
   const [progressData, setProgressData] = useState<ProgressData>({
     totalTasks: 0,
     completedTasks: 0,
     completionPercent: 0
   });
-  const {user} = useSelector((state: RootState) => state.authSlice)
+  const { user } = useSelector((state: RootState) => state.authSlice)
 
 
   // Fetch API
-  const fetchAllDeviceStats = async () => {
+  const fetchAllDeviceStats = async (schoolId: number) => {
     try {
 
-      const [deviceCountRes, deviceTypeCountRes, outOfStocksDeviceRes] = await Promise.all([
-        deviceCount(),
-        deviceTypeCount(),
-        getOutOfStockCount()
+      const [deviceCountRes, deviceTypeCountRes, outOfStocksDeviceRes, aideviceCountRes, aideviceTypeCountRes, aioutOfStocksDeviceRes] = await Promise.all([
+        deviceCountForSchoolDas(schoolId),
+        deviceTypeCountForSchoolDas(schoolId),
+        getOutOfStockCountForSchoolDas(schoolId),
+        aiDeviceCountForSchoolDas(schoolId),
+        aiDeviceTypeCountForSchoolDas(schoolId),
+        AIgetOutOfStockCountForSchoolDas(schoolId)
       ]);
 
       if (deviceCountRes.data.success) {
@@ -112,6 +120,16 @@ const AdminDashboard = () => {
       }
       if (outOfStocksDeviceRes.data.success) {
         setOutOfStocks(outOfStocksDeviceRes.data.data)
+      }
+
+      if (aideviceCountRes.data.success) {
+        setAiDeviceNo(aideviceCountRes.data.devices);
+      }
+      if (aideviceTypeCountRes.data.success) {
+        setAiDeviceTypeNo(aideviceTypeCountRes.data.data);
+      }
+      if (aioutOfStocksDeviceRes.data.success) {
+        setAiOutOfStocks(aioutOfStocksDeviceRes.data.data)
       }
 
     } catch (error: any) {
@@ -174,10 +192,13 @@ const AdminDashboard = () => {
     fetchClassForOption()
   }, []);
 
-   useEffect(() => {
-    fetchAllDeviceStats();
-  
-  }, [setAddModal2 , addModal2]);
+  useEffect(() => {
+
+    if (schoolId) {
+      fetchAllDeviceStats(Number(schoolId));
+    }
+
+  }, [setAddModal2, addModal2]);
 
   useEffect(() => {
 
@@ -196,29 +217,18 @@ const AdminDashboard = () => {
 
             <div className="d-md-flex d-block align-items-center justify-content-between mb-3">
               <div className="my-auto mb-2">
-                <h3 className="page-title mb-1">Robotics Lab</h3>
+                <h3 className="page-title mb-1">Lab Management</h3>
                 <nav>
                   <ol className="breadcrumb mb-0">
                     <li className="breadcrumb-item">
-                      <Link to={routes.adminDashboard}>Dashboard</Link>
-                      
+                      <Link to={routes.superadmindashboard}>Dashboard</Link>
+
                     </li>
 
                   </ol>
                 </nav>
               </div>
-              <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-                <div className="mb-2">
-                  <button
-                
-                  className="btn btn-primary"
-                  onClick={()=>setAddModal2(true)}
-                >
-                  <i className="ti ti-square-rounded-plus-filled me-2" />
-                  Add Device
-                </button>
-                </div>
-              </div>
+
             </div>
 
             <div className="row">
@@ -267,11 +277,12 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="row">
+              <h1 className="fw-semibold fs-4 my-2">Robotics Data</h1>
               {/* Total Devices */}
               <div className="col-xxl-4 col-sm-6 d-flex">
                 <div className="card flex-fill animate-card border-0">
                   <div className="card-body">
-                    <Link to={routes.devicelist}>
+                    <Link to={`${routes.robodevices}/${schoolId}`}>
                       <div className="d-flex align-items-center">
                         <div className="avatar avatar-xl bg-danger-transparent me-2 p-1">
                           <ImageWithBasePath
@@ -287,6 +298,95 @@ const AdminDashboard = () => {
 
                           </div>
                           <p className="fw-semibold">No Of Devices</p>
+                        </div>
+                      </div>
+                    </Link>
+
+                  </div>
+                </div>
+              </div>
+              {/* /Total Devices */}
+              {/* Out of stocks */}
+              <div className="col-xxl-4 col-sm-6 d-flex">
+                <div className="card flex-fill animate-card border-0">
+                  <div className="card-body">
+                    <Link to={`${routes.robotoutofstocks}/${schoolId}`}>
+                      <div className="d-flex align-items-center">
+                        <div className="avatar avatar-xl me-2 bg-secondary-transparent p-1">
+                          <ImageWithBasePath
+                            src="assets/img/out.webp"
+                            alt="img"
+                          />
+                        </div>
+                        <div className="overflow-hidden flex-fill">
+                          <div className="d-flex align-items-center justify-content-between">
+                            <h2 className="counter">
+                              <CountUp end={outOfStocks} />
+                            </h2>
+
+                          </div>
+                          <p className="fw-semibold">Out Of Stocks</p>
+                        </div>
+                      </div>
+                    </Link>
+
+                  </div>
+                </div>
+              </div>
+              {/* out of stocks */}
+              {/* Total items */}
+              <div className="col-xxl-4 col-sm-6 d-flex">
+                <div className="card flex-fill animate-card border-0">
+                  <div className="card-body">
+                    <Link to={`${routes.robodevicestype}/${schoolId}`}>
+                      <div className="d-flex align-items-center">
+                        <div className="avatar avatar-xl me-2 bg-warning-transparent p-1">
+                          <ImageWithBasePath
+                            src="assets/img/device1.jpg"
+                            alt="img"
+                          />
+                        </div>
+                        <div className="overflow-hidden flex-fill">
+                          <div className="d-flex align-items-center justify-content-between">
+                            <h2 className="counter">
+                              <CountUp end={deviceTypeNo} />
+                            </h2>
+
+                          </div>
+                          <p className="fw-semibold">List Of Devices</p>
+                        </div>
+                      </div>
+                    </Link>
+
+
+                  </div>
+                </div>
+              </div>
+              {/* /Total items */}
+            </div>
+
+            <div className="row">
+              <h1 className="fw-semibold fs-4 my-2">AI Data</h1>
+              {/* Total Devices */}
+              <div className="col-xxl-4 col-sm-6 d-flex">
+                <div className="card flex-fill animate-card border-0">
+                  <div className="card-body">
+                    <Link to={`${routes.aidevices}/${schoolId}`}>
+                      <div className="d-flex align-items-center">
+                        <div className="avatar avatar-xl bg-danger-transparent me-2 p-1">
+                          <ImageWithBasePath
+                            src="assets/img/device.png"
+                            alt="img"
+                          />
+                        </div>
+                        <div className="overflow-hidden flex-fill">
+                          <div className="d-flex align-items-center justify-content-between">
+                            <h2 className="counter">
+                              <CountUp end={aiDeviceNo} />
+                            </h2>
+
+                          </div>
+                          <p className="fw-semibold">No Of AI Devices</p>
                         </div>
                       </div>
                     </Link>
@@ -309,24 +409,24 @@ const AdminDashboard = () => {
               <div className="col-xxl-4 col-sm-6 d-flex">
                 <div className="card flex-fill animate-card border-0">
                   <div className="card-body">
-                     <Link to={routes.outofstock}>
-                    <div className="d-flex align-items-center">
-                      <div className="avatar avatar-xl me-2 bg-secondary-transparent p-1">
-                        <ImageWithBasePath
-                          src="assets/img/out.webp"
-                          alt="img"
-                        />
-                      </div>
-                      <div className="overflow-hidden flex-fill">
-                        <div className="d-flex align-items-center justify-content-between">
-                          <h2 className="counter">
-                            <CountUp end={outOfStocks} />
-                          </h2>
-
+                   <Link to={`${routes.aidevicesoutofstock}/${schoolId}`}>
+                      <div className="d-flex align-items-center">
+                        <div className="avatar avatar-xl me-2 bg-secondary-transparent p-1">
+                          <ImageWithBasePath
+                            src="assets/img/out.webp"
+                            alt="img"
+                          />
                         </div>
-                        <p className="fw-semibold">Out Of Stocks</p>
+                        <div className="overflow-hidden flex-fill">
+                          <div className="d-flex align-items-center justify-content-between">
+                            <h2 className="counter">
+                              <CountUp end={aiOutOfStocks} />
+                            </h2>
+
+                          </div>
+                          <p className="fw-semibold">Out Of AI Stocks</p>
+                        </div>
                       </div>
-                    </div>
                     </Link>
                     {/* <div className="d-flex align-items-center justify-content-between border-top mt-3 pt-3">
                         <p className="mb-0">
@@ -347,7 +447,7 @@ const AdminDashboard = () => {
               <div className="col-xxl-4 col-sm-6 d-flex">
                 <div className="card flex-fill animate-card border-0">
                   <div className="card-body">
-                    <Link to={routes.devicetypelist}>
+                    <Link to={`${routes.aidevicestype}/${schoolId}`}>
                       <div className="d-flex align-items-center">
                         <div className="avatar avatar-xl me-2 bg-warning-transparent p-1">
                           <ImageWithBasePath
@@ -358,11 +458,11 @@ const AdminDashboard = () => {
                         <div className="overflow-hidden flex-fill">
                           <div className="d-flex align-items-center justify-content-between">
                             <h2 className="counter">
-                              <CountUp end={deviceTypeNo} />
+                              <CountUp end={aiDeviceTypeNo} />
                             </h2>
 
                           </div>
-                          <p className="fw-semibold">List Of Devices</p>
+                          <p className="fw-semibold">List Of AI Devices</p>
                         </div>
                       </div>
                     </Link>
@@ -384,30 +484,12 @@ const AdminDashboard = () => {
               {/* /Total items */}
 
             </div>
+
             <div className="row">
 
-              <div className="col-xxl-4 col-xl-6 col-md-12 d-flex">
-                <div className="card flex-fill">
-                  <div className="card-header d-flex align-items-center justify-content-between">
-                    <div>
-                      <h4 className="card-title">Today</h4>
-                    </div>
+              
 
-                  </div>
-                  <div className="card-body ">
-                    {/* <div className="datepic mb-4" /> */}
-                    <Calendar
-                      className="datepickers mb-4"
-                      value={date}
-                      onChange={(e) => setDate(e.value)}
-                      inline
-                    />
-
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-xxl-4 col-xl-6 col-md-12 d-flex flex-column">
+              <div className=" col-xl-6 col-md-12 d-flex flex-column">
                 <div className="card">
                   <div className="card-header d-flex align-items-center justify-content-between">
                     <h4 className="card-title">Task Status</h4>
@@ -484,7 +566,7 @@ const AdminDashboard = () => {
 
               </div>
 
-              <div className="col-xxl-4 col-md-12 d-flex flex-column">
+              <div className="col-xl-6 col-md-12 d-flex flex-column">
                 {/* Quick Links */}
                 <div className="card flex-fill">
                   <div className="card-header d-flex align-items-center justify-content-between">
@@ -556,8 +638,8 @@ const AdminDashboard = () => {
             </div>
           </>
         </div>
-        
-        <DeviceModal addModal2={addModal2} setAddModal2={setAddModal2} />
+
+
       </div>
 
 
@@ -565,4 +647,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default SchoolDashboard;

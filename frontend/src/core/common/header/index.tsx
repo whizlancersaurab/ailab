@@ -13,9 +13,9 @@ import {
 import { useState } from "react";
 import { all_routes } from "../../../router/all_routes";
 import { toast } from "react-toastify";
-import { logout} from "../../../service/api";
+import { logout } from "../../../service/api";
 import type { AppDispatch, RootState } from "../../data/redux/store";
-import {reset} from '../../data/redux/authSlice'
+import { reset } from '../../data/redux/authSlice'
 
 
 const Header = () => {
@@ -29,6 +29,10 @@ const Header = () => {
 
   const toggleMobileSidebar = () => {
     dispatch(setMobileSidebar(!mobileSidebar));
+    if (dataLayout === "mini_layout") {
+      dispatch(setDataLayout("default_layout"));
+      localStorage.setItem("dataLayout", "default_layout");
+    }
   };
 
   const onMouseEnter = () => {
@@ -76,11 +80,11 @@ const Header = () => {
     }
   };
 
- 
+
   const navigate = useNavigate()
   const dispatch = useDispatch<AppDispatch>()
-   const {user ,role,profileImage } = useSelector((state: RootState) => state.authSlice)
- 
+  const { user, role, profileImage } = useSelector((state: RootState) => state.authSlice)
+
 
   const handleLogout = async () => {
     const { data } = await logout()
@@ -93,7 +97,7 @@ const Header = () => {
   }
 
 
- 
+
   return (
     <>
       {/* Header */}
@@ -130,7 +134,7 @@ const Header = () => {
             {/* Search */}
             <div className="mx-auto d-flex g-2 align-items-center justify-content-center">
               {/* <div className="mx-2"><img  width={45} src="assets/img/logo.jpg" alt="" /></div> */}
-              <div style={{color:'#0061FC'}} className="fw-bold fs-3">LAB MANAGEMENT SYSTEM</div>
+              <div style={{ color: '#0061FC' }} className="fw-bold fs-3">LAB MANAGEMENT SYSTEM</div>
             </div>
             {/* /Search */}
             <div className="d-flex align-items-center  justify-content-end">
@@ -169,17 +173,17 @@ const Header = () => {
                   data-bs-toggle="dropdown"
                 >
                   <span className="avatar avatar-md rounded">
-                     {
-                          profileImage?( <img
-                          style={{ objectFit: 'cover' }}
-                          src={profileImage} 
-                          alt="img"
-                        />):( <img
-                          style={{ objectFit: 'cover' }}
-                          src="assets/img/user1.jpg"
-                          alt="img"
-                        />)
-                        }
+                    {
+                      profileImage ? (<img
+                        style={{ objectFit: 'cover' }}
+                        src={profileImage}
+                        alt="img"
+                      />) : (<img
+                        style={{ objectFit: 'cover' }}
+                        src="assets/img/user1.jpg"
+                        alt="img"
+                      />)
+                    }
                   </span>
                 </Link>
                 <div className="dropdown-menu">
@@ -187,17 +191,17 @@ const Header = () => {
                     <div className="d-flex align-items-center p-2">
                       <span className="avatar avatar-md me-2 online avatar-rounded">
                         {
-                          profileImage?( <img
-                          style={{ objectFit: 'cover' }}
-                          src={profileImage} 
-                          alt="img"
-                        />):( <img
-                          style={{ objectFit: 'cover' }}
-                          src="assets/img/user1.jpg"
-                          alt="img"
-                        />)
+                          profileImage ? (<img
+                            style={{ objectFit: 'cover' }}
+                            src={profileImage}
+                            alt="img"
+                          />) : (<img
+                            style={{ objectFit: 'cover' }}
+                            src="assets/img/user1.jpg"
+                            alt="img"
+                          />)
                         }
-                       
+
                       </span>
                       <div>
                         <h6 className="text-capitalize">{user}</h6>
@@ -206,8 +210,8 @@ const Header = () => {
                     </div>
                     <hr className="m-0" />
                     <hr className="m-0" />
-                     <button
-                      onClick={()=>navigate(routes.userProfile)}
+                    <button
+                      onClick={() => navigate(routes.userProfile)}
                       className="dropdown-item  d-inline-flex align-items-center p-2"
 
                     >
@@ -242,7 +246,7 @@ const Header = () => {
             <Link className="dropdown-item" to={routes.userProfile}>
               My Profile
             </Link>
-           
+
             <Link to={'#'} className="dropdown-item text-danger" onClick={handleLogout}>
               Logout
             </Link>
