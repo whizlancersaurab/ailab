@@ -12,19 +12,19 @@ function generatePassword(length = 8) {
 
 exports.register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
-  
+
 
   let schools = [];
-if (req.body.schools) {
-  if (Array.isArray(req.body.schools)) {
-    schools = req.body.schools.map((s) =>
-      typeof s === "string" ? JSON.parse(s) : s
-    );
-  } else {
-    // Single school
-    schools = [typeof req.body.schools === "string" ? JSON.parse(req.body.schools) : req.body.schools];
+  if (req.body.schools) {
+    if (Array.isArray(req.body.schools)) {
+      schools = req.body.schools.map((s) =>
+        typeof s === "string" ? JSON.parse(s) : s
+      );
+    } else {
+      // Single school
+      schools = [typeof req.body.schools === "string" ? JSON.parse(req.body.schools) : req.body.schools];
+    }
   }
-}
 
   const adminImages = req.files?.profileImage || [];
   const schoolLogos = req.files?.schoolLogo || [];
@@ -356,13 +356,15 @@ exports.login = async (req, res) => {
 
 
   const [schools] = await db.query(
-    `SELECT s.id, s.name FROM schools s
+    `SELECT s.id, s.name , s.status FROM schools s
      JOIN user_schools us ON s.id = us.school_id
-     WHERE us.user_id = ?`,
+     WHERE us.user_id = ? AND s.status='ACTIVE'`,
     [user.id]
   );
 
-  if (!schools.length) return res.status(403).json({ success: false, message: "No school assigned" });
+
+  if (!schools.length) return res.status(403).json({ success: false, message: "No school assigned OR Your school is suspended ! Contact Super Admin" });
+
 
   const defaultSchool = schools[0];
 
@@ -370,7 +372,7 @@ exports.login = async (req, res) => {
   const accessToken = jwt.sign(
     { id: user.id, email: user.email, role: user.role, schoolId: defaultSchool.id },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "1d" }
   );
 
   const refreshToken = jwt.sign({ id: user.id, role: user.role, schoolId: defaultSchool.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
@@ -383,7 +385,7 @@ exports.login = async (req, res) => {
     [user.id, refreshToken]
   );
 
-  res.cookie("access_token", accessToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 15 * 60 * 1000 });
+  res.cookie("access_token", accessToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 1 * 24 * 60 * 60 * 1000 });
   res.cookie("refresh_token", refreshToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 7 * 24 * 60 * 60 * 1000 });
 
 
@@ -419,7 +421,7 @@ exports.switchSchool = async (req, res) => {
   }
 
 
-  const accessToken = jwt.sign({ id: userId, email: req.user.email, role: req.user.role, schoolId: school.id }, process.env.JWT_ACCESS_SECRET, { expiresIn: "15m" });
+  const accessToken = jwt.sign({ id: userId, email: req.user.email, role: req.user.role, schoolId: school.id }, process.env.JWT_ACCESS_SECRET, { expiresIn: "1d" });
   const refreshToken = jwt.sign({ id: userId, role: req.user.role }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 
   await db.query(
@@ -430,7 +432,7 @@ exports.switchSchool = async (req, res) => {
   );
 
 
-  res.cookie("access_token", accessToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 15 * 60 * 1000 });
+  res.cookie("access_token", accessToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 1 * 24 * 60 * 60 * 1000 });
   res.cookie("refresh_token", refreshToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 7 * 24 * 60 * 60 * 1000 });
 
   return res.status(200).json({
@@ -441,7 +443,7 @@ exports.switchSchool = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  
+
   const userId = req.user.id;
   const { schoolId } = req.user;
   const { firstName, lastName, email, schoolName } = req.body;
@@ -812,14 +814,14 @@ exports.refreshToken = async (req, res) => {
         schoolId: schoolId
       },
       process.env.JWT_ACCESS_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "1d" }
     );
 
     res.cookie("access_token", accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      maxAge: 15 * 60 * 1000
+      maxAge: 1 * 24 * 60 * 60 * 1000
     });
 
 
@@ -846,7 +848,7 @@ exports.getUserSchools = async (req, res) => {
       `SELECT s.id, s.name,s.schoolLogo
        FROM schools s
        JOIN user_schools us ON s.id = us.school_id
-       WHERE us.user_id = ?`,
+       WHERE us.user_id = ? AND s.status='ACTIVE'`,
       [userId]
     );
 

@@ -8,7 +8,7 @@ import { all_routes } from "../../../router/all_routes";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { aiDeviceCountForSchoolDas, aiDeviceTypeCountForSchoolDas, AIgetOutOfStockCountForSchoolDas, classForOption, classProgressData, deviceCountForSchoolDas, deviceTypeCountForSchoolDas, getOutOfStockCountForSchoolDas } from "../../../service/api";
+import { aiDeviceCountForSchoolDas, aiDeviceTypeCountForSchoolDas, AIgetOutOfStockCountForSchoolDas, classForOption, classProgressDataForSchoolDas, deviceCountForSchoolDas, deviceTypeCountForSchoolDas, getOutOfStockCountForSchoolDas } from "../../../service/api";
 import type { OptionType } from "../../../core/data/interface";
 import Select from 'react-select'
 import type { RootState } from "../../../core/data/redux/store";
@@ -97,8 +97,6 @@ const SchoolDashboard = () => {
     completionPercent: 0
   });
   const { user } = useSelector((state: RootState) => state.authSlice)
-
-
   // Fetch API
   const fetchAllDeviceStats = async (schoolId: number) => {
     try {
@@ -138,7 +136,6 @@ const SchoolDashboard = () => {
     }
   };
 
-
   const fetchClassForOption = async () => {
     try {
 
@@ -154,8 +151,9 @@ const SchoolDashboard = () => {
   }
 
   const fetchProgressData = async (id: number) => {
+    if(!schoolId) return
     try {
-      const { data } = await classProgressData(id);
+      const { data } = await classProgressDataForSchoolDas(id ,Number(schoolId));
       if (data.success) {
         setProgressData(data.data);
       }
@@ -549,7 +547,7 @@ const SchoolDashboard = () => {
                             width={218}
                           />
                           <Link
-                            to={routes.dailytask}
+                            to={`${routes.dailytaskdata}/${schoolId}`}
                             className="btn btn-light"
                           >
                             <i className="ti ti-calendar-share me-1" />
@@ -572,26 +570,28 @@ const SchoolDashboard = () => {
                   <div className="card-header d-flex align-items-center justify-content-between">
                     <h4 className="card-title">Quick Links</h4>
                   </div>
-                  <div className="card-body pb-1">
+                  
+                  <div className="card-body ">
                     <Slider
                       {...settings}
                       className="owl-carousel link-slider"
                     >
+
                       <div className="item">
                         <Link
-                          to={routes.robotcategory}
-                          className="d-block bg-success-transparent ronded p-2 text-center mb-3 class-hover"
+                         to={`${routes.dailytaskdata}/${schoolId}`}
+                          className="d-block bg-success-transparent ronded p-1 text-center mb-3 class-hover"
                         >
                           <div className="avatar avatar-lg border p-1 border-success rounded-circle mb-2">
                             <span className="d-inline-flex align-items-center justify-content-center w-100 h-100 bg-success rounded-circle">
                               <i className="ti ti-calendar" />
                             </span>
                           </div>
-                          <p className="text-dark">Category</p>
+                          <p className="text-dark">Daily Tasks</p>
                         </Link>
                         <Link
                           to={routes.classlist}
-                          className="d-block bg-secondary-transparent ronded p-2 text-center mb-3 class-hover"
+                          className="d-block bg-secondary-transparent ronded p-1 text-center mb-3 class-hover"
                         >
                           <div className="avatar avatar-lg border p-1 border-secondary rounded-circle mb-2">
                             <span className="d-inline-flex align-items-center justify-content-center w-100 h-100 bg-secondary rounded-circle">
@@ -603,19 +603,19 @@ const SchoolDashboard = () => {
                       </div>
                       <div className="item">
                         <Link
-                          to={routes.robotsubcategory}
-                          className="d-block bg-primary-transparent ronded p-2 text-center mb-3 class-hover"
+                           to={`${routes.eventsdata}/${schoolId}`}
+                          className="d-block bg-primary-transparent ronded p-1 text-center mb-3 class-hover"
                         >
                           <div className="avatar avatar-lg border p-1 border-primary rounded-circle mb-2">
                             <span className="d-inline-flex align-items-center justify-content-center w-100 h-100 bg-primary rounded-circle">
                               <i className="ti ti-hexagonal-prism" />
                             </span>
                           </div>
-                          <p className="text-dark">Sub Category</p>
+                          <p className="text-dark">School Events</p>
                         </Link>
                         <Link
-                          to={routes.syllabus}
-                          className="d-block bg-danger-transparent ronded p-2 text-center mb-3 class-hover"
+                          to={`${routes.syllabusdata}/${schoolId}`}
+                          className="d-block bg-danger-transparent ronded p-1 text-center mb-3 class-hover"
                         >
                           <div className="avatar avatar-lg border p-1 border-danger rounded-circle mb-2">
                             <span className="d-inline-flex align-items-center justify-content-center w-100 h-100 bg-danger rounded-circle">
@@ -623,6 +623,64 @@ const SchoolDashboard = () => {
                             </span>
                           </div>
                           <p className="text-dark">Syllabus</p>
+                        </Link>
+                      </div>
+                      
+
+
+                    </Slider>
+                  </div>
+                   <div className="card-body ">
+                    <Slider
+                      {...settings}
+                      className="owl-carousel link-slider"
+                    >
+                       <div className="item">
+                        <Link
+                           to={`${routes.robocategoryforschooldas}/${schoolId}`}
+                          className="d-block bg-primary-transparent ronded p-1 text-center mb-3 class-hover"
+                        >
+                          <div className="avatar avatar-lg border p-1 border-primary rounded-circle mb-2">
+                            <span className="d-inline-flex align-items-center justify-content-center w-100 h-100 bg-primary rounded-circle">
+                              <i className="ti ti-hexagonal-prism" />
+                            </span>
+                          </div>
+                          <p className="text-dark">Robotics Category</p>
+                        </Link>
+                        <Link
+                          to={`${routes.robosubcategoryforschooldas}/${schoolId}`}
+                          className="d-block bg-danger-transparent ronded p-1 text-center mb-3 class-hover"
+                        >
+                          <div className="avatar avatar-lg border p-1 border-danger rounded-circle mb-2">
+                            <span className="d-inline-flex align-items-center justify-content-center w-100 h-100 bg-warning rounded-circle">
+                              <i className="ti ti-calendar" />
+                            </span>
+                          </div>
+                          <p className="text-dark">Robotics Sub-Category</p>
+                        </Link>
+                      </div>
+                        <div className="item">
+                        <Link
+                          to={`${routes.aicategoryforschooldas}/${schoolId}`}
+                          className="d-block bg-primary-transparent ronded p-1 text-center mb-3 class-hover"
+                        >
+                          <div className="avatar avatar-lg border p-1 border-primary rounded-circle mb-2">
+                            <span className="d-inline-flex align-items-center justify-content-center w-100 h-100 bg-secondary rounded-circle">
+                               <i className="ti ti-license" />
+                            </span>
+                          </div>
+                          <p className="text-dark">AI Category</p>
+                        </Link>
+                        <Link
+                          to={`${routes.aisubcategoryforschooldas}/${schoolId}`}
+                          className="d-block bg-danger-transparent ronded p-1 text-center mb-3 class-hover"
+                        >
+                          <div className="avatar avatar-lg border p-1 border-danger rounded-circle mb-2">
+                            <span className="d-inline-flex align-items-center justify-content-center w-100 h-100 bg-danger rounded-circle">
+                              <i className="ti ti-report-money" />
+                            </span>
+                          </div>
+                          <p className="text-dark">AI Sub-Category</p>
                         </Link>
                       </div>
 

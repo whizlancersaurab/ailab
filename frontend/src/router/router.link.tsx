@@ -57,6 +57,14 @@ import RoboOutOfStockDevice from "../admin/superadmin/roboticsData/RoboticsOutOf
 import AiDeviceForSchoolDas from "../admin/superadmin/AiData/AiDevices/index.tsx";
 import AiDeviceTypeListForSchoolDas from "../admin/superadmin/AiData/AiDeviceType/index.tsx";
 import AiOutOfStockDeviceForSchoolDas from "../admin/superadmin/AiData/AiOutOfStocks/index.tsx";
+import SyllabusForSchoolDas from "../admin/superadmin/SyllabusData/index.tsx";
+import EventsForSchoolDas from "../admin/superadmin/EventsData/index.tsx";
+import DailyTaskForSchoolDas from "../admin/superadmin/DailyTaskData/index.tsx";
+
+import RoboSubCategoryForSchoolDas from "../admin/superadmin/RoboSubCat/index.tsx";
+import AiCategoryForSchoolDas from "../admin/superadmin/AiCatData/index.tsx";
+import RoboCategoryForSchoolDas from "../admin/superadmin/RoboCatData/index.tsx";
+import AiSubCategoryForSchoolDas from "../admin/superadmin/AiSubCatData/index.tsx";
 
 const routes = all_routes;
 
@@ -231,7 +239,7 @@ export const publicRoutes = [
     element: <RoboticsDevice />,
     route: Route
   },
-   {
+  {
     path: `${routes.robodevicestype}/:schoolId`,
     element: <RoboticsDeviceTypeList />,
     route: Route
@@ -256,9 +264,45 @@ export const publicRoutes = [
     element: <AiOutOfStockDeviceForSchoolDas />,
     route: Route
   },
+  {
+    path: `${routes.syllabusdata}/:schoolId`,
+    element: <SyllabusForSchoolDas />,
+    route: Route
+  },
+  {
+    path: `${routes.eventsdata}/:schoolId`,
+    element: <EventsForSchoolDas />,
+    route: Route
+  },
+  {
+    path: `${routes.dailytaskdata}/:schoolId`,
+    element: <DailyTaskForSchoolDas />,
+    route: Route
+  },
+  {
+    path: `${routes.robocategoryforschooldas}/:schoolId`,
+    element: <RoboCategoryForSchoolDas />,
+    route: Route
+  },
+  {
+    path: `${routes.robosubcategoryforschooldas}/:schoolId`,
+    element: <RoboSubCategoryForSchoolDas />,
+    route: Route
+  },
+
+  {
+    path: `${routes.aicategoryforschooldas}/:schoolId`,
+    element: <AiCategoryForSchoolDas />,
+    route: Route
+  },
+  {
+    path: `${routes.aisubcategoryforschooldas}/:schoolId`,
+    element: <AiSubCategoryForSchoolDas />,
+    route: Route
+  },
 
   // teachers
-{
+  {
     path: routes.schoolteachers,
     element: <Teacher />,
     route: Route

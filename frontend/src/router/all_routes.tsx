@@ -76,5 +76,19 @@ export const all_routes = {
 
   aidevices:'/ai-devices',
   aidevicestype:'/ai-devicestype',
-  aidevicesoutofstock:'/ai-outofstocks-devices'
+  aidevicesoutofstock:'/ai-outofstocks-devices',
+
+  syllabusdata:'/syllabus-data',
+
+  eventsdata:'/events-data',
+
+  dailytaskdata:'/dailytask-data',
+
+  // robo category and subcategory
+  robocategoryforschooldas:'/robo-category',
+  robosubcategoryforschooldas:'/robo-subcategory',
+
+  // ai
+  aicategoryforschooldas:'/ai-category',
+  aisubcategoryforschooldas:'/ai-subcategory'
 };

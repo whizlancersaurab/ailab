@@ -1,17 +1,17 @@
 import axios from 'axios'
 
 
-const baseUrl: string = import.meta.env.VITE_API_URL 
+const baseUrl: string = import.meta.env.VITE_API_URL
 
 export const api = axios.create({
-    baseURL: baseUrl,
-    withCredentials: true
+  baseURL: baseUrl,
+  withCredentials: true
 })
 
 
 
 export const setupAxiosInterceptor = (navigate: Function) => {
-  
+
   let isRefreshing = false;
   let failedQueue: any[] = [];
 
@@ -32,11 +32,11 @@ export const setupAxiosInterceptor = (navigate: Function) => {
         }
         originalRequest._retry = true;
         isRefreshing = true;
-        try { 
-          await api.get("/auth/refresh"); 
+        try {
+          await api.get("/auth/refresh");
           isRefreshing = false;
           processQueue(null);
-          return api(originalRequest) ;
+          return api(originalRequest);
         } catch (err) {
           console.log("Refresh failed", err);
           isRefreshing = false;
@@ -60,51 +60,66 @@ export const resetPassword = (data: object) => api.post('/auth/reset-password', 
 export const logout = () => api.get('/auth/logout')
 export const userInfo = () => api.get('/auth/user')
 export const speUser = () => api.get('/auth/speUser')
-export const usersSchools = ()=>api.get('/auth/usersschools')
-export const switchSchool = (data:object)=>api.post('/auth/switch-school' , data)
-export const allUsers = ()=>api.get('/auth/allusers')
+export const usersSchools = () => api.get('/auth/usersschools')
+export const switchSchool = (data: object) => api.post('/auth/switch-school', data)
+export const allUsers = () => api.get('/auth/allusers')
 
 // teachers api
-export const speSchoolTeachers = ()=>api.get('/teacher/speschoolteachers')
-export const deleteTeacher = (id:number)=>api.delete(`/teacher/delteacher/${id}`)
-export const addNewTeacher = (data:object)=>api.post('/teacher/addteacher' , data)
+export const speSchoolTeachers = () => api.get('/teacher/speschoolteachers')
+export const deleteTeacher = (id: number) => api.delete(`/teacher/delteacher/${id}`)
+export const addNewTeacher = (data: object) => api.post('/teacher/addteacher', data)
 
 // superadin
-export const allSchools = ()=>api.get('/superadmin/allschools')
-export const allActiveSchools = ()=>api.get('/superadmin/allactiveschools')
-export const allSuspendedSchools = ()=>api.get('/superadmin/allsuspendedschools')
-export const speSchool = (id:number)=>api.get(`/superadmin/speschool/${id}`)
-export const changeSchoolStatus = (id:number , data:object)=>api.patch(`/superadmin/updschool/${id}` , data)
-export const updateSchool = (id:number , data:object)=>api.patch(`/superadmin/updateschool/${id}` , data)
-export const delSchool = (id:number)=>api.delete(`/superadmin/delschool/${id}`)
-export const schoolStats = ()=>api.get('/superadmin/schoolstats')
-export const addNewSchool = (data:object)=>api.post('/superadmin/addnew' ,data)
+export const allSchools = () => api.get('/superadmin/allschools')
+export const allActiveSchools = () => api.get('/superadmin/allactiveschools')
+export const allSuspendedSchools = () => api.get('/superadmin/allsuspendedschools')
+export const speSchool = (id: number) => api.get(`/superadmin/speschool/${id}`)
+export const changeSchoolStatus = (id: number, data: object) => api.patch(`/superadmin/updschool/${id}`, data)
+export const updateSchool = (id: number, data: object) => api.patch(`/superadmin/updateschool/${id}`, data)
+export const delSchool = (id: number) => api.delete(`/superadmin/delschool/${id}`)
+export const schoolStats = () => api.get('/superadmin/schoolstats')
+export const addNewSchool = (data: object) => api.post('/superadmin/addnew', data)
 
 // super admin extra feature for school
-export const deviceCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/devicescountforschooldas/${schoolId}`)
-export const deviceTypeCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/totaldevicetypecountforschooldas/${schoolId}`)
-export const getOutOfStockCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/outofstockcountforschooldas/${schoolId}`)
+export const deviceCountForSchoolDas = (schoolId: number) => api.get(`/superadmin/devicescountforschooldas/${schoolId}`)
+export const deviceTypeCountForSchoolDas = (schoolId: number) => api.get(`/superadmin/totaldevicetypecountforschooldas/${schoolId}`)
+export const getOutOfStockCountForSchoolDas = (schoolId: number) => api.get(`/superadmin/outofstockcountforschooldas/${schoolId}`)
 
-export const aiDeviceCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/aidevicescountforschooldas/${schoolId}`)
-export const aiDeviceTypeCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/aitotaldevicetypecountforschooldas/${schoolId}`)
-export const AIgetOutOfStockCountForSchoolDas = (schoolId:number) => api.get(`/superadmin/aioutofstockcountforschooldas/${schoolId}`)
+export const aiDeviceCountForSchoolDas = (schoolId: number) => api.get(`/superadmin/aidevicescountforschooldas/${schoolId}`)
+export const aiDeviceTypeCountForSchoolDas = (schoolId: number) => api.get(`/superadmin/aitotaldevicetypecountforschooldas/${schoolId}`)
+export const AIgetOutOfStockCountForSchoolDas = (schoolId: number) => api.get(`/superadmin/aioutofstockcountforschooldas/${schoolId}`)
 
-export const roboAllDevicesForSchoolDas = (schoolId:number) => api.get(`/superadmin/all/${schoolId}`)
-export const roboDeviceTypeCountWithDataForSchoolDas = (schoolId:number) => api.get(`/superadmin/devicecount/${schoolId}`)
-export const roboOutOfStockDevicesForSchoolDas = (schoolId:number) => api.get(`/superadmin/outofstock/${schoolId}`)
+export const roboAllDevicesForSchoolDas = (schoolId: number) => api.get(`/superadmin/all/${schoolId}`)
+export const roboDeviceTypeCountWithDataForSchoolDas = (schoolId: number) => api.get(`/superadmin/devicecount/${schoolId}`)
+export const roboOutOfStockDevicesForSchoolDas = (schoolId: number) => api.get(`/superadmin/outofstock/${schoolId}`)
 
-export const AIDevicesForSchoolDas = (schoolId:number) => api.get(`/superadmin/allai/${schoolId}`)
-export const AiDeviceTypeCountWithDataForSchoolDas = (schoolId:number) => api.get(`/superadmin/aidevicecount/${schoolId}`)
-export const AiOutOfStockDevicesForSchoolDas = (schoolId:number) => api.get(`/superadmin/aioutofstock/${schoolId}`)
+export const AIDevicesForSchoolDas = (schoolId: number) => api.get(`/superadmin/allai/${schoolId}`)
+export const AiDeviceTypeCountWithDataForSchoolDas = (schoolId: number) => api.get(`/superadmin/aidevicecount/${schoolId}`)
+export const AiOutOfStockDevicesForSchoolDas = (schoolId: number) => api.get(`/superadmin/aioutofstock/${schoolId}`)
 
+
+export const allClassSyllabusForSchoolDas = (schoolId: number) => api.get(`/superadmin/allsyllabusforschooldas/${schoolId}`)
+export const speSyllabusForSchoolDas = (id: number, schoolId: number) => api.get(`/superadmin/spesyllabusforschooldas/${id}/${schoolId}`)
+
+export const allEventsForSchoolDas = (schoolId: number) => api.get(`/superadmin/eventsforschooldas/${schoolId}`)
+
+export const dailyTasksForSchoolDas = (schoolId: number) => api.get(`/superadmin/dailytasksforschooldas/${schoolId}`)
+
+export const classProgressDataForSchoolDas = (class_id: number, schoolId: number) => api.get(`/superadmin/progressdataforschooldas/${class_id}/${schoolId}`)
+
+export const allRoboCategoriesForSchoolDas = (schoolId: number) => api.get(`/superadmin/allrobocatforschooldas/${schoolId}`)
+export const allRoboSubCategoriesForSchoolDas = (schoolId: number) => api.get(`/superadmin/allrobosubcatforschooldas/${schoolId}`)
+
+export const allAICategoriesForSchoolDas = (schoolId: number) => api.get(`/superadmin/allaicatforschooldas/${schoolId}`)
+export const allAISubCategoriesForSchoolDas = (schoolId: number) => api.get(`/superadmin/allaisubcatforschooldas/${schoolId}`)
 
 // whats new in school
-export const addTopic = (data:object)=>api.post('/topic/addtopic' , data)
-export const allTopics = ()=>api.get('/topic/alltopics')
-export const newTopics = ()=>api.get('/topic/newtopics')
-export const deleteTopic = (id:number)=>api.delete(`/topic/deltopic/${id}`)
-export const speTopic = (id:number)=>api.get(`/topic/spetopic/${id}`)
-export const updateTopic = (data:object , id:number)=>api.patch(`/topic/updatetopic/${id}` ,data)
+export const addTopic = (data: object) => api.post('/topic/addtopic', data)
+export const allTopics = () => api.get('/topic/alltopics')
+export const newTopics = () => api.get('/topic/newtopics')
+export const deleteTopic = (id: number) => api.delete(`/topic/deltopic/${id}`)
+export const speTopic = (id: number) => api.get(`/topic/spetopic/${id}`)
+export const updateTopic = (data: object, id: number) => api.patch(`/topic/updatetopic/${id}`, data)
 
 //classes ==================================================================
 export const addClass = (data: object) => api.post('/class/addclass', data)

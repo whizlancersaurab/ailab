@@ -33,15 +33,34 @@ router.get('/aitotaldevicetypecountforschooldas/:schoolId', superAdmin, schoolCo
 router.get('/aioutofstockcountforschooldas/:schoolId', superAdmin, schoolController.aiGetOutOfStockDeviceCountForSchoolDas)
 
 // robotics
-router.get('/all/:schoolId', schoolController.getAllRoboticsDevicesForSchoolDas);
-router.get('/outofstock/:schoolId', schoolController.OutOfStockDevicesForSchoolDas)
-router.get('/devicecount/:schoolId', schoolController.deviceTypeCountForSchoolDas)
+router.get('/all/:schoolId',superAdmin ,schoolController.getAllRoboticsDevicesForSchoolDas);
+router.get('/outofstock/:schoolId',superAdmin ,schoolController.OutOfStockDevicesForSchoolDas)
+router.get('/devicecount/:schoolId',superAdmin ,schoolController.deviceTypeCountForSchoolDas)
 
 
 // ai
-router.get('/allai/:schoolId', schoolController.AiGetAllDevicesForSchoolDas);
-router.get('/aioutofstock/:schoolId', schoolController.AiOutOfStockDevicesForSchoolDas)
-router.get('/aidevicecount/:schoolId', schoolController.AideviceTypeCountForSchoolDas)
+router.get('/allai/:schoolId',superAdmin ,schoolController.AiGetAllDevicesForSchoolDas);
+router.get('/aioutofstock/:schoolId', superAdmin,schoolController.AiOutOfStockDevicesForSchoolDas)
+router.get('/aidevicecount/:schoolId',superAdmin ,schoolController.AideviceTypeCountForSchoolDas)
+
+// syllabus
+router.get('/allsyllabusforschooldas/:schoolId' ,superAdmin, schoolController.getAllClassSyllabusForSchoolDas)
+router.get('/spesyllabusforschooldas/:id/:schoolId' , superAdmin, schoolController.getSyllabusByIdForSchoolDas)
+
+// events
+router.get('/eventsforschooldas/:schoolId' , superAdmin,schoolController.getEventsForSchoolDas)
+
+// daily task
+router.get('/dailytasksforschooldas/:schoolId' , superAdmin,schoolController.getAllDailyTasksForSchoolDas)
+router.get('/progressdataforschooldas/:class_id/:schoolId', superAdmin, schoolController.getClassProgressDataForSchoolDas)
+
+// robo cateogry and subcategory
+router.get('/allrobocatforschooldas/:schoolId' , superAdmin,schoolController.getRoboCategoriesForSchoolDas)
+router.get('/allrobosubcatforschooldas/:schoolId' , superAdmin,schoolController.allRoboSubCategoriesForSchoolDas)
+
+// ai category and subcategory
+router.get('/allaicatforschooldas/:schoolId' , superAdmin,schoolController.getAiCategoriesForSchoolDas)
+router.get('/allaisubcatforschooldas/:schoolId' , superAdmin,schoolController.allAiSubCategoriesForSchoolDas)
 
 
 module.exports = router;

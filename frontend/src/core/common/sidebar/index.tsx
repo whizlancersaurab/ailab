@@ -237,9 +237,9 @@ const Sidebar = () => {
                           <img
                             src={option.logo}
                             alt=""
-                            width={25}
-                            height={25}
-                            style={{ marginRight: 8, borderRadius: "50%" }}
+                            width={30}
+                            height={30}
+                            style={{ marginRight: 10, borderRadius: "50%" }}
                           />
                           {option.label}
                         </div>

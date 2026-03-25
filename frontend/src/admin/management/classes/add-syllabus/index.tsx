@@ -62,9 +62,9 @@ const AddSyllabus = () => {
 
     const [editId, setEditId] = useState<number | null>(null)
     const [sortType, setSortType] = useState<"asc" | "desc">("asc");
-    const [showAddModal , setShowAddModal] = useState<boolean>(false)
-    const [showEditModal ,setShowEditModal] = useState<boolean>(false)
-    const [viewModal ,setViewModal] = useState<boolean>(false)
+    const [showAddModal, setShowAddModal] = useState<boolean>(false)
+    const [showEditModal, setShowEditModal] = useState<boolean>(false)
+    const [viewModal, setViewModal] = useState<boolean>(false)
 
 
 
@@ -171,12 +171,13 @@ const AddSyllabus = () => {
             toast.warn('Syllabus Id is required !')
             return
         }
-        setViewModal(true)
+
         try {
 
             const { data } = await speSyllabus(id)
             if (data.success) {
                 setViewSyllabus(data.data)
+                setViewModal(true)
             }
 
         } catch (error: any) {
@@ -191,11 +192,12 @@ const AddSyllabus = () => {
             toast.warn('Id is required !')
             return
         }
-        setShowEditModal(true)
+
         try {
 
             const { data } = await speSyllabus(id)
             if (data.success) {
+                setShowEditModal(true)
                 setEditData({
                     title: data.data.title,
                     activity: data.data.activity,
@@ -332,7 +334,7 @@ const AddSyllabus = () => {
 
     // delete class--------------------------------------------------------------------
     const [deleteId, setDeleteId] = useState<number | null>(null)
-    const [showDelModal ,setShowDelModal] = useState<boolean>(false)
+    const [showDelModal, setShowDelModal] = useState<boolean>(false)
 
     const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
@@ -342,7 +344,7 @@ const AddSyllabus = () => {
                 setDeleteId(null)
                 toast.success(data.message)
                 fetchAllClassSyllabus()
-              setShowDelModal(false)
+                setShowDelModal(false)
 
             }
 
@@ -473,7 +475,7 @@ const AddSyllabus = () => {
                                         <button
                                             className="dropdown-item rounded-1"
                                             onClick={() => fetchEditData(record.id)}
-                                            
+
                                         >
                                             <i className="ti ti-edit-circle me-2" />
                                             Edit
@@ -486,7 +488,7 @@ const AddSyllabus = () => {
                                     <button
                                         className="dropdown-item rounded-1"
                                         onClick={() => fetchSpeSyllabus(record.id)}
-                                       
+
                                     >
                                         <i className="ti ti-edit-circle me-2" />
                                         View
@@ -496,12 +498,12 @@ const AddSyllabus = () => {
                                 <li>
                                     <button
                                         className="dropdown-item rounded-1"
-                                        onClick={() =>{   
+                                        onClick={() => {
                                             setDeleteId(record.id)
                                             setShowDelModal(true)
                                         }
                                         }
-                                        
+
                                     >
                                         <i className="ti ti-trash-x me-2" />
                                         Delete
@@ -614,9 +616,9 @@ const AddSyllabus = () => {
 
                             <div className="mb-">
                                 <button
-                                    
+
                                     className="btn btn-primary"
-                                    onClick={()=>setShowAddModal(true)}
+                                    onClick={() => setShowAddModal(true)}
                                 >
                                     <i className="ti ti-square-rounded-plus-filled me-2" />
                                     Add Class Syllabus
@@ -736,426 +738,426 @@ const AddSyllabus = () => {
             {/* /Page Wrapper */}
             <>
                 {/* Add Classes */}
-                 {
-                    showAddModal&&(<div className="modal fade show d-block" id="add_syllabus">
-                    <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Add Class & Monthly Curriculum</h4>
-                                <button
-                                    type="button"
-                                    className="btn-close custom-btn-close"
-                                    onClick={()=>setShowAddModal(false)}
-                                >
-                                    <i className="ti ti-x" />
-                                </button>
-                            </div>
+                {
+                    showAddModal && (<div className="modal fade show d-block" id="add_syllabus">
+                        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h4 className="modal-title">Add Class & Monthly Curriculum</h4>
+                                    <button
+                                        type="button"
+                                        className="btn-close custom-btn-close"
+                                        onClick={() => setShowAddModal(false)}
+                                    >
+                                        <i className="ti ti-x" />
+                                    </button>
+                                </div>
 
-                            <form onSubmit={handleSubmit}>
-                                {/* Make modal-body scrollable */}
-                                <div
-                                    className="modal-body"
-                                    style={{ maxHeight: "70vh", overflowY: "auto", paddingRight: "10px" }}
-                                >
-                                    <div className="mb-3">
-                                        <label className="form-label">Class</label>
+                                <form onSubmit={handleSubmit}>
+                                    {/* Make modal-body scrollable */}
+                                    <div
+                                        className="modal-body"
+                                        style={{ maxHeight: "70vh", overflowY: "auto", paddingRight: "10px" }}
+                                    >
+                                        <div className="mb-3">
+                                            <label className="form-label">Class</label>
 
-                                        <Select<OptionType>
-                                            options={classOptions}
-                                            value={classOptions.find((o) => o.value === formData.className)}
-                                            onChange={(option) =>
-                                                setFormData((prev) => ({ ...prev, className: option?.value || "" }))
-                                            }
-                                            placeholder="Select Class"
-                                            className="text-capitalize"
-                                        />
+                                            <Select<OptionType>
+                                                options={classOptions}
+                                                value={classOptions.find((o) => o.value === formData.className)}
+                                                onChange={(option) =>
+                                                    setFormData((prev) => ({ ...prev, className: option?.value || "" }))
+                                                }
+                                                placeholder="Select Class"
+                                                className="text-capitalize"
+                                            />
 
-                                    </div>
+                                        </div>
 
-                                    {formData.months.map((month, index) => (
-                                        <div key={index} className="border p-3 mb-2">
-                                            <h6>Month Details</h6>
+                                        {formData.months.map((month, index) => (
+                                            <div key={index} className="border p-3 mb-2">
+                                                <h6>Month Details</h6>
 
-                                            <div className="mb-2">
-                                                <label className="form-label">Month No</label>
-                                                <input
-                                                    className="form-control"
-                                                    type="number"
-                                                    name="month_no"
-                                                    value={month.month_no}
-                                                    onChange={(e) => handleMonthChange(index, e)}
-                                                    min={1}
-                                                    required
-                                                />
-                                            </div>
+                                                <div className="mb-2">
+                                                    <label className="form-label">Month No</label>
+                                                    <input
+                                                        className="form-control"
+                                                        type="number"
+                                                        name="month_no"
+                                                        value={month.month_no}
+                                                        onChange={(e) => handleMonthChange(index, e)}
+                                                        min={1}
+                                                        required
+                                                    />
+                                                </div>
 
-                                            <div className="mb-2">
-                                                <label className="form-label">Title</label>
-                                                <input
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="title"
-                                                    value={month.title}
-                                                    onChange={(e) => handleMonthChange(index, e)}
-                                                    required
-                                                />
-                                            </div>
-
-
-                                            <div className="mb-2">
-                                                <label className="form-label">Description</label>
-                                                <textarea
-                                                    className="form-control"
-                                                    name="description"
-                                                    value={month.description}
-                                                    rows={3}
-                                                    onChange={(e) => handleMonthChange(index, e)}
-                                                    required
-                                                />
-                                            </div>
-
-                                            <div className="mb-2">
-                                                <label className="form-label">Activity</label>
-                                                <textarea
-                                                    className="form-control"
-                                                    name="activity"
-                                                    value={month.activity}
-                                                    onChange={(e) => handleMonthChange(index, e)}
-                                                    rows={4}
-                                                    required
-                                                />
-
-                                            </div>
+                                                <div className="mb-2">
+                                                    <label className="form-label">Title</label>
+                                                    <input
+                                                        className="form-control"
+                                                        type="text"
+                                                        name="title"
+                                                        value={month.title}
+                                                        onChange={(e) => handleMonthChange(index, e)}
+                                                        required
+                                                    />
+                                                </div>
 
 
+                                                <div className="mb-2">
+                                                    <label className="form-label">Description</label>
+                                                    <textarea
+                                                        className="form-control"
+                                                        name="description"
+                                                        value={month.description}
+                                                        rows={3}
+                                                        onChange={(e) => handleMonthChange(index, e)}
+                                                        required
+                                                    />
+                                                </div>
 
-                                            <div className="mb-2">
-                                                <label className="form-label">Status</label>
-                                                <Select
-                                                    options={statusOptions}
-                                                    value={statusOptions.find(opt => opt.value === month.status)}
-                                                    onChange={(option: any) => handleStausChange(index, option.value)}
-                                                    placeholder="Select Status"
-                                                    className="text-capitalize"
-                                                />
+                                                <div className="mb-2">
+                                                    <label className="form-label">Activity</label>
+                                                    <textarea
+                                                        className="form-control"
+                                                        name="activity"
+                                                        value={month.activity}
+                                                        onChange={(e) => handleMonthChange(index, e)}
+                                                        rows={4}
+                                                        required
+                                                    />
 
-                                                {errors.status && (
-                                                    <small className="text-danger">{errors.status}</small>
+                                                </div>
+
+
+
+                                                <div className="mb-2">
+                                                    <label className="form-label">Status</label>
+                                                    <Select
+                                                        options={statusOptions}
+                                                        value={statusOptions.find(opt => opt.value === month.status)}
+                                                        onChange={(option: any) => handleStausChange(index, option.value)}
+                                                        placeholder="Select Status"
+                                                        className="text-capitalize"
+                                                    />
+
+                                                    {errors.status && (
+                                                        <small className="text-danger">{errors.status}</small>
+                                                    )}
+                                                </div>
+
+
+                                                {formData.months.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-danger btn-sm"
+                                                        onClick={() => removeMonth(index)}
+                                                    >
+                                                        Remove Month
+                                                    </button>
                                                 )}
                                             </div>
+                                        ))}
 
+                                        <button type="button" className="btn btn-secondary mb-3" onClick={addMonth}>
+                                            + Add Month
+                                        </button>
+                                    </div>
 
-                                            {formData.months.length > 1 && (
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-danger btn-sm"
-                                                    onClick={() => removeMonth(index)}
-                                                >
-                                                    Remove Month
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-
-                                    <button type="button" className="btn btn-secondary mb-3" onClick={addMonth}>
-                                        + Add Month
-                                    </button>
-                                </div>
-
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-light me-2" onClick={()=>setShowAddModal(false)}>
-                                        Cancel
-                                    </button>
-                                    <button type="submit" className="btn btn-primary">
-                                        Add Curriculum
-                                    </button>
-                                </div>
-                            </form>
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-light me-2" onClick={() => setShowAddModal(false)}>
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            Add Curriculum
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                </div>)
-                 }
+                    </div>)
+                }
                 {/* /Add Classes */}
 
                 {/* Edit Classes */}
-                 {
-                    showEditModal&&(<div className="modal fade show d-block" id="edit_syllabus">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Edit Class</h4>
-                                <button
-                                    type="button"
-                                    className="btn-close custom-btn-close"
-                                    onClick={(e) =>cancelEditDataSubmit(e)}
-                                >
-                                    <i className="ti ti-x" />
-                                </button>
-                            </div>
-
-
-                            <form onSubmit={handleEditSubmit}>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <div className="col-md-12">
-                                            <div className="mb-2">
-                                                <label className="form-label">Title</label>
-                                                <input
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="title"
-                                                    value={editData.title}
-                                                    onChange={(e) => handleEditDataChange(e)}
-
-                                                />
-                                                {errors.title && <small className="text-danger">{errors.title}</small>}
-                                            </div>
-
-                                            <div className="mb-2">
-                                                <label className="form-label">Activity</label>
-                                                <input
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="activity"
-                                                    value={editData.activity}
-                                                    onChange={(e) => handleEditDataChange(e)}
-
-                                                />
-                                                {errors.activity && (
-                                                    <small className="text-danger">{errors.activity}</small>
-                                                )}
-                                            </div>
-
-                                            <div className="mb-2">
-                                                <label className="form-label">Description</label>
-                                                <textarea
-                                                    className="form-control"
-                                                    name="description"
-                                                    value={editData.description}
-                                                    onChange={(e) => handleEditDataChange(e)}
-
-                                                />
-                                                {errors.description && (
-                                                    <small className="text-danger">{errors.description}</small>
-                                                )}
-                                            </div>
-
-                                            <div className="mb-2">
-                                                <label className="form-label">Status</label>
-                                                <Select
-                                                    options={statusOptions}
-                                                    value={statusOptions.find(opt => opt.value === editData.status)}
-                                                    onChange={(option: any) => setEditData((prev) => ({ ...prev, "status": option.value }))}
-                                                    placeholder="Select Status"
-                                                    className="text-capitalize"
-                                                />
-
-                                                {errors.status && (
-                                                    <small className="text-danger">{errors.status}</small>
-                                                )}
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Footer */}
-                                <div className="modal-footer">
+                {
+                    showEditModal && (<div className="modal fade show d-block" id="edit_syllabus">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h4 className="modal-title">Edit Class</h4>
                                     <button
                                         type="button"
+                                        className="btn-close custom-btn-close"
                                         onClick={(e) => cancelEditDataSubmit(e)}
-                                        className="btn btn-light me-2"
-                                        
                                     >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary"
-
-                                    >
-                                        Save Changes
+                                        <i className="ti ti-x" />
                                     </button>
                                 </div>
-                            </form>
 
 
-                        </div>
-                    </div>
-                </div>)
-                 }
-                {/* /Edit Classes */}
-                {/* Delete Modal */}
-                 {
-                    showDelModal&&(<div className="modal fade show d-block" id="delete-modal">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <form>
-                                <div className="modal-body text-center">
-                                    <span className="delete-icon">
-                                        <i className="ti ti-trash-x" />
-                                    </span>
-                                    <h4>Confirm Deletion</h4>
-                                    <p>
-                                        You want to delete this items, this cant be undone once
-                                        you delete.
-                                    </p>
-                                    {
-                                        deleteId && (
-                                            <div className="d-flex justify-content-center">
-                                                <button
-                                                    onClick={(e) => cancelDelete(e)}
-                                                    className="btn btn-light me-3"
-                                                    
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
-                                                    Yes, Delete
-                                                </button>
+                                <form onSubmit={handleEditSubmit}>
+                                    <div className="modal-body">
+                                        <div className="row">
+                                            <div className="col-md-12">
+                                                <div className="mb-2">
+                                                    <label className="form-label">Title</label>
+                                                    <input
+                                                        className="form-control"
+                                                        type="text"
+                                                        name="title"
+                                                        value={editData.title}
+                                                        onChange={(e) => handleEditDataChange(e)}
+
+                                                    />
+                                                    {errors.title && <small className="text-danger">{errors.title}</small>}
+                                                </div>
+
+                                                <div className="mb-2">
+                                                    <label className="form-label">Activity</label>
+                                                    <input
+                                                        className="form-control"
+                                                        type="text"
+                                                        name="activity"
+                                                        value={editData.activity}
+                                                        onChange={(e) => handleEditDataChange(e)}
+
+                                                    />
+                                                    {errors.activity && (
+                                                        <small className="text-danger">{errors.activity}</small>
+                                                    )}
+                                                </div>
+
+                                                <div className="mb-2">
+                                                    <label className="form-label">Description</label>
+                                                    <textarea
+                                                        className="form-control"
+                                                        name="description"
+                                                        value={editData.description}
+                                                        onChange={(e) => handleEditDataChange(e)}
+
+                                                    />
+                                                    {errors.description && (
+                                                        <small className="text-danger">{errors.description}</small>
+                                                    )}
+                                                </div>
+
+                                                <div className="mb-2">
+                                                    <label className="form-label">Status</label>
+                                                    <Select
+                                                        options={statusOptions}
+                                                        value={statusOptions.find(opt => opt.value === editData.status)}
+                                                        onChange={(option: any) => setEditData((prev) => ({ ...prev, "status": option.value }))}
+                                                        placeholder="Select Status"
+                                                        className="text-capitalize"
+                                                    />
+
+                                                    {errors.status && (
+                                                        <small className="text-danger">{errors.status}</small>
+                                                    )}
+                                                </div>
 
                                             </div>
-                                        )}
-                                </div>
-                            </form>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => cancelEditDataSubmit(e)}
+                                            className="btn btn-light me-2"
+
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary"
+
+                                        >
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+
+
+                            </div>
                         </div>
-                    </div>
-                </div>)
-                 }
+                    </div>)
+                }
+                {/* /Edit Classes */}
+                {/* Delete Modal */}
+                {
+                    showDelModal && (<div className="modal fade show d-block" id="delete-modal">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <form>
+                                    <div className="modal-body text-center">
+                                        <span className="delete-icon">
+                                            <i className="ti ti-trash-x" />
+                                        </span>
+                                        <h4>Confirm Deletion</h4>
+                                        <p>
+                                            You want to delete this items, this cant be undone once
+                                            you delete.
+                                        </p>
+                                        {
+                                            deleteId && (
+                                                <div className="d-flex justify-content-center">
+                                                    <button
+                                                        onClick={(e) => cancelDelete(e)}
+                                                        className="btn btn-light me-3"
+
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
+                                                        Yes, Delete
+                                                    </button>
+
+                                                </div>
+                                            )}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>)
+                }
                 {/* /Delete Modal */}
 
             </>
 
             {/* view modal */}
             {
-                viewModal&&(<div
-                className="modal fade show d-block"
-                id="view_syllabus"
-               
-              
-            >
-                <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-                    <div className="modal-content shadow-lg border-0 rounded-4">
+                viewModal && (<div
+                    className="modal fade show d-block"
+                    id="view_syllabus"
 
-                        {/* Header */}
-                        <div className="modal-header bg-secondary text-white rounded-top-4">
-                            <div>
-                                <h4 className="modal-title mb-1" id="viewSyllabusModalLabel">
-                                    Monthly Curriculum
-                                </h4>
-                                <small className="opacity-75 text-dark">
-                                    Detailed syllabus overview
-                                </small>
+
+                >
+                    <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+                        <div className="modal-content shadow-lg border-0 rounded-4">
+
+                            {/* Header */}
+                            <div className="modal-header bg-secondary text-white rounded-top-4">
+                                <div>
+                                    <h4 className="modal-title mb-1" id="viewSyllabusModalLabel">
+                                        Monthly Curriculum
+                                    </h4>
+                                    <small className="opacity-75 text-dark">
+                                        Detailed syllabus overview
+                                    </small>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="btn-close btn-close-white"
+                                    onClick={() => setViewModal(false)}
+                                />
                             </div>
-                            <button
-                                type="button"
-                                className="btn-close btn-close-white"
-                                 onClick={()=>setViewModal(false)}
-                            />
-                        </div>
 
-                        {/* Body */}
-                        <div className="modal-body p-4 bg-light">
-                            {viewSyllabus ? (
-                                <>
-                                    {/* Top Meta Section */}
-                                    <div className="row mb-4">
-                                        {/* Class */}
-                                        <div className="col-md-4">
-                                            <div className="card border-0 shadow-sm">
-                                                <div className="card-body">
-                                                    <div className="text-muted">Class</div>
-                                                    <h5 className="mb-0">Class {viewSyllabus.class_name}</h5>
+                            {/* Body */}
+                            <div className="modal-body p-4 bg-light">
+                                {viewSyllabus ? (
+                                    <>
+                                        {/* Top Meta Section */}
+                                        <div className="row mb-4">
+                                            {/* Class */}
+                                            <div className="col-md-4">
+                                                <div className="card border-0 shadow-sm">
+                                                    <div className="card-body">
+                                                        <div className="text-muted">Class</div>
+                                                        <h5 className="mb-0">Class {viewSyllabus.class_name}</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Month */}
+                                            <div className="col-md-4">
+                                                <div className="card border-0 shadow-sm">
+                                                    <div className="card-body">
+                                                        <div className="text-muted">Month</div>
+                                                        <h5 className="mb-0">Month {viewSyllabus.month_no}</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Status */}
+                                            <div className="col-md-4">
+                                                <div className="card border-0 shadow-sm">
+                                                    <div className="card-body">
+                                                        <div className="text-muted">Status</div>
+                                                        <h5
+
+                                                            className={`mb-0 badge ${viewSyllabus.status === 'COMPLETED'
+                                                                ? 'bg-success'
+                                                                : viewSyllabus.status === 'IN_PROGRESS'
+                                                                    ? 'bg-primary'
+                                                                    : viewSyllabus.status === 'ON_HOLD'
+                                                                        ? 'bg-warning'
+                                                                        : 'bg-secondary'
+                                                                }`}
+                                                        >
+                                                            {viewSyllabus.status}
+                                                        </h5>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* Month */}
-                                        <div className="col-md-4">
-                                            <div className="card border-0 shadow-sm">
-                                                <div className="card-body">
-                                                    <div className="text-muted">Month</div>
-                                                    <h5 className="mb-0">Month {viewSyllabus.month_no}</h5>
-                                                </div>
+                                        {/* Title */}
+                                        <div className="card border-0 shadow-sm mb-4">
+                                            <div className="card-body">
+                                                <h6 className="text-muted mb-1">Topic Title</h6>
+                                                <h5 className="fw-semibold">{viewSyllabus.title}</h5>
                                             </div>
                                         </div>
 
-                                        {/* Status */}
-                                        <div className="col-md-4">
-                                            <div className="card border-0 shadow-sm">
-                                                <div className="card-body">
-                                                    <div className="text-muted">Status</div>
-                                                    <h5
-
-                                                        className={`mb-0 badge ${viewSyllabus.status === 'COMPLETED'
-                                                            ? 'bg-success'
-                                                            : viewSyllabus.status === 'IN_PROGRESS'
-                                                                ? 'bg-primary'
-                                                                : viewSyllabus.status === 'ON_HOLD'
-                                                                    ? 'bg-warning'
-                                                                    : 'bg-secondary'
-                                                            }`}
-                                                    >
-                                                        {viewSyllabus.status}
-                                                    </h5>
-                                                </div>
+                                        {/* Learning Activity */}
+                                        <div className="card border-0 shadow-sm mb-4">
+                                            <div className="card-body">
+                                                <h6 className="text-muted mb-2">Learning Activity</h6>
+                                                <p className="mb-0 text-dark">{viewSyllabus.activity}</p>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* Title */}
-                                    <div className="card border-0 shadow-sm mb-4">
-                                        <div className="card-body">
-                                            <h6 className="text-muted mb-1">Topic Title</h6>
-                                            <h5 className="fw-semibold">{viewSyllabus.title}</h5>
+                                        {/* Description */}
+                                        <div className="card border-0 shadow-sm mb-4">
+                                            <div className="card-body">
+                                                <h6 className="text-muted mb-2">Description</h6>
+                                                <div className="mb-0 text-dark">{viewSyllabus.description}</div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {/* Learning Activity */}
-                                    <div className="card border-0 shadow-sm mb-4">
-                                        <div className="card-body">
-                                            <h6 className="text-muted mb-2">Learning Activity</h6>
-                                            <p className="mb-0 text-dark">{viewSyllabus.activity}</p>
+                                        {/* Footer Meta */}
+                                        <div className="d-flex justify-content-between align-items-center text-muted small">
+                                            <div>
+                                                Created: {dayjs(viewSyllabus.created_at).format('DD MMM YYYY')}
+                                            </div>
+                                            <div>
+                                                Updated: {dayjs(viewSyllabus.updated_at).format('DD MMM YYYY')}
+                                            </div>
                                         </div>
-                                    </div>
+                                    </>
+                                ) : (
+                                    <Spinner />
+                                )}
+                            </div>
 
-                                    {/* Description */}
-                                    <div className="card border-0 shadow-sm mb-4">
-                                        <div className="card-body">
-                                            <h6 className="text-muted mb-2">Description</h6>
-                                            <div className="mb-0 text-dark">{viewSyllabus.description}</div>
-                                        </div>
-                                    </div>
+                            {/* Footer */}
+                            <div className="modal-footer bg-white border-top-0">
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary"
+                                    onClick={() => setViewModal(false)}
+                                >
+                                    Close
+                                </button>
+                            </div>
 
-                                    {/* Footer Meta */}
-                                    <div className="d-flex justify-content-between align-items-center text-muted small">
-                                        <div>
-                                            Created: {dayjs(viewSyllabus.created_at).format('DD MMM YYYY')}
-                                        </div>
-                                        <div>
-                                            Updated: {dayjs(viewSyllabus.updated_at).format('DD MMM YYYY')}
-                                        </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <Spinner />
-                            )}
                         </div>
-
-                        {/* Footer */}
-                        <div className="modal-footer bg-white border-top-0">
-                            <button
-                                type="button"
-                                className="btn btn-outline-secondary"
-                                 onClick={()=>setViewModal(false)}
-                            >
-                                Close
-                            </button>
-                        </div>
-
                     </div>
-                </div>
-            </div>)
+                </div>)
             }
         </div>
     );

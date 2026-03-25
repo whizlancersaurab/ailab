@@ -451,8 +451,6 @@ exports.getOutOfStockDeviceCountForSchoolDas = async (req, res) => {
   }
 };
 
-// super admin
-
 exports.aiDevicesCountForSchoolDas = async (req, res) => {
   const { schoolId } = req.params
   try {
@@ -521,6 +519,8 @@ exports.aiGetOutOfStockDeviceCountForSchoolDas = async (req, res) => {
   }
 };
 
+
+// robotics devices
 exports.getAllRoboticsDevicesForSchoolDas = async (req, res) => {
   const { schoolId } = req.params;
   try {
@@ -602,6 +602,7 @@ exports.OutOfStockDevicesForSchoolDas = async (req, res) => {
 };
 
 
+// ai devices
 exports.AideviceTypeCountForSchoolDas = async (req, res) => {
   const { schoolId } = req.params
   try {
@@ -698,6 +699,262 @@ exports.AiGetAllDevicesForSchoolDas = async (req, res) => {
   }
 };
 
+// syllabus
+exports.getAllClassSyllabusForSchoolDas = async (req, res) => {
+  const { schoolId } = req.params;
+  try {
+    const sql = `
+            SELECT s.id, c.class_name AS className, s.month_no, s.title, s.activity, s.description, s.status, s.updated_at
+            FROM curriculum_months s
+            LEFT JOIN classes c ON c.id = s.class_id
+            WHERE s.school_id=?
+            ORDER BY c.id ASC, s.month_no ASC
+        `;
+    const [rows] = await db.query(sql, [schoolId]);
+    return res.status(200).json({ success: true, message: 'All class syllabus fetched successfully!', data: rows });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+exports.getSyllabusByIdForSchoolDas = async (req, res) => {
+  const { id, schoolId } = req.params;
+
+
+  if (!id || isNaN(id)) return res.status(400).json({ success: false, message: "Invalid syllabus ID" });
+
+  try {
+    const sql = `
+            SELECT cm.id, cm.month_no, cm.title, cm.activity, cm.description, cm.created_at, cm.updated_at, c.class_name, cm.status
+            FROM curriculum_months cm
+            LEFT JOIN classes c ON c.id = cm.class_id
+            WHERE cm.id=? AND cm.school_id=?
+        `;
+    const [rows] = await db.query(sql, [id, schoolId]);
+
+    if (rows.length === 0) return res.status(404).json({ success: false, message: "Syllabus not found" });
+
+    return res.status(200).json({ success: true, data: rows[0] });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+// events
+exports.getEventsForSchoolDas = async (req, res) => {
+  const { schoolId } = req.params
+  try {
+    const [rows] = await db.query("SELECT id ,title,start,end,className FROM events WHERE school_id=? ORDER BY id DESC", [schoolId]);
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
+
+
+// daily task and progress data
+exports.getAllDailyTasksForSchoolDas = async (req, res) => {
+  const { schoolId } = req.params
+  try {
+    const sql = `
+            SELECT 
+                dt.id,
+                c.class_name AS className,
+                cm.month_no,
+                cm.title,
+                dt.task_title AS taskTitle,
+                dt.status,
+                dt.created_at
+            FROM daily_tasks dt
+            LEFT JOIN classes c ON c.id = dt.class_id
+            LEFT JOIN curriculum_months cm ON cm.id = dt.month_id
+            WHERE dt.school_id=?
+            ORDER BY dt.id DESC
+        `;
+
+    const [rows] = await db.query(sql, [schoolId]);
+
+    return res.status(200).json({
+      success: true,
+      data: rows
+    });
+
+  } catch (error) {
+    console.error("Get Daily Tasks Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.getClassProgressDataForSchoolDas = async (req, res) => {
+  const { class_id, schoolId } = req.params;
+
+
+  if (!class_id || isNaN(class_id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid class_id"
+    });
+  }
+
+  try {
+    // Get total tasks and completed tasks for the class
+    const sql = `
+            SELECT 
+                COUNT(*) AS totalTasks,
+                SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) AS completedTasks
+            FROM daily_tasks
+            WHERE class_id = ? AND school_id=?
+        `;
+
+    const [rows] = await db.query(sql, [class_id, schoolId]);
+
+    const totalTasks = rows[0].totalTasks || 0;
+    const completedTasks = Number(rows[0].completedTasks) || 0;
+
+    // Calculate percentage (avoid division by 0)
+    const completionPercent = totalTasks > 0
+      ? parseFloat(((completedTasks / totalTasks) * 100).toFixed(2))
+      : 0;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalTasks,
+        completedTasks,
+        completionPercent
+      },
+      message: "Class progress fetched successfully"
+    });
+
+  } catch (error) {
+    console.error("Get Progress Data Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// ai category and subcategory
+exports.getAiCategoriesForSchoolDas = async (req, res) => {
+  const { schoolId } = req.params
+  try {
+    const sql = `
+      SELECT 
+        id,
+        UPPER(category) AS category
+      FROM ai_category
+      WHERE school_id=?
+      ORDER BY id DESC
+    `
+
+    const [rows] = await db.query(sql, [schoolId])
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+    })
+  } catch (error) {
+    console.error("Get Categories Error:", error)
+    return res.status(500).json({
+      success: false,
+      message: "Error while fetching categories",
+    })
+  }
+}
+
+exports.allAiSubCategoriesForSchoolDas = async (req, res) => {
+  const { schoolId } = req.params
+  try {
+    const sql = `
+      SELECT 
+        sc.id,
+        sc.sub_category_name AS sub_category,
+        c.category
+      FROM ai_sub_categories sc
+      LEFT JOIN ai_category c ON sc.category_id = c.id
+      WHERE sc.school_id=?
+      ORDER BY sc.id DESC
+    `;
+
+    const [rows] = await db.query(sql, [schoolId]);
+    return res.status(200).json({ data: rows, success: true });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+// robo caregory and subcategory
+exports.getRoboCategoriesForSchoolDas = async (req, res) => {
+const {schoolId} = req.params
+  try {
+    const sql = `
+      SELECT 
+        id,
+        UPPER(category) AS category
+      FROM category
+      WHERE school_id=?
+      ORDER BY id DESC
+    `
+
+    const [rows] = await db.query(sql ,[schoolId])
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+    })
+  } catch (error) {
+    console.error("Get Categories Error:", error)
+    return res.status(500).json({
+      success: false,
+      message: "Error while fetching categories",
+    })
+  }
+}
+
+exports.allRoboSubCategoriesForSchoolDas = async (req, res) => {
+  const {schoolId} = req.params;
+
+  try {
+    const [rows] = await db.query(
+      `
+      SELECT 
+        sc.id,
+        sc.sub_category_name AS sub_category,
+        c.category
+      FROM sub_categories sc
+      JOIN category c 
+        ON c.id = sc.category_id 
+       AND c.school_id = sc.school_id
+      WHERE sc.school_id = ?
+      ORDER BY sc.id DESC
+      `,
+      [schoolId]
+    );
+
+    return res.status(200).json({ success: true, data: rows });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 
 
 
