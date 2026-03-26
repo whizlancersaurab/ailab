@@ -16,6 +16,7 @@ exports.allSchools = async (req, res) => {
     u.id AS userId,
     s.name,
     s.status,
+    s.lab_type,
     us.profileImage,
     s.schoolLogo,
     s.created_at
@@ -46,6 +47,7 @@ exports.allActiveSchools = async (req, res) => {
     u.email,
     s.name,
     s.status,
+    s.lab_type,
     us.profileImage,
     s.schoolLogo,
     s.created_at
@@ -75,6 +77,7 @@ exports.allSuspendedSchools = async (req, res) => {
     u.email,
     s.name,
     s.status,
+    s.lab_type,
     us.profileImage,
     s.schoolLogo,
     s.created_at
@@ -249,7 +252,7 @@ function generatePassword(length = 8) {
 }
 
 exports.addNewSchool = async (req, res) => {
-  const { schoolName, userId, teacher } = req.body;
+  const { schoolName,lab_type, userId, teacher } = req.body;
 
   if (!userId || !schoolName?.trim() || !teacher) {
     return res.status(400).json({
@@ -300,9 +303,9 @@ exports.addNewSchool = async (req, res) => {
       });
     }
     const [schoolResult] = await conn.query(
-      `INSERT INTO schools (name, status, schoolLogo, created_at)
-       VALUES (?, 'ACTIVE', ?, NOW())`,
-      [schoolName.trim(), schoolLogo]
+      `INSERT INTO schools (name, status, schoolLogo, lab_type, created_at)
+       VALUES (?, 'ACTIVE', ?, ?,NOW())`,
+      [schoolName.trim(),  schoolLogo ,lab_type??'SCHOOL_OWNED_LAB']
     );
 
     const schoolId = schoolResult.insertId;

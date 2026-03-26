@@ -1,5 +1,5 @@
 const db = require('../../../config/db');
-
+// const puppeteer = require("puppeteer");
 // Add curriculum months + activities (bulk)
 exports.addSyllabusMonths = async (req, res) => {
     const { class_id, months } = req.body;
@@ -197,5 +197,180 @@ exports.getSyllabusByClassIdAndId = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+
+exports.downloadSyllabusPDF = async (req, res) => {
+    const { schoolId } = req.params;
+
+    try {
+
+        const [[school]] = await db.query(
+            `SELECT name, schoolLogo FROM schools WHERE id=? LIMIT 1`,
+            [schoolId]
+        );
+
+        if (!school) {
+            return res.status(404).json({
+                success: false,
+                message: "School not found",
+            });
+        }
+
+        const [rows] = await db.query(`
+            SELECT c.class_name, s.month_no, s.title, s.activity, s.description, s.status
+            FROM curriculum_months s
+            LEFT JOIN classes c ON c.id = s.class_id
+            WHERE s.school_id=?
+            ORDER BY c.id ASC, s.month_no ASC
+        `, [schoolId]);
+
+        if (!rows.length) {
+            return res.status(404).json({
+                success: false,
+                message: "No syllabus found",
+            });
+        }
+
+        const grouped = {};
+        rows.forEach(item => {
+            if (!grouped[item.class_name]) grouped[item.class_name] = [];
+            grouped[item.class_name].push(item);
+        });
+
+
+
+        const html = `
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 30px;
+                    background: #f4f6f8;
+                }
+
+                .header {
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                    border-bottom: 2px solid #4a90e2;
+                    padding-bottom: 10px;
+                    margin-bottom: 20px;
+                }
+
+                .logo {
+                    height: 60px;
+                }
+
+                .school-name {
+                    font-size: 20px;
+                    font-weight: bold;
+                }
+
+                .report-title {
+                    font-size: 14px;
+                    color: #666;
+                }
+
+                .class-card {
+                    margin-top: 20px;
+                    background: #fff;
+                    padding: 20px;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+
+                .class-title {
+                    font-size: 18px;
+                    font-weight: bold;
+                    color: #4a90e2;
+                    margin-bottom: 10px;
+                }
+
+                .month {
+                    border-top: 1px solid #eee;
+                    padding: 10px 0;
+                }
+
+                .badge {
+                    padding: 4px 8px;
+                    border-radius: 5px;
+                    color: #fff;
+                    font-size: 12px;
+                }
+
+                .COMPLETED { background: #28a745; }
+                .IN_PROGRESS { background: #007bff; }
+                .ON_HOLD { background: #ffc107; color:#000; }
+                .PENDING { background: #6c757d; }
+
+            </style>
+        </head>
+
+        <body>
+
+            <div class="header">
+                <img src="${school.schoolLogo}" class="logo"/>
+                <div>
+                    <div class="school-name">${school.name}</div>
+                    <div class="report-title">📘 Syllabus Report</div>
+                </div>
+            </div>
+
+            ${Object.keys(grouped).map(className => `
+                <div class="class-card">
+                    <div class="class-title">Class ${className}</div>
+
+                    ${grouped[className].map(item => `
+                        <div class="month">
+                            <strong>Month ${item.month_no}</strong>
+                            <div><b>Title:</b> ${item.title || '-'}</div>
+                            <div><b>Activity:</b> ${item.activity}</div>
+                            <div><b>Description:</b> ${item.description}</div>
+                            <div>
+                                <span class="badge ${item.status}">
+                                    ${item.status}
+                                </span>
+                            </div>
+                        </div>
+                    `).join("")}
+
+                </div>
+            `).join("")}
+
+        </body>
+        </html>
+        `;
+
+        // ✅ 6. Generate PDF
+        const browser = await puppeteer.launch({
+            headless: "new",
+            args: ["--no-sandbox"]
+        });
+
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: "networkidle0" });
+
+        const pdfBuffer = await page.pdf({
+            format: "A4",
+            printBackground: true
+        });
+
+        await browser.close();
+
+        // ✅ 7. Send PDF
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", "attachment; filename=syllabus.pdf");
+
+        return res.send(pdfBuffer);
+
+    } catch (error) {
+        console.error("PDF Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "PDF generation failed",
+        });
     }
 };

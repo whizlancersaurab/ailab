@@ -151,9 +151,9 @@ const SchoolDashboard = () => {
   }
 
   const fetchProgressData = async (id: number) => {
-    if(!schoolId) return
+    if (!schoolId) return
     try {
-      const { data } = await classProgressDataForSchoolDas(id ,Number(schoolId));
+      const { data } = await classProgressDataForSchoolDas(id, Number(schoolId));
       if (data.success) {
         setProgressData(data.data);
       }
@@ -212,7 +212,6 @@ const SchoolDashboard = () => {
       <div className="page-wrapper">
         <div className="content">
           <>
-
             <div className="d-md-flex d-block align-items-center justify-content-between mb-3">
               <div className="my-auto mb-2">
                 <h3 className="page-title mb-1">Lab Management</h3>
@@ -228,7 +227,6 @@ const SchoolDashboard = () => {
               </div>
 
             </div>
-
             <div className="row">
               <div className="col-md-12">
 
@@ -362,7 +360,6 @@ const SchoolDashboard = () => {
               </div>
               {/* /Total items */}
             </div>
-
             <div className="row">
               <h1 className="fw-semibold fs-4 my-2">AI Data</h1>
               {/* Total Devices */}
@@ -407,7 +404,7 @@ const SchoolDashboard = () => {
               <div className="col-xxl-4 col-sm-6 d-flex">
                 <div className="card flex-fill animate-card border-0">
                   <div className="card-body">
-                   <Link to={`${routes.aidevicesoutofstock}/${schoolId}`}>
+                    <Link to={`${routes.aidevicesoutofstock}/${schoolId}`}>
                       <div className="d-flex align-items-center">
                         <div className="avatar avatar-xl me-2 bg-secondary-transparent p-1">
                           <ImageWithBasePath
@@ -482,10 +479,9 @@ const SchoolDashboard = () => {
               {/* /Total items */}
 
             </div>
-
             <div className="row">
 
-              
+
 
               <div className=" col-xl-6 col-md-12 d-flex flex-column">
                 <div className="card">
@@ -570,7 +566,7 @@ const SchoolDashboard = () => {
                   <div className="card-header d-flex align-items-center justify-content-between">
                     <h4 className="card-title">Quick Links</h4>
                   </div>
-                  
+
                   <div className="card-body ">
                     <Slider
                       {...settings}
@@ -579,7 +575,7 @@ const SchoolDashboard = () => {
 
                       <div className="item">
                         <Link
-                         to={`${routes.dailytaskdata}/${schoolId}`}
+                          to={`${routes.dailytaskdata}/${schoolId}`}
                           className="d-block bg-success-transparent ronded p-1 text-center mb-3 class-hover"
                         >
                           <div className="avatar avatar-lg border p-1 border-success rounded-circle mb-2">
@@ -603,7 +599,7 @@ const SchoolDashboard = () => {
                       </div>
                       <div className="item">
                         <Link
-                           to={`${routes.eventsdata}/${schoolId}`}
+                          to={`${routes.eventsdata}/${schoolId}`}
                           className="d-block bg-primary-transparent ronded p-1 text-center mb-3 class-hover"
                         >
                           <div className="avatar avatar-lg border p-1 border-primary rounded-circle mb-2">
@@ -625,19 +621,19 @@ const SchoolDashboard = () => {
                           <p className="text-dark">Syllabus</p>
                         </Link>
                       </div>
-                      
+
 
 
                     </Slider>
                   </div>
-                   <div className="card-body ">
+                  <div className="card-body ">
                     <Slider
                       {...settings}
                       className="owl-carousel link-slider"
                     >
-                       <div className="item">
+                      <div className="item">
                         <Link
-                           to={`${routes.robocategoryforschooldas}/${schoolId}`}
+                          to={`${routes.robocategoryforschooldas}/${schoolId}`}
                           className="d-block bg-primary-transparent ronded p-1 text-center mb-3 class-hover"
                         >
                           <div className="avatar avatar-lg border p-1 border-primary rounded-circle mb-2">
@@ -659,14 +655,14 @@ const SchoolDashboard = () => {
                           <p className="text-dark">Robotics Sub-Category</p>
                         </Link>
                       </div>
-                        <div className="item">
+                      <div className="item">
                         <Link
                           to={`${routes.aicategoryforschooldas}/${schoolId}`}
                           className="d-block bg-primary-transparent ronded p-1 text-center mb-3 class-hover"
                         >
                           <div className="avatar avatar-lg border p-1 border-primary rounded-circle mb-2">
                             <span className="d-inline-flex align-items-center justify-content-center w-100 h-100 bg-secondary rounded-circle">
-                               <i className="ti ti-license" />
+                              <i className="ti ti-license" />
                             </span>
                           </div>
                           <p className="text-dark">AI Category</p>

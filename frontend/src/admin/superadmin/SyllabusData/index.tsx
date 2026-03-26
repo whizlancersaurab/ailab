@@ -277,6 +277,22 @@ const SyllabusForSchoolDas = () => {
         }
     };
 
+//     onClick={async () => {
+//     const res = await fetch("/api/download-syllabus", {
+//         headers: {
+//             Authorization: `Bearer ${localStorage.getItem("token")}`
+//         }
+//     });
+
+//     const blob = await res.blob();
+//     const url = window.URL.createObjectURL(blob);
+
+//     const a = document.createElement("a");
+//     a.href = url;
+//     a.download = "syllabus.pdf";
+//     a.click();
+// }}
+
 
     return (
         <div>

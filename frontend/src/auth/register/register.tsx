@@ -25,6 +25,7 @@ interface TeacherForm {
 
 interface SchoolForm {
   schoolName: string;
+  labType: "COMPANY_OWNED_LAB" | "SCHOOL_OWNED_LAB",
   profileFile: File | null;   // admin image
   profilePreview: string | null;
   logoFile: File | null;      // school logo
@@ -56,6 +57,7 @@ const Register: React.FC = () => {
   const [schools, setSchools] = useState<SchoolForm[]>([
     {
       schoolName: "",
+      labType: "SCHOOL_OWNED_LAB",
       profileFile: null,
       profilePreview: null,
       logoFile: null,
@@ -71,7 +73,7 @@ const Register: React.FC = () => {
     localStorage.setItem("menuOpened", "Register");
   }, []);
 
- 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -111,18 +113,24 @@ const Register: React.FC = () => {
         updated[schoolIdx].teacher.profilePreview = URL.createObjectURL(value);
       }
     } else {
-   
+
       updated[schoolIdx].teacher[field] = value as string;
     }
     setSchools(updated);
   };
+  const handleLabTypeChange = (index: number, value: "COMPANY_OWNED_LAB" | "SCHOOL_OWNED_LAB") => {
+    const updated = [...schools];
+    updated[index].labType = value;
+    setSchools(updated);
+  };
 
-  
+
   const addSchool = () => {
     setSchools(prev => [
       ...prev,
       {
         schoolName: "",
+        labType: "SCHOOL_OWNED_LAB",
         profileFile: null,
         profilePreview: null,
         logoFile: null,
@@ -154,6 +162,9 @@ const Register: React.FC = () => {
     // Validate each school and teacher
     schools.forEach((school, idx) => {
       if (!school.schoolName.trim()) err[`schoolName${idx}`] = `School ${idx + 1} name is required`;
+      if (!school.labType) {
+        err[`labType${idx}`] = "Lab type is required";
+      }
       const t = school.teacher;
       if (!t.firstName.trim()) err[`teacherFirstName${idx}`] = "Teacher first name required";
       if (!t.email.trim()) err[`teacherEmail${idx}`] = "Teacher email required";
@@ -168,6 +179,7 @@ const Register: React.FC = () => {
     setSchools([
       {
         schoolName: "",
+        labType: "SCHOOL_OWNED_LAB",
         profileFile: null,
         profilePreview: null,
         logoFile: null,
@@ -195,6 +207,7 @@ const Register: React.FC = () => {
         "schools",
         JSON.stringify({
           schoolName: school.schoolName,
+          labType: school.labType,
           teacher: {
             firstName: school.teacher.firstName,
             lastName: school.teacher.lastName,
@@ -208,10 +221,10 @@ const Register: React.FC = () => {
       if (school.teacher.profileFile) formData.append("teacherProfileImage", school.teacher.profileFile);
     });
 
-     
-  // for (const pair of formData.entries()) {
-  //   console.log(pair[0], pair[1]);
-  // }
+
+    // for (const pair of formData.entries()) {
+    //   console.log(pair[0], pair[1]);
+    // }
 
     try {
       const { data } = await register(formData);
@@ -232,7 +245,7 @@ const Register: React.FC = () => {
       <div className="w-100 vh-100">
         <div className="row">
           {/* LEFT SIDE */}
-         
+
 
           {/* RIGHT SIDE */}
           <div style={{ overflowY: 'scroll' }} className="col-12">
@@ -240,7 +253,7 @@ const Register: React.FC = () => {
               <div className="col-md-8 p-4">
                 <form onSubmit={handleSubmit}>
                   <div className="text-center mb-4">
-                   <h1>Register New School</h1>
+                    <h1>Register New School</h1>
                   </div>
 
                   <div className="card">
@@ -278,14 +291,36 @@ const Register: React.FC = () => {
                         {errors.confirmPassword && <p className="text-danger">{errors.confirmPassword}</p>}
                       </div>
 
+                      <h2 className="my-2">School Details</h2>
+
                       {/* Schools */}
                       {schools.map((school, idx) => (
                         <div key={idx} className="border p-3 mb-3 rounded">
                           <h5>School {idx + 1}</h5>
                           <input type="text" value={school.schoolName} onChange={(e) => handleSchoolChange(idx, e.target.value)} placeholder="School Name" className="form-control mb-2" />
                           {errors[`schoolName${idx}`] && <p className="text-danger">{errors[`schoolName${idx}`]}</p>}
+                          <div>
+                            <label className="form-label">Lab Type</label>
+                            <select
+                              value={school.labType}
+                              onChange={(e) =>
+                                handleLabTypeChange(
+                                  idx,
+                                  e.target.value as "COMPANY_OWNED_LAB" | "SCHOOL_OWNED_LAB"
+                                )
+                              }
+                              className="form-control form-select mb-2"
+                            >
+                              <option value="SCHOOL_OWNED_LAB">School Owned Lab</option>
+                              <option value="COMPANY_OWNED_LAB">Company Owned Lab</option>
+                            </select>
 
+                          </div>
                           <div className="row mb-3">
+
+                            {errors[`labType${idx}`] && (
+                              <p className="text-danger">{errors[`labType${idx}`]}</p>
+                            )}
                             <div className="col-6">
                               <CircleImage preview={school.profilePreview} label="User Image" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleProfileChange(idx, f); }} />
                             </div>

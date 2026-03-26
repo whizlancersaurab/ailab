@@ -17,8 +17,9 @@ export interface schoolData {
     lastname: string,
     email: string,
     name: string,
-     profileImage:string,
-    schoolLogo:string,
+    lab_type: "COMPANY_OWNED_LAB" | "SCHOOL_OWNED_LAB",
+    profileImage: string,
+    schoolLogo: string,
     status: 'SUSPENDED | ACTIVE',
     updated_at: string;
 }
@@ -39,7 +40,7 @@ const SuspendedSchool = () => {
     const [editId, setEditId] = useState<number | null>(null)
     const [schoolName, setSchoolName] = useState<string>('')
     const [status, setStatus] = useState<string | 'ACTIVE' | 'SUSPENDED'>('')
-    const [editModal ,setEditModal] = useState<boolean>(false)
+    const [editModal, setEditModal] = useState<boolean>(false)
 
     const fetchSchools = async () => {
         setLoading(true)
@@ -113,7 +114,7 @@ const SuspendedSchool = () => {
                 setEditId(null)
                 setSchoolName('')
                 setStatus('')
-              setEditModal(false)
+                setEditModal(false)
 
             }
 
@@ -126,7 +127,7 @@ const SuspendedSchool = () => {
 
     // delete class ===================
     const [deleteId, setDeleteId] = useState<number | null>(null)
-    const [delModal ,setDelModal] = useState<boolean>(false)
+    const [delModal, setDelModal] = useState<boolean>(false)
 
     const handleDelete = async (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
@@ -167,17 +168,17 @@ const SuspendedSchool = () => {
             dataIndex: "id",
             render: (text: any) => (
                 <>
-                    <Link  to={`${route.schooldashboard}/${text}`} className="link-primary">
+                    <Link to={`${route.schooldashboard}/${text}`} className="link-primary">
                         SC-{text}
                     </Link>
                 </>
             ),
         },
 
-      {
+        {
             title: "School Logo",
             dataIndex: "schoolLogo",
-            render: (text: any , record:any) => (
+            render: (text: any, record: any) => (
                 <Link className="cursor-pointer" to={`${route.schooldashboard}/${record.id}`} ><img style={{ objectFit: 'cover', borderRadius: '100%', width: '60px', height: '60px' }} className="text-capitalize" src={text ?? 'assets/img/school.webp'} /></Link>
             ),
             sorter: (a: any, b: any) => a.schoolLogo.length - b.schoolLogo.length,
@@ -192,12 +193,23 @@ const SuspendedSchool = () => {
             sorter: (a: any, b: any) => a.name.length - b.name.length,
         },
         {
+            title: "Lab Type",
+            dataIndex: "lab_type",
+            render: (text: string) => {
+                if (text === "SCHOOL_OWNED_LAB") return "School Owned";
+                if (text === "COMPANY_OWNED_LAB") return "Company Owned";
+                return text;
+            },
+            sorter: (a: any, b: any) =>
+                (a.lab_type || "").localeCompare(b.lab_type || ""),
+        },
+        {
             title: "User Image",
             dataIndex: "profileImage",
             render: (text: any) => (
-                <img style={{objectFit:'cover' , borderRadius:'100%' , width:'60px' , height:'60px'}} className="text-capitalize" src={text??'assets/img/user.jpg'} />
+                <img style={{ objectFit: 'cover', borderRadius: '100%', width: '60px', height: '60px' }} className="text-capitalize" src={text ?? 'assets/img/user.jpg'} />
             ),
-            sorter: (a: any, b: any) => a. profileImage.length - b. profileImage.length,
+            sorter: (a: any, b: any) => a.profileImage.length - b.profileImage.length,
         },
         {
             title: "FirstName",
@@ -270,7 +282,7 @@ const SuspendedSchool = () => {
                                     <button
                                         className="dropdown-item rounded-1"
                                         onClick={() => fetchSpeSchool(record.id)}
-                                        
+
                                     >
                                         <i className="ti ti-edit-circle me-2" />
                                         Edit
@@ -280,12 +292,12 @@ const SuspendedSchool = () => {
                                 <li>
                                     <button
                                         className="dropdown-item rounded-1"
-                                        onClick={() =>{ 
+                                        onClick={() => {
                                             setDeleteId(record.id)
                                             setDelModal(true)
 
-                                         }}
-                                       
+                                        }}
+
                                     >
                                         <i className="ti ti-trash-x me-2" />
                                         Delete
@@ -396,112 +408,112 @@ const SuspendedSchool = () => {
             <>
 
                 {/* change status */}
-              {
-                editModal&&(   <div
-                    className="modal fade show d-block"
-                    id="changeModal"
-                   
-                >
-                    <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                        <div className="modal-content">
+                {
+                    editModal && (<div
+                        className="modal fade show d-block"
+                        id="changeModal"
 
-                            <form onSubmit={handelChageSubmit}>
-                                {/* HEADER */}
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Change status</h5>
-                                    <button type="button" onClick={cancelEdit} className="btn-close" />
-                                </div>
+                    >
+                        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div className="modal-content">
 
-                                {/* BODY */}
-                                <div className="modal-body">
+                                <form onSubmit={handelChageSubmit}>
+                                    {/* HEADER */}
+                                    <div className="modal-header">
+                                        <h5 className="modal-title">Change status</h5>
+                                        <button type="button" onClick={cancelEdit} className="btn-close" />
+                                    </div>
 
-                                    {/* DEVICE NAME */}
-                                    <div className="mb-3">
-                                        <label className="form-label">School Name</label>
-                                        <input
-                                            className={`form-control`}
-                                            value={schoolName}
-                                            disabled={true}
-                                            // onChange={(e) => setDeviceName(e.target.value)}
-                                            placeholder="School name"
-                                        />
+                                    {/* BODY */}
+                                    <div className="modal-body">
+
+                                        {/* DEVICE NAME */}
+                                        <div className="mb-3">
+                                            <label className="form-label">School Name</label>
+                                            <input
+                                                className={`form-control`}
+                                                value={schoolName}
+                                                disabled={true}
+                                                // onChange={(e) => setDeviceName(e.target.value)}
+                                                placeholder="School name"
+                                            />
+
+                                        </div>
+
+                                        {/* STATUS */}
+                                        <div className="mb-3">
+                                            <label className="form-label">Category</label>
+                                            <Select
+                                                options={schoolStatus}
+                                                value={schoolStatus.find((i: any) => i.value === status)}
+                                                onChange={(opt: any) => setStatus(opt.value)}
+                                                placeholder="Select Category"
+
+                                            />
+
+                                        </div>
 
                                     </div>
 
-                                    {/* STATUS */}
-                                    <div className="mb-3">
-                                        <label className="form-label">Category</label>
-                                        <Select
-                                            options={schoolStatus}
-                                            value={schoolStatus.find((i: any) => i.value === status)}
-                                            onChange={(opt: any) => setStatus(opt.value)}
-                                            placeholder="Select Category"
+                                    {/* FOOTER */}
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary me-1"
 
-                                        />
+                                            onClick={cancelEdit}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            Change Status
 
+                                        </button>
                                     </div>
 
-                                </div>
+                                </form>
 
-                                {/* FOOTER */}
-                                <div className="modal-footer">
-                                    <button
-                                        type="button"
-                                        className="btn btn-secondary me-1"
-                                     
-                                        onClick={cancelEdit}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button type="submit" className="btn btn-primary">
-                                        Change Status
-
-                                    </button>
-                                </div>
-
-                            </form>
-
+                            </div>
                         </div>
-                    </div>
-                </div>)
-              }
+                    </div>)
+                }
                 {/* Delete Modal */}
-                 {
-                    delModal&&(<div className="modal fade show d-block" id="delete-modal">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <form>
-                                <div className="modal-body text-center">
-                                    <span className="delete-icon">
-                                        <i className="ti ti-trash-x" />
-                                    </span>
-                                    <h4>Confirm Deletion</h4>
-                                    <p>
-                                        You want to delete this items, this cant be undone once
-                                        you delete.
-                                    </p>
-                                    {
-                                        deleteId && (
-                                            <div className="d-flex justify-content-center">
-                                                <button
-                                                    onClick={(e) => cancelDelete(e)}
-                                                    className="btn btn-light me-3"
-                                                  
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
-                                                    Yes, Delete
-                                                </button>
+                {
+                    delModal && (<div className="modal fade show d-block" id="delete-modal">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <form>
+                                    <div className="modal-body text-center">
+                                        <span className="delete-icon">
+                                            <i className="ti ti-trash-x" />
+                                        </span>
+                                        <h4>Confirm Deletion</h4>
+                                        <p>
+                                            You want to delete this items, this cant be undone once
+                                            you delete.
+                                        </p>
+                                        {
+                                            deleteId && (
+                                                <div className="d-flex justify-content-center">
+                                                    <button
+                                                        onClick={(e) => cancelDelete(e)}
+                                                        className="btn btn-light me-3"
 
-                                            </div>
-                                        )}
-                                </div>
-                            </form>
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
+                                                        Yes, Delete
+                                                    </button>
+
+                                                </div>
+                                            )}
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                </div>)
-                 }
+                    </div>)
+                }
             </>
         </div>
     );

@@ -80,9 +80,9 @@ exports.register = async (req, res) => {
       const adminProfileImage = adminImages[i]?.path || null;
       const teacherProfileImage = teacherImages[i]?.path || null;
       const [schoolResult] = await conn.query(
-        `INSERT INTO schools (name, status, schoolLogo, created_at)
-         VALUES (?, 'ACTIVE', ?, NOW())`,
-        [schoolData.schoolName.trim(), schoolLogo]
+        `INSERT INTO schools (name, status, schoolLogo, lab_type ,created_at)
+         VALUES (?, 'ACTIVE', ?, ? , NOW())`,
+        [schoolData.schoolName.trim(), schoolLogo , schoolData.labType??'SCHOOL_OWNED_LAB']
       );
 
       const schoolId = schoolResult.insertId;

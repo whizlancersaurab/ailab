@@ -19,6 +19,7 @@ export interface schoolData {
     lastname: string,
     email: string,
     name: string,
+    lab_type: "COMPANY_OWNED_LAB" | "SCHOOL_OWNED_LAB",
     profileImage: string,
     schoolLogo: string,
     status: 'SUSPENDED | ACTIVE',
@@ -74,8 +75,8 @@ const School = () => {
         if (!id) return
         try {
 
-        const { data } = await speSchool(id)
-        
+            const { data } = await speSchool(id)
+
             if (data.success) {
                 console.log(data)
                 setStatus(data.data.status)
@@ -174,7 +175,7 @@ const School = () => {
             render: (text: any) => (
                 <>
                     <Link to={`${route.schooldashboard}/${text}`} className="link-primary">
-                       SC-{text}
+                        SC-{text}
                     </Link>
                 </>
             ),
@@ -182,7 +183,7 @@ const School = () => {
         {
             title: "School Logo",
             dataIndex: "schoolLogo",
-            render: (text: any ,record: any) => (
+            render: (text: any, record: any) => (
                 <Link className="cursor-pointer" to={`${route.schooldashboard}/${record.id}`} ><img style={{ objectFit: 'cover', borderRadius: '100%', width: '60px', height: '60px' }} className="text-capitalize" src={text ?? 'assets/img/school.webp'} /></Link>
             ),
             sorter: (a: any, b: any) => a.schoolLogo.length - b.schoolLogo.length,
@@ -195,6 +196,17 @@ const School = () => {
                 <span className="text-capitalize">{text}</span>
             ),
             sorter: (a: any, b: any) => a.name.length - b.name.length,
+        },
+        {
+            title: "Lab Type",
+            dataIndex: "lab_type",
+            render: (text: string) => {
+                if (text === "SCHOOL_OWNED_LAB") return "School Owned";
+                if (text === "COMPANY_OWNED_LAB") return "Company Owned";
+                return text;
+            },
+            sorter: (a: any, b: any) =>
+                (a.lab_type || "").localeCompare(b.lab_type || ""),
         },
         {
             title: "User Image",
@@ -273,7 +285,7 @@ const School = () => {
                                         Edit
                                     </button>
                                 </li>
-                                
+
 
                                 <li>
                                     <button
@@ -396,7 +408,7 @@ const School = () => {
                     editModal && (<div
                         className="modal fade show d-block"
                         id="changeModal"
-                      
+
                     >
                         <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                             <div className="modal-content">
@@ -502,7 +514,7 @@ const School = () => {
                     </div>)
                 }
 
-               
+
             </>
         </div>
     );

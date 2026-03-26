@@ -21,7 +21,7 @@ const NewSchool = () => {
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-
+  const [labType, setlabType] = useState<"COMPANY_OWNED_LAB" | "SCHOOL_OWNED_LAB">("SCHOOL_OWNED_LAB")
   // Teacher fields
   const [teacherFirstName, setTeacherFirstName] = useState<string>("");
   const [teacherLastName, setTeacherLastName] = useState<string>("");
@@ -120,6 +120,7 @@ const NewSchool = () => {
 
     // School info
     formData.append("schoolName", schoolName);
+    formData.append('lab_type' , labType);
     formData.append("userId", String(user));
     if (profileFile) formData.append("profileImage", profileFile);
     if (logoFile) formData.append("schoolLogo", logoFile);
@@ -135,6 +136,9 @@ const NewSchool = () => {
     );
     if (teacherProfileFile) formData.append("teacherProfileImage", teacherProfileFile);
 
+    //   for (const pair of formData.entries()) {
+    //   console.log(pair[0], pair[1]);
+    // }
     try {
       const { data } = await addNewSchool(formData);
 
@@ -215,10 +219,22 @@ const NewSchool = () => {
                     />
                     {errors.schoolName && <small className="text-danger">{errors.schoolName}</small>}
                   </div>
+                  <div>
+                    <label className="form-label">Lab Type</label>
+                    <select
+                      value={labType}
+                      onChange={(e) => setlabType(e.target.value as "COMPANY_OWNED_LAB" | "SCHOOL_OWNED_LAB")}
+                      className="form-control form-select mb-2"
+                    >
+                      <option value="SCHOOL_OWNED_LAB">School Owned Lab</option>
+                      <option value="COMPANY_OWNED_LAB">Company Owned Lab</option>
+                    </select>
+
+                  </div>
 
                   {/* Owner */}
                   <div className="mb-3">
-                    <label htmlFor="">Owner Name</label>
+                    <label className="form-label" htmlFor="">Owner Name</label>
                     <Select<OptionType>
                       options={users}
                       value={users.find((o) => Number(o.value) === user)}
