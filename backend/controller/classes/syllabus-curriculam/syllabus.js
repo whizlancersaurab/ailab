@@ -1,7 +1,9 @@
 const db = require('../../../config/db');
+const xlsx = require("xlsx");
 // const puppeteer = require("puppeteer");
 // Add curriculum months + activities (bulk)
 exports.addSyllabusMonths = async (req, res) => {
+    
     const { class_id, months } = req.body;
     const schoolId = req.schoolId;
     const allowedStatus = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD'];
@@ -374,3 +376,171 @@ exports.downloadSyllabusPDF = async (req, res) => {
         });
     }
 };
+
+
+// const pdfParse = require("pdf-parse");
+
+
+// ------------------- PDF Parsing Function -------------------
+const parseFullSyllabus = (text) => {
+    const classes = [];
+    const classMatches = [...text.matchAll(/Class:\s*(\d+)/g)];
+
+    const classBlocks = text.split(/Class:\s*\d+/).filter(b => b.trim() !== "");
+
+    classBlocks.forEach((block, idx) => {
+        const class_id = Number(classMatches[idx][1]);
+        const months = [];
+
+        const monthMatches = [...block.matchAll(/Month:\s*(\d+)/g)];
+        const monthBlocks = block.split(/Month:\s*\d+/).filter(b => b.trim() !== "");
+
+        monthBlocks.forEach((mBlock, mIdx) => {
+            const month_no = Number(monthMatches[mIdx][1]);
+            const title = mBlock.match(/Title:\s*(.*)/)?.[1]?.trim() || "";
+            const activity = mBlock.match(/Activity:\s*(.*)/)?.[1]?.trim() || "";
+            const description = mBlock.match(/Description:\s*(.*)/)?.[1]?.trim() || "";
+
+            months.push({
+                month_no,
+                title,
+                activity,
+                description,
+                status: "PENDING"
+            });
+        });
+
+        classes.push({ class_id, months });
+    });
+
+    return classes;
+};
+
+exports.addClassSyllabusViaPdf = () => async (req, res) => {
+    const schoolId = Number(req.params.schoolId);
+    if (!req.file) return res.status(400).json({ success: false, message: "PDF file missing" });
+
+    try {
+        // PDF text extraction
+        const dataBuffer = req.file.buffer;
+        const pdfData = await pdfParse(dataBuffer);
+        const classesData = parseFullSyllabus(pdfData.text);
+
+        const connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        try {
+            const sql = `
+                INSERT INTO curriculum_months 
+                (school_id, class_id, month_no, title, activity, description, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            for (let cls of classesData) {
+                for (let m of cls.months) {
+                    // Duplicate check
+                    const [existing] = await connection.query(
+                        `SELECT id FROM curriculum_months WHERE school_id=? AND class_id=? AND month_no=?`,
+                        [schoolId, cls.class_id, m.month_no]
+                    );
+                    if (existing.length > 0) continue; // skip duplicate
+
+                    await connection.query(sql, [
+                        schoolId,
+                        cls.class_id,
+                        m.month_no,
+                        m.title,
+                        m.activity,
+                        m.description,
+                        m.status
+                    ]);
+                }
+            }
+
+            await connection.commit();
+            connection.release();
+
+            return res.json({ success: true, message: "Syllabus uploaded successfully" });
+        } catch (err) {
+            await connection.rollback();
+            connection.release();
+            console.error(err);
+            return res.status(500).json({ success: false, message: err.message });
+        }
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+const parseExcelSyllabus = (rows) => {
+    const classes = [];
+    const classMap = {};
+
+    rows.forEach(row => {
+        const { Class: class_id, Month: month_no, Title: title, Activity: activity, Description: description } = row;
+        if (!classMap[class_id]) classMap[class_id] = { class_id, months: [] };
+        classMap[class_id].months.push({
+            month_no,
+            title: title?.trim(),
+            activity: activity?.trim(),
+            description: description?.trim(),
+            status: "PENDING"
+        });
+    });
+
+    return Object.values(classMap);
+};
+
+exports.addClassSyllabusViaExcel = async (req, res) => {
+    
+    try {
+        const schoolId = Number(req.params.schoolId);
+        if (!req.file) return res.status(400).json({ success: false, message: "Excel file missing" });
+
+        const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = xlsx.utils.sheet_to_json(sheet);
+        const classesData = parseExcelSyllabus(rows);
+        const connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        const sql = `
+            INSERT INTO curriculum_months 
+            (school_id, class_id, month_no, title, activity, description, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        for (let cls of classesData) {
+            for (let m of cls.months) {
+                const [existing] = await connection.query(
+                    `SELECT id FROM curriculum_months WHERE school_id=? AND class_id=? AND month_no=?`,
+                    [schoolId, cls.class_id, m.month_no]
+                );
+                if (existing.length > 0) continue;
+
+                await connection.query(sql, [
+                    schoolId,
+                    cls.class_id,
+                    m.month_no,
+                    m.title,
+                    m.activity,
+                    m.description,
+                    m.status
+                ]);
+            }
+        }
+
+        await connection.commit();
+        connection.release();
+
+        return res.status(200).json({ success: true, message: "Excel syllabus uploaded successfully" });
+
+    } catch (err) {
+        console.error("Error uploading syllabus Excel:", err);
+        return res.status(500).json({ success: false, message: err.message || "Internal Server Error" });
+    }
+};
+

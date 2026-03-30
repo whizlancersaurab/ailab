@@ -6,7 +6,7 @@ import { all_routes } from "../../../router/all_routes";
 
 // allClasses
 import { toast } from "react-toastify";
-import {allClassSyllabusForSchoolDas, classForOption, speSyllabusForSchoolDas, } from "../../../service/api";
+import { addSyllabusExcelFile, allClassSyllabusForSchoolDas, classForOption, speSyllabusForSchoolDas, } from "../../../service/api";
 import type { OptionType, syllabusData } from "../../../core/data/interface";
 import Select from "react-select";
 import dayjs from 'dayjs'
@@ -14,7 +14,7 @@ import { Spinner } from "../../../spinner";
 
 const SyllabusForSchoolDas = () => {
     const route = all_routes
-    const {schoolId} = useParams()
+    const { schoolId } = useParams()
     const [allSyllabusData, setAllSyllabusData] = useState<syllabusData[]>([])
     const [originalAllSyllabusData, setOriginalAllSyllabusData] = useState<syllabusData[]>([])
     const [classOptions, setClassOptions] = useState<OptionType[]>([])
@@ -26,7 +26,7 @@ const SyllabusForSchoolDas = () => {
 
 
 
-    const fetchAllClassSyllabus = async (schoolId:number) => {
+    const fetchAllClassSyllabus = async (schoolId: number) => {
 
         setLoading(true)
         try {
@@ -60,10 +60,10 @@ const SyllabusForSchoolDas = () => {
     }
 
     useEffect(() => {
-      
+
         fetchClassForOption()
-        if(schoolId){
-              fetchAllClassSyllabus(Number(schoolId))
+        if (schoolId) {
+            fetchAllClassSyllabus(Number(schoolId))
         }
     }, [])
 
@@ -74,13 +74,13 @@ const SyllabusForSchoolDas = () => {
             toast.warn('Syllabus Id is required !')
             return
         }
-       
+
         try {
 
-            const { data } = await speSyllabusForSchoolDas(id ,Number(schoolId))
+            const { data } = await speSyllabusForSchoolDas(id, Number(schoolId))
             if (data.success) {
                 setViewSyllabus(data.data)
-                 setViewModal(true)
+                setViewModal(true)
             }
 
         } catch (error: any) {
@@ -277,21 +277,54 @@ const SyllabusForSchoolDas = () => {
         }
     };
 
-//     onClick={async () => {
-//     const res = await fetch("/api/download-syllabus", {
-//         headers: {
-//             Authorization: `Bearer ${localStorage.getItem("token")}`
-//         }
-//     });
+    //     onClick={async () => {
+    //     const res = await fetch("/api/download-syllabus", {
+    //         headers: {
+    //             Authorization: `Bearer ${localStorage.getItem("token")}`
+    //         }
+    //     });
 
-//     const blob = await res.blob();
-//     const url = window.URL.createObjectURL(blob);
+    //     const blob = await res.blob();
+    //     const url = window.URL.createObjectURL(blob);
 
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = "syllabus.pdf";
-//     a.click();
-// }}
+    //     const a = document.createElement("a");
+    //     a.href = url;
+    //     a.download = "syllabus.pdf";
+    //     a.click();
+    // }}
+    const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        if (!schoolId) return
+        const file = e.target.files[0];
+
+
+        const formData = new FormData();
+        formData.append("file", file);
+        // for (const pair of formData.entries()) {
+        //     console.log(pair[0], pair[1]);
+        // }
+
+        try {
+            setLoading(true);
+
+            const { data } = await addSyllabusExcelFile(formData, Number(schoolId))
+
+            if (data.success) {
+                toast.success(data.message);
+                fetchAllClassSyllabus(Number(schoolId));
+                e.target.value = "";
+                // setShowAddModal(false);
+            } else {
+                toast.error(data.message || "Excel upload failed");
+            }
+        } catch (err: any) {
+            console.error(err?.response?.data);
+            toast.error(err.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+            e.target.value = "";
+        }
+    };
 
 
     return (
@@ -317,21 +350,40 @@ const SyllabusForSchoolDas = () => {
                                 </ol>
                             </nav>
                         </div>
-                        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-                            {/* <TooltipOption />
-                             */}
+                        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-3">
+                            {/* Download Syllabus */}
                             <button
-                                className="btn btn-success me-2"
+                                className="btn btn-success"
                                 onClick={() => {
                                     const link = document.createElement("a");
-                                    link.href = "/assets/botixbo.pdf"; // your PDF path
+                                    link.href = "/assets/img/syllabusguide.png"; // your PDF path
                                     link.target = "_blank"; // open in new tab
                                     link.click();
                                 }}
                             >
-                                Download Syllabus
+                                Download Template
                             </button>
 
+                            {/* Stylish Upload Excel */}
+                            <div className="position-relative">
+                                <label className="btn btn-warning mb-0">
+                                    <i className="ti ti-upload me-2" /> Upload Syllabus
+                                    <input
+                                        type="file"
+                                        accept=".xlsx, .xls"
+                                        onChange={handleExcelUpload}
+                                        style={{
+                                            position: "absolute",
+                                            left: 0,
+                                            top: 0,
+                                            width: "100%",
+                                            height: "100%",
+                                            opacity: 0,
+                                            cursor: "pointer",
+                                        }}
+                                    />
+                                </label>
+                            </div>
 
 
 

@@ -160,15 +160,14 @@ const Profile = () => {
     if (logoFile) {
       formData.append("schoolLogo", logoFile);
     }
-    for (let pair of formData.entries()) {
-  console.log(pair[0] + ": ", pair[1]);
-}
+//     for (let pair of formData.entries()) {
+//   console.log(pair[0] + ": ", pair[1]);
+// }
 
 
     try {
       const { data } = await updateProfile(formData);
-      console.log(data)
-
+     
       if (data.success) {
         toast.success(data.message);
         resetFormData()

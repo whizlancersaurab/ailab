@@ -132,6 +132,8 @@ export const classForOption = () => api.get('/class/option')
 
 // add class syllabus ========================================================
 export const addSyllabus = (data: object) => api.post('/syllabus/addsyllabus', data)
+export const addSyllabusExcelFile = (data: any , schoolId:number) => api.post(`/syllabus/uploadsyllabus/${schoolId}`, data)
+
 export const allClassSyllabus = () => api.get('/syllabus/allsyllabus')
 export const deleteSpeSyllabus = (id: number) => api.delete(`/syllabus/delsyllabus/${id}`)
 export const speSyllabus = (id: number) => api.get(`/syllabus/spesyllabus/${id}`)

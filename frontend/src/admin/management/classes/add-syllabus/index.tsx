@@ -6,11 +6,13 @@ import { all_routes } from "../../../../router/all_routes";
 
 // allClasses
 import { toast } from "react-toastify";
-import { addSyllabus, allClassSyllabus, classForOption, deleteSpeSyllabus, speSyllabus, updateSyllabus } from "../../../../service/api";
+import { addSyllabus, addSyllabusExcelFile, allClassSyllabus, classForOption, deleteSpeSyllabus, speSyllabus, updateSyllabus } from "../../../../service/api";
 import type { OptionType, syllabusData } from "../../../../core/data/interface";
 import Select from "react-select";
 import dayjs from 'dayjs'
 import { Spinner } from "../../../../spinner";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../../core/data/redux/store";
 
 
 
@@ -572,6 +574,41 @@ const AddSyllabus = () => {
         }
     };
 
+    const { schoolId } = useSelector((state: RootState) => state.authSlice)
+
+    const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        if (!schoolId) return
+        const file = e.target.files[0];
+
+
+        const formData = new FormData();
+        formData.append("file", file);
+        // for (const pair of formData.entries()) {
+        //     console.log(pair[0], pair[1]);
+        // }
+
+        try {
+            setLoading(true);
+
+            const { data } = await addSyllabusExcelFile(formData, schoolId)
+
+            if (data.success) {
+                toast.success(data.message);
+                fetchAllClassSyllabus();
+                setShowAddModal(false);
+            } else {
+                toast.error(data.message || "Excel upload failed");
+            }
+        } catch (err: any) {
+            console.error(err?.response?.data);
+            toast.error(err.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+            e.target.value = "";
+        }
+    };
+
 
     return (
         <div>
@@ -596,35 +633,49 @@ const AddSyllabus = () => {
                                 </ol>
                             </nav>
                         </div>
-                        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-                            {/* <TooltipOption />
-                             */}
+                        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-3">
+                            {/* Download Syllabus */}
                             <button
-                                className="btn btn-success me-2"
+                                className="btn btn-success"
                                 onClick={() => {
                                     const link = document.createElement("a");
-                                    link.href = "/assets/botixbo.pdf"; // your PDF path
+                                    link.href = "/assets/img/syllabusguide.png";
                                     link.target = "_blank"; // open in new tab
                                     link.click();
                                 }}
                             >
-                                Download Syllabus
+                                Download Template
                             </button>
 
-
-
-
-                            <div className="mb-">
-                                <button
-
-                                    className="btn btn-primary"
-                                    onClick={() => setShowAddModal(true)}
-                                >
-                                    <i className="ti ti-square-rounded-plus-filled me-2" />
-                                    Add Class Syllabus
-                                </button>
+                            {/* Stylish Upload Excel */}
+                            <div className="position-relative">
+                                <label className="btn btn-warning mb-0">
+                                    <i className="ti ti-upload me-2" /> Upload Syllabus
+                                    <input
+                                        type="file"
+                                        accept=".xlsx, .xls"
+                                        onChange={handleExcelUpload}
+                                        style={{
+                                            position: "absolute",
+                                            left: 0,
+                                            top: 0,
+                                            width: "100%",
+                                            height: "100%",
+                                            opacity: 0,
+                                            cursor: "pointer",
+                                        }}
+                                    />
+                                </label>
                             </div>
 
+                            {/* Add Class Syllabus */}
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setShowAddModal(true)}
+                            >
+                                <i className="ti ti-square-rounded-plus-filled me-2" />
+                                Add Class Syllabus
+                            </button>
                         </div>
                     </div>
                     {/* /Page Header */}
