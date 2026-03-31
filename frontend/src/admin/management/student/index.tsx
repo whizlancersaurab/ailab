@@ -277,7 +277,8 @@ const Student = () => {
                 </ol>
               </nav>
             </div>
-            <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
+            {
+              students.length==0&&( <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
               <div className="mb-2">
                 <button
                   type="button"
@@ -288,7 +289,8 @@ const Student = () => {
                   Add Student
                 </button>
               </div>
-            </div>
+            </div>)
+            }
           </div>
 
           <div className="card">

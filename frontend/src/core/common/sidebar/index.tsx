@@ -26,22 +26,35 @@ const Sidebar = () => {
   const [customSide, setCustomSide] = useState<any[]>([]);
   const { role } = useSelector((state: RootState) => state.authSlice)
 
+  const SIDEBAR_MAP: any = {
+    SUPER_ADMIN: superAdminSidebar,
+    ADMIN: SidebarData,
+    TEACHER: TeacherSidebarData,
+    STUDENT: StudentSidebarData,
+  };
+
+
+  // useEffect(() => {
+  //   if (role) {
+  //     if (role == "SUPER_ADMIN") {
+  //       setCustomSide([...superAdminSidebar])
+  //     } else if (role == "ADMIN") {
+  //       setCustomSide([...SidebarData]);
+  //     }
+  //     else if(role=='TEACHER') {
+  //       setCustomSide([...TeacherSidebarData]);
+  //     }
+  //     else{
+  //       setCustomSide([...StudentSidebarData]);
+  //     }
+  //   }
+  // }, []);
 
   useEffect(() => {
-    if (role) {
-      if (role == "SUPER_ADMIN") {
-        setCustomSide([...superAdminSidebar])
-      } else if (role == "ADMIN") {
-        setCustomSide([...SidebarData]);
-      }
-      else if(role=='TEACHER') {
-        setCustomSide([...TeacherSidebarData]);
-      }
-      else{
-        setCustomSide([...StudentSidebarData]);
-      }
+    if (role && SIDEBAR_MAP[role]) {
+      setCustomSide(SIDEBAR_MAP[role]);
     }
-  }, []);
+  }, [role]);
 
 
 
@@ -218,7 +231,7 @@ const Sidebar = () => {
         <PerfectScrollbar>
           <div className="sidebar-inner slimscroll">
             <div id="sidebar-menu" className="sidebar-menu">
-             
+
               {selectedSchool && (
                 <ul>
                   <li>
