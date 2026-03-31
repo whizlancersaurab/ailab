@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { SidebarData, superAdminSidebar, TeacherSidebarData } from "../../data/json/sidebarData";
+import { SidebarData, StudentSidebarData, superAdminSidebar, TeacherSidebarData } from "../../data/json/sidebarData";
 import "../../../style/icon/tabler-icons/webfont/tabler-icons.css";
 import { setExpandMenu } from "../../data/redux/sidebarSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,8 +34,11 @@ const Sidebar = () => {
       } else if (role == "ADMIN") {
         setCustomSide([...SidebarData]);
       }
-      else {
+      else if(role=='TEACHER') {
         setCustomSide([...TeacherSidebarData]);
+      }
+      else{
+        setCustomSide([...StudentSidebarData]);
       }
     }
   }, []);

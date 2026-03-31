@@ -65,6 +65,7 @@ import RoboSubCategoryForSchoolDas from "../admin/superadmin/RoboSubCat/index.ts
 import AiCategoryForSchoolDas from "../admin/superadmin/AiCatData/index.tsx";
 import RoboCategoryForSchoolDas from "../admin/superadmin/RoboCatData/index.tsx";
 import AiSubCategoryForSchoolDas from "../admin/superadmin/AiSubCatData/index.tsx";
+import Student from "../admin/management/student/index.tsx";
 
 const routes = all_routes;
 
@@ -305,6 +306,13 @@ export const publicRoutes = [
   {
     path: routes.schoolteachers,
     element: <Teacher />,
+    route: Route
+  },
+
+  // stuednt
+   {
+    path: routes.schoolstuent,
+    element: <Student />,
     route: Route
   }
 ];

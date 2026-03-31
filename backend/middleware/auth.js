@@ -70,9 +70,6 @@ exports.refreshTokenMidddlware = (req, res, next) => {
   }
 };
 
-
-
-
 exports.tenant = (req, res, next) => {
   if (req.role === "SUPER_ADMIN") {
     return next();

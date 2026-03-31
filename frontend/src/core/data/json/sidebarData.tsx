@@ -86,6 +86,14 @@ export const SidebarData = [
         showSubRoute: false,
 
       },
+      {
+        label: "Student",
+        link: routes.schoolstuent,
+        icon: "ti ti-layout-dashboard",
+        submenu: false,
+        showSubRoute: false,
+
+      },
 
     ],
   },
@@ -355,6 +363,81 @@ export const superAdminSidebar = [
         link: routes.layoutRtl,
         themeSetting: true,
       },
+      {
+        label: "Box",
+        icon: "ti ti-layout-distribute-vertical",
+        submenu: false,
+        showSubRoute: false,
+        link: routes.layoutBox,
+        themeSetting: true,
+      },
+
+    ],
+  },
+];
+
+export const StudentSidebarData = [
+  {
+    label: "MAIN",
+    submenuOpen: false,
+    showSubRoute: false,
+    submenuHdr: "Main",
+    submenuItems: [
+      
+    
+      {
+        label: "Class Syllabus",
+        link: routes.syllabus,
+        icon: "ti ti-layout-dashboard",
+        submenu: false,
+        showSubRoute: false,
+
+
+      },
+      {
+        label: "Daily Tasks",
+        link: routes.dailytask,
+        icon: "ti ti-layout-dashboard",
+        submenu: false,
+        showSubRoute: false,
+
+
+      },
+      {
+        label: "Events",
+        link: routes.events,
+        icon: "ti ti-layout-dashboard",
+        submenu: false,
+        showSubRoute: false,
+
+      },
+    
+    ],
+  },
+
+  {
+    label: "LAYOUT",
+    submenuOpen: false,
+    showSubRoute: false,
+    submenuHdr: "LAYOUT",
+    submenuItems: [
+      {
+        label: "Default",
+        icon: "ti ti-layout-sidebar",
+        submenu: false,
+        showSubRoute: false,
+        link: routes.layoutDefault,
+        themeSetting: true,
+      },
+      {
+        label: "Mini",
+        icon: "ti ti-layout-align-left",
+        submenu: false,
+        showSubRoute: false,
+        link: routes.layoutMini,
+        themeSetting: true,
+      },
+     
       {
         label: "Box",
         icon: "ti ti-layout-distribute-vertical",

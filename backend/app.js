@@ -61,6 +61,8 @@ app.use('/api/event', require('./routes/event/event.routes'))
 
 // teacher
 app.use('/api/teacher' , require('./routes/teacherRoutes/teacher.routes'))
+// student
+app.use('/api/student' , require('./routes/studentRoutes/student.routes'))
 
 // super admin
 app.use('/api/superadmin' , require('./routes/schoolRoutes/school.routes'))

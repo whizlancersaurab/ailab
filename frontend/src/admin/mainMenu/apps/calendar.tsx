@@ -14,6 +14,8 @@ import Select from "react-select";
 
 import { addEvent, allEvents, updateEvent, deleteEvent } from "../../../service/api";
 import { all_routes } from "../../../router/all_routes";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../core/data/redux/store";
 
 interface AddEventForm {
   title: string;
@@ -40,6 +42,7 @@ const colorOptions = [
 
 const Calendar = () => {
   const routes = all_routes;
+  const {role} = useSelector((state:RootState)=>state.authSlice)
 
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [weekendsVisible] = useState(true);
@@ -197,9 +200,11 @@ const Calendar = () => {
             <h3 className="page-title mb-1">Calendar</h3>
             <nav>
               <ol className="breadcrumb mb-0">
-                <li className="breadcrumb-item">
+                {
+                  role!='STUDENT'&&( <li className="breadcrumb-item">
                   <Link to={routes.adminDashboard}>Dashboard</Link>
-                </li>
+                </li>)
+                }
                 <li className="breadcrumb-item">
                   <Link to="#">Application</Link>
                 </li>
@@ -210,14 +215,16 @@ const Calendar = () => {
             </nav>
           </div>
           <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-            <div className="mb-2">
+             {
+              role!=='STUDENT'&&(<div className="mb-2">
               <button
                 className="btn btn-primary"
                 onClick={() => setShowAddModal(true)}
               >
                 Create Event
               </button>
-            </div>
+            </div>)
+             }
           </div>
         </div>
 
@@ -365,13 +372,15 @@ const Calendar = () => {
                 <form onSubmit={handleEditSubmit}>
                   <div className="modal-header">
                     <h4 className="modal-title">Edit Event</h4>
-                    <button
+                   {
+                    role!='STUDENT'&&( <button
                       type="button"
                       className="btn text-danger"
                       onClick={handleDelete}
                     >
                       <MdDeleteForever size={25} />
-                    </button>
+                    </button>)
+                   }
                   </div>
 
                   <div className="modal-body">
@@ -442,9 +451,11 @@ const Calendar = () => {
                     >
                       Cancel
                     </button>
-                    <button type="submit" className="btn btn-primary">
+                    {
+                      role!='STUDENT'&&( <button type="submit" className="btn btn-primary">
                       Update Event
-                    </button>
+                    </button>)
+                    }
                   </div>
                 </form>
               </div>

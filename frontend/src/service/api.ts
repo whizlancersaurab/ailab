@@ -69,6 +69,13 @@ export const speSchoolTeachers = () => api.get('/teacher/speschoolteachers')
 export const deleteTeacher = (id: number) => api.delete(`/teacher/delteacher/${id}`)
 export const addNewTeacher = (data: object) => api.post('/teacher/addteacher', data)
 
+
+// student api
+export const speSchoolStudent = () => api.get('/student/speschoolstudent')
+export const deleteStudent = (id: number) => api.delete(`/student/delstudent/${id}`)
+export const addNewStudent = (data: object) => api.post('/student/addstudent', data)
+export const updateStudent = (id:number , data: object) => api.patch(`/student/updatestudent/${id}`, data)
+
 // superadin
 export const allSchools = () => api.get('/superadmin/allschools')
 export const allActiveSchools = () => api.get('/superadmin/allactiveschools')

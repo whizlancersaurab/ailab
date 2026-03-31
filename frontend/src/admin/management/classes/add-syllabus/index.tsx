@@ -362,6 +362,98 @@ const AddSyllabus = () => {
         setShowDelModal(false)
     }
 
+    
+
+    // filter
+    const sortedDevices = useMemo(() => {
+        const copy = [...allSyllabusData];
+
+        copy.sort((a, b) => {
+            return sortType === "asc"
+                ? a.id - b.id
+                : b.id - a.id;
+        });
+
+        return copy;
+    }, [allSyllabusData, sortType]);
+
+
+
+    interface FilterData {
+        className: number | null;
+    }
+
+    const [filterData, setFilterData] = useState<FilterData>({ className: null });
+
+    const handleFilterSelectChange = (name: keyof FilterData, value: null | number) => {
+        setFilterData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
+
+    const handleApplyClick = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const filtered = originalAllSyllabusData.filter((row: any) => {
+            if (filterData.className !== null) {
+                return Number(row.className) === Number(filterData.className);
+            }
+            return true;
+        });
+
+        setAllSyllabusData([...filtered]);
+        setFilterData({ className: null });
+        if (dropdownMenuRef.current) {
+            dropdownMenuRef.current.classList.remove("show");
+        }
+    };
+
+
+    const handleResetFilter = (e?: React.MouseEvent<HTMLButtonElement>) => {
+        e?.preventDefault();
+        setFilterData({ className: null });
+        setAllSyllabusData(originalAllSyllabusData);
+        if (dropdownMenuRef.current) {
+            dropdownMenuRef.current.classList.remove("show");
+        }
+    };
+
+    const { schoolId ,role} = useSelector((state: RootState) => state.authSlice)
+
+    const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        if (!schoolId) return
+        const file = e.target.files[0];
+
+
+        const formData = new FormData();
+        formData.append("file", file);
+        // for (const pair of formData.entries()) {
+        //     console.log(pair[0], pair[1]);
+        // }
+
+        try {
+            setLoading(true);
+
+            const { data } = await addSyllabusExcelFile(formData, schoolId)
+
+            if (data.success) {
+                toast.success(data.message);
+                fetchAllClassSyllabus();
+                setShowAddModal(false);
+            } else {
+                toast.error(data.message || "Excel upload failed");
+            }
+        } catch (err: any) {
+            console.error(err?.response?.data);
+            toast.error(err.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+            e.target.value = "";
+        }
+    };
+
+
     const columns = [
         {
             title: "ID",
@@ -472,6 +564,7 @@ const AddSyllabus = () => {
                             <ul className="dropdown-menu dropdown-menu-right p-3">
 
                                 {
+                                    role!='STUDENT'&&
 
                                     <li>
                                         <button
@@ -496,6 +589,8 @@ const AddSyllabus = () => {
                                         View
                                     </button>
                                 </li>
+                                {
+                                    role!='STUDENT'&&
 
                                 <li>
                                     <button
@@ -511,6 +606,7 @@ const AddSyllabus = () => {
                                         Delete
                                     </button>
                                 </li>
+        }
 
                             </ul>
                         </div>
@@ -519,96 +615,6 @@ const AddSyllabus = () => {
             ),
         },
     ];
-
-    // filter
-    const sortedDevices = useMemo(() => {
-        const copy = [...allSyllabusData];
-
-        copy.sort((a, b) => {
-            return sortType === "asc"
-                ? a.id - b.id
-                : b.id - a.id;
-        });
-
-        return copy;
-    }, [allSyllabusData, sortType]);
-
-
-
-    interface FilterData {
-        className: number | null;
-    }
-
-    const [filterData, setFilterData] = useState<FilterData>({ className: null });
-
-    const handleFilterSelectChange = (name: keyof FilterData, value: null | number) => {
-        setFilterData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
-
-    const handleApplyClick = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        const filtered = originalAllSyllabusData.filter((row: any) => {
-            if (filterData.className !== null) {
-                return Number(row.className) === Number(filterData.className);
-            }
-            return true;
-        });
-
-        setAllSyllabusData([...filtered]);
-        setFilterData({ className: null });
-        if (dropdownMenuRef.current) {
-            dropdownMenuRef.current.classList.remove("show");
-        }
-    };
-
-
-    const handleResetFilter = (e?: React.MouseEvent<HTMLButtonElement>) => {
-        e?.preventDefault();
-        setFilterData({ className: null });
-        setAllSyllabusData(originalAllSyllabusData);
-        if (dropdownMenuRef.current) {
-            dropdownMenuRef.current.classList.remove("show");
-        }
-    };
-
-    const { schoolId } = useSelector((state: RootState) => state.authSlice)
-
-    const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files || e.target.files.length === 0) return;
-        if (!schoolId) return
-        const file = e.target.files[0];
-
-
-        const formData = new FormData();
-        formData.append("file", file);
-        // for (const pair of formData.entries()) {
-        //     console.log(pair[0], pair[1]);
-        // }
-
-        try {
-            setLoading(true);
-
-            const { data } = await addSyllabusExcelFile(formData, schoolId)
-
-            if (data.success) {
-                toast.success(data.message);
-                fetchAllClassSyllabus();
-                setShowAddModal(false);
-            } else {
-                toast.error(data.message || "Excel upload failed");
-            }
-        } catch (err: any) {
-            console.error(err?.response?.data);
-            toast.error(err.message || "Something went wrong");
-        } finally {
-            setLoading(false);
-            e.target.value = "";
-        }
-    };
-
 
     return (
         <div>
@@ -621,9 +627,11 @@ const AddSyllabus = () => {
                             <h3 className="page-title mb-1">Syllabus List</h3>
                             <nav>
                                 <ol className="breadcrumb mb-0">
-                                    <li className="breadcrumb-item">
+                                     {
+                                        role!='STUDENT'&&(<li className="breadcrumb-item">
                                         <Link to={route.adminDashboard}>Dashboard</Link>
-                                    </li>
+                                    </li>)
+                                     }
                                     <li className="breadcrumb-item">
                                         <Link to="#">Syllabus </Link>
                                     </li>
@@ -633,7 +641,8 @@ const AddSyllabus = () => {
                                 </ol>
                             </nav>
                         </div>
-                        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-3">
+                        {
+                            role!='STUDENT'&&( <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-3">
                             {/* Download Syllabus */}
                             <button
                                 className="btn btn-success"
@@ -676,7 +685,8 @@ const AddSyllabus = () => {
                                 <i className="ti ti-square-rounded-plus-filled me-2" />
                                 Add Class Syllabus
                             </button>
-                        </div>
+                        </div>)
+                        }
                     </div>
                     {/* /Page Header */}
                     {/* Guardians List */}

@@ -10,6 +10,8 @@ import { Spinner } from "../../../spinner.tsx";
 import type { OptionType, TasksData } from "../../../core/data/interface/index.tsx";
 import Select from "react-select";
 import dayjs from 'dayjs'
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../core/data/redux/store.tsx";
 
 const statusOptions = [
     { value: 'IN_PROGRESS', label: '🔵 In Progress' },
@@ -33,9 +35,9 @@ const DailyTask = () => {
     const [editId, setEditId] = useState<number | null>(null)
     const [sortType, setSortType] = useState<"asc" | "desc">("asc");
 
-    const [addModal ,setAddModal] = useState<boolean>(false)
-    const [editModal ,setEditModal] = useState<boolean>(false)
-    const [delModal ,setDelModal] =useState<boolean>(false)
+    const [addModal, setAddModal] = useState<boolean>(false)
+    const [editModal, setEditModal] = useState<boolean>(false)
+    const [delModal, setDelModal] = useState<boolean>(false)
 
 
     const fetchTasks = async () => {
@@ -239,6 +241,51 @@ const DailyTask = () => {
 
 
 
+
+    // filter data
+
+    interface FilterData {
+        className: number | null;
+    }
+
+    const [filterData, setFilterData] = useState<FilterData>({ className: null });
+
+    const handleFilterSelectChange = (name: keyof FilterData, value: null | number) => {
+        setFilterData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
+
+    const handleApplyClick = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const filtered = originalTaskList.filter((row: any) => {
+            if (filterData.className !== null) {
+                return Number(row.className) === Number(filterData.className);
+            }
+            return true;
+        });
+
+        setTasksList([...filtered]);
+        setFilterData({ className: null });
+        if (dropdownMenuRef.current) {
+            dropdownMenuRef.current.classList.remove("show");
+        }
+    };
+
+
+    const handleResetFilter = (e?: React.MouseEvent<HTMLButtonElement>) => {
+        e?.preventDefault();
+        setFilterData({ className: null });
+        setTasksList(originalTaskList);
+        if (dropdownMenuRef.current) {
+            dropdownMenuRef.current.classList.remove("show");
+        }
+    };
+
+    const { role } = useSelector((state: RootState) => state.authSlice)
+
+
     const columns = [
         {
             title: "ID",
@@ -299,96 +346,55 @@ const DailyTask = () => {
             ),
 
         },
-        {
-            title: "Action",
-            dataIndex: "action",
-            render: (_: any, record: any) => (
-                <>
-                    <div className="d-flex align-items-center">
-                        <div className="dropdown">
-                            <Link
-                                to="#"
-                                className="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                            >
-                                <i className="ti ti-dots-vertical fs-14" />
-                            </Link>
-                            <ul className="dropdown-menu dropdown-menu-right p-3">
-                                <li>
-                                    <button
-                                        className="dropdown-item rounded-1"
-                                        onClick={() => fetchSpecificTask(record.id)}
-                                        
+        ...(
+            role !== 'STUDENT'
+                ? [
+                    {
+                        title: "Action",
+                        dataIndex: "action",
+                        render: (_: any, record: any) => (
+                            <div className="d-flex align-items-center">
+                                <div className="dropdown">
+                                    <Link
+                                        to="#"
+                                        className="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
                                     >
-                                        <i className="ti ti-edit-circle me-2" />
-                                        Edit
-                                    </button>
-                                </li>
-                                <li>
-                                    <button
-                                        className="dropdown-item rounded-1"
-                                        onClick={() =>{
-                                             setDeleteId(record.id)
-                                             setDelModal(true)
-                                        }
-                                            }
-                                        
-                                    >
-                                        <i className="ti ti-trash-x me-2" />
-                                        Delete
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </>
-            ),
-        },
+                                        <i className="ti ti-dots-vertical fs-14" />
+                                    </Link>
+                                    <ul className="dropdown-menu dropdown-menu-right p-3">
+                                        <li>
+                                            <button
+                                                className="dropdown-item rounded-1"
+                                                onClick={() => fetchSpecificTask(record.id)}
+                                            >
+                                                <i className="ti ti-edit-circle me-2" />
+                                                Edit
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                className="dropdown-item rounded-1"
+                                                onClick={() => {
+                                                    setDeleteId(record.id);
+                                                    setDelModal(true);
+                                                }}
+                                            >
+                                                <i className="ti ti-trash-x me-2" />
+                                                Delete
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        ),
+                    },
+                ]
+                : []
+        )
+
     ];
-
-    // filter data
-
-    interface FilterData {
-        className: number | null;
-    }
-
-    const [filterData, setFilterData] = useState<FilterData>({ className: null });
-
-    const handleFilterSelectChange = (name: keyof FilterData, value: null | number) => {
-        setFilterData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
-
-    const handleApplyClick = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        const filtered = originalTaskList.filter((row: any) => {
-            if (filterData.className !== null) {
-                return Number(row.className) === Number(filterData.className);
-            }
-            return true;
-        });
-
-        setTasksList([...filtered]);
-        setFilterData({ className: null });
-        if (dropdownMenuRef.current) {
-            dropdownMenuRef.current.classList.remove("show");
-        }
-    };
-
-
-    const handleResetFilter = (e?: React.MouseEvent<HTMLButtonElement>) => {
-        e?.preventDefault();
-        setFilterData({ className: null });
-        setTasksList(originalTaskList);
-        if (dropdownMenuRef.current) {
-            dropdownMenuRef.current.classList.remove("show");
-        }
-    };
-
-
 
     return (
         <div>
@@ -401,9 +407,11 @@ const DailyTask = () => {
                             <h3 className="page-title mb-1">Daily-Tasks List</h3>
                             <nav>
                                 <ol className="breadcrumb mb-0">
-                                    <li className="breadcrumb-item">
-                                        <Link to={route.adminDashboard}>Dashboard</Link>
-                                    </li>
+                                    {
+                                        role != 'STUDENT' && (<li className="breadcrumb-item">
+                                            <Link to={route.adminDashboard}>Dashboard</Link>
+                                        </li>)
+                                    }
                                     <li className="breadcrumb-item">
                                         <Link to="#">Daily-Tasks </Link>
                                     </li>
@@ -413,19 +421,21 @@ const DailyTask = () => {
                                 </ol>
                             </nav>
                         </div>
-                        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-                            <TooltipOption />
-                            <div className="mb-2">
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                     onClick={()=>setAddModal(true)}
-                                >
-                                    <i className="ti ti-square-rounded-plus-filled me-2" />
-                                    Add Task
-                                </button>
-                            </div>
-                        </div>
+                        {
+                            role != 'STUDENT' && (<div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
+                                <TooltipOption />
+                                <div className="mb-2">
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={() => setAddModal(true)}
+                                    >
+                                        <i className="ti ti-square-rounded-plus-filled me-2" />
+                                        Add Task
+                                    </button>
+                                </div>
+                            </div>)
+                        }
                     </div>
                     {/* /Page Header */}
                     {/* Guardians List */}
@@ -522,7 +532,7 @@ const DailyTask = () => {
                             {/* Guardians List */}
                             {loading ? (
                                 <Spinner />
-                            ) : (<Table key={sortType+Math.floor(Math.random() * 100000)} columns={columns} dataSource={sortedDevices} Selection={false} />)
+                            ) : (<Table key={sortType + Math.floor(Math.random() * 100000)} columns={columns} dataSource={sortedDevices} Selection={false} />)
                             }
                             {/* /Guardians List */}
                         </div>
@@ -534,247 +544,247 @@ const DailyTask = () => {
             <>
                 {/* Add task */}
                 {
-                    addModal&&( <div className="modal fade d-block show" id="add_task">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Add Task</h4>
-                                <button
-                                    type="button"
-                                    onClick={cancelAdd}
-                                    className="btn-close custom-btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                >
-                                    <i className="ti ti-x" />
-                                </button>
-                            </div>
-
-
-                            <form onSubmit={handleSubmit}>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <div className="col-md-12">
-                                            {/* Class Name */}
-                                            <div className="mb-3">
-                                                <label className="form-label">Class</label>
-
-                                                <Select<OptionType>
-                                                    options={classOptions}
-                                                    value={classOptions.find((o) => Number(o.value) === className)}
-                                                    onChange={(option: any) => handleSelectClassChange(option)}
-                                                    placeholder="Select Class"
-                                                    className="text-capitalize"
-                                                />
-
-                                            </div>
-
-                                            <div className="mb-3">
-                                                <label className="form-label">Month</label>
-
-                                                <Select<OptionType>
-                                                    options={monthsOptions}
-                                                    value={monthsOptions.find((o) => Number(o.value) === monthName)}
-                                                    onChange={(option: any) =>
-                                                        setMonthName(option ? option.value : null)}
-                                                    placeholder="Select Class"
-                                                    className="text-capitalize"
-                                                    isDisabled={!className}
-                                                />
-
-                                            </div>
-                                            <div className="mb-3">
-                                                <label htmlFor="" className="form-label" >Title</label>
-                                                <input
-                                                    className="form-control"
-                                                    id="title"
-                                                    value={title}
-                                                    disabled={true}
-
-                                                />
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="form-label" >Activity</label>
-                                                <textarea
-                                                    className="form-control"
-                                                    id="activity"
-                                                    disabled={true}
-                                                    value={activity}
-                                                    cols={4}
-                                                />
-                                            </div>
-
-                                            <div className="mb-3">
-                                                <label className="form-label" >Activity Task</label>
-                                                <textarea
-                                                    className="form-control"
-                                                    id="task-activity"
-                                                    value={taskTitle}
-                                                    onChange={(e) => setTaskTitle(e.target.value)}
-                                                />
-                                            </div>
-                                            <div className="mb-0">
-                                                <label className="form-label" >Task Status</label>
-                                                <Select
-                                                    options={statusOptions}
-                                                    value={statusOptions.find(opt => opt.value === status)}
-                                                    onChange={(option: any) => setStatus(option.value)}
-                                                    placeholder="Select Status"
-                                                    className="text-capitalize"
-                                                />
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Footer */}
-                                <div className="modal-footer">
+                    addModal && (<div className="modal fade d-block show" id="add_task">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h4 className="modal-title">Add Task</h4>
                                     <button
                                         type="button"
-                                        className="btn btn-light me-2"
-                                        
                                         onClick={cancelAdd}
+                                        className="btn-close custom-btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Close"
                                     >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary"
-
-                                    >
-                                        Add Task
+                                        <i className="ti ti-x" />
                                     </button>
                                 </div>
-                            </form>
 
 
+                                <form onSubmit={handleSubmit}>
+                                    <div className="modal-body">
+                                        <div className="row">
+                                            <div className="col-md-12">
+                                                {/* Class Name */}
+                                                <div className="mb-3">
+                                                    <label className="form-label">Class</label>
+
+                                                    <Select<OptionType>
+                                                        options={classOptions}
+                                                        value={classOptions.find((o) => Number(o.value) === className)}
+                                                        onChange={(option: any) => handleSelectClassChange(option)}
+                                                        placeholder="Select Class"
+                                                        className="text-capitalize"
+                                                    />
+
+                                                </div>
+
+                                                <div className="mb-3">
+                                                    <label className="form-label">Month</label>
+
+                                                    <Select<OptionType>
+                                                        options={monthsOptions}
+                                                        value={monthsOptions.find((o) => Number(o.value) === monthName)}
+                                                        onChange={(option: any) =>
+                                                            setMonthName(option ? option.value : null)}
+                                                        placeholder="Select Class"
+                                                        className="text-capitalize"
+                                                        isDisabled={!className}
+                                                    />
+
+                                                </div>
+                                                <div className="mb-3">
+                                                    <label htmlFor="" className="form-label" >Title</label>
+                                                    <input
+                                                        className="form-control"
+                                                        id="title"
+                                                        value={title}
+                                                        disabled={true}
+
+                                                    />
+                                                </div>
+                                                <div className="mb-3">
+                                                    <label className="form-label" >Activity</label>
+                                                    <textarea
+                                                        className="form-control"
+                                                        id="activity"
+                                                        disabled={true}
+                                                        value={activity}
+                                                        cols={4}
+                                                    />
+                                                </div>
+
+                                                <div className="mb-3">
+                                                    <label className="form-label" >Activity Task</label>
+                                                    <textarea
+                                                        className="form-control"
+                                                        id="task-activity"
+                                                        value={taskTitle}
+                                                        onChange={(e) => setTaskTitle(e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="mb-0">
+                                                    <label className="form-label" >Task Status</label>
+                                                    <Select
+                                                        options={statusOptions}
+                                                        value={statusOptions.find(opt => opt.value === status)}
+                                                        onChange={(option: any) => setStatus(option.value)}
+                                                        placeholder="Select Status"
+                                                        className="text-capitalize"
+                                                    />
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            className="btn btn-light me-2"
+
+                                            onClick={cancelAdd}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary"
+
+                                        >
+                                            Add Task
+                                        </button>
+                                    </div>
+                                </form>
+
+
+                            </div>
                         </div>
-                    </div>
-                </div>)
+                    </div>)
                 }
                 {/* /Add task*/}
                 {/* edit task */}
                 {
-                    editModal&&( <div className="modal fade show d-block" id="edit_task">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Add Task</h4>
-                                <button
-                                    type="button"
-                                    onClick={cancelAdd}
-                                    className="btn-close custom-btn-close"
-                                   
-                                   
-                                >
-                                    <i className="ti ti-x" />
-                                </button>
-                            </div>
-
-
-                            <form onSubmit={handleEditSubmit}>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <div className="col-md-12">
-                                            <div className="mb-3">
-                                                <label className="form-label" >Activity</label>
-                                                <textarea
-                                                    className="form-control"
-                                                    id="activity"
-                                                    disabled={true}
-                                                    value={activity}
-                                                    cols={4}
-                                                />
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="form-label" >Activity Task</label>
-                                                <textarea
-                                                    className="form-control"
-                                                    id="task-activity"
-                                                    value={taskTitle}
-                                                    onChange={(e) => setTaskTitle(e.target.value)}
-                                                />
-                                            </div>
-                                            <div className="mb-0">
-                                                <label className="form-label" >Task Status</label>
-                                                <Select
-                                                    options={statusOptions}
-                                                    value={statusOptions.find(opt => opt.value === status)}
-                                                    onChange={(option: any) => setStatus(option.value)}
-                                                    placeholder="Select Status"
-                                                    className="text-capitalize"
-                                                />
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Footer */}
-                                <div className="modal-footer">
+                    editModal && (<div className="modal fade show d-block" id="edit_task">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h4 className="modal-title">Add Task</h4>
                                     <button
                                         type="button"
-                                        className="btn btn-light me-2"
-                                       
                                         onClick={cancelAdd}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary"
+                                        className="btn-close custom-btn-close"
+
 
                                     >
-                                        Save Changes
+                                        <i className="ti ti-x" />
                                     </button>
                                 </div>
-                            </form>
 
 
+                                <form onSubmit={handleEditSubmit}>
+                                    <div className="modal-body">
+                                        <div className="row">
+                                            <div className="col-md-12">
+                                                <div className="mb-3">
+                                                    <label className="form-label" >Activity</label>
+                                                    <textarea
+                                                        className="form-control"
+                                                        id="activity"
+                                                        disabled={true}
+                                                        value={activity}
+                                                        cols={4}
+                                                    />
+                                                </div>
+                                                <div className="mb-3">
+                                                    <label className="form-label" >Activity Task</label>
+                                                    <textarea
+                                                        className="form-control"
+                                                        id="task-activity"
+                                                        value={taskTitle}
+                                                        onChange={(e) => setTaskTitle(e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="mb-0">
+                                                    <label className="form-label" >Task Status</label>
+                                                    <Select
+                                                        options={statusOptions}
+                                                        value={statusOptions.find(opt => opt.value === status)}
+                                                        onChange={(option: any) => setStatus(option.value)}
+                                                        placeholder="Select Status"
+                                                        className="text-capitalize"
+                                                    />
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            className="btn btn-light me-2"
+
+                                            onClick={cancelAdd}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary"
+
+                                        >
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+
+
+                            </div>
                         </div>
-                    </div>
-                </div>)
+                    </div>)
                 }
                 {/* edit task */}
                 {/* Delete Modal */}
                 {
-                    delModal&&( <div className="modal fade d-block show" id="delete-modal">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <form>
-                                <div className="modal-body text-center">
-                                    <span className="delete-icon">
-                                        <i className="ti ti-trash-x" />
-                                    </span>
-                                    <h4>Confirm Deletion</h4>
-                                    <p>
-                                        You want to delete this items, this cant be undone once
-                                        you delete.
-                                    </p>
-                                    {
-                                        deleteId && (
-                                            <div className="d-flex justify-content-center">
-                                                <button
-                                                    onClick={(e) => cancelDelete(e)}
-                                                    className="btn btn-light me-3"
-                                                   
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
-                                                    Yes, Delete
-                                                </button>
+                    delModal && (<div className="modal fade d-block show" id="delete-modal">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <form>
+                                    <div className="modal-body text-center">
+                                        <span className="delete-icon">
+                                            <i className="ti ti-trash-x" />
+                                        </span>
+                                        <h4>Confirm Deletion</h4>
+                                        <p>
+                                            You want to delete this items, this cant be undone once
+                                            you delete.
+                                        </p>
+                                        {
+                                            deleteId && (
+                                                <div className="d-flex justify-content-center">
+                                                    <button
+                                                        onClick={(e) => cancelDelete(e)}
+                                                        className="btn btn-light me-3"
 
-                                            </div>
-                                        )}
-                                </div>
-                            </form>
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button className="btn btn-danger" onClick={(e) => handleDelete(deleteId, e)}>
+                                                        Yes, Delete
+                                                    </button>
+
+                                                </div>
+                                            )}
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                </div>)
+                    </div>)
                 }
                 {/* /Delete Modal */}
 

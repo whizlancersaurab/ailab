@@ -1,11 +1,13 @@
 
-import { Link } from "react-router-dom";
-import { all_routes } from "../../../router/all_routes";
+// import { Link } from "react-router-dom";
+// import { all_routes } from "../../../router/all_routes";
 import { speUser, updateProfile } from "../../../service/api";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import CircleImage from "../../../auth/register/CircleImage";
 import { Spinner } from "../../../spinner";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../core/data/redux/store";
 
 
 interface RegisterForm {
@@ -25,7 +27,7 @@ interface Errors {
 
 
 const Profile = () => {
-  const route = all_routes;
+  // const route = all_routes;
   const [form, setForm] = useState<RegisterForm>({
     schoolName: "",
     firstName: "",
@@ -183,6 +185,8 @@ const Profile = () => {
   };
 
 
+  const {role} = useSelector((state:RootState)=>state.authSlice)
+
 
   return (
     <div>
@@ -194,7 +198,7 @@ const Profile = () => {
               <div className="my-auto mb-2">
                 <h3 className="page-title mb-1">Profile</h3>
                 <nav>
-                  <ol className="breadcrumb mb-0">
+                  {/* <ol className="breadcrumb mb-0">
                     <li className="breadcrumb-item">
                       <Link to={route.adminDashboard}>Dashboard</Link>
                     </li>
@@ -204,7 +208,7 @@ const Profile = () => {
                     <li className="breadcrumb-item active" aria-current="page">
                       Profile
                     </li>
-                  </ol>
+                  </ol> */}
                 </nav>
               </div>
               <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
@@ -304,14 +308,16 @@ const Profile = () => {
                           <div className="card">
                             <div className="card-header d-flex justify-content-between align-items-center">
                               <h5>Personal Information</h5>
-                              <button
+                              {
+                                role!='STUDENT'&&( <button
                                 type="button"
                                 className="btn btn-primary btn-sm"
                                 onClick={() => setShowEditModal(true)}
                               >
                                 <i className="ti ti-edit me-2" />
                                 Edit
-                              </button>
+                              </button>)
+                              }
                             </div>
                             <div className="card-body pb-0">
                               <div className="d-block d-xl-flex">

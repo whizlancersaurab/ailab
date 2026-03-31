@@ -89,6 +89,8 @@ const Login = () => {
         toast.success(data.message)
         if (data.data.user.role === 'SUPER_ADMIN')
           navigate(routes.superadmindashboard)
+        else if(data.data.user.role==='STUDENT')
+           navigate(routes.syllabus)
         else {
           navigate(routes.adminDashboard)
         }
